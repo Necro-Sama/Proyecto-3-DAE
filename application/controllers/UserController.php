@@ -29,8 +29,8 @@ class UserController extends CI_Controller {
             if ($usuario) {
                 switch ($usuario->user_type) {
                     case 'student':
-                        
-                        $this->load->view("StudentView");
+                        $bloques = $this->get_bloques_reservados_carrera($usuario->carrera);
+                        $this->load->view("StudentView", array("bloques_ocupados" => $bloques));
                         break;
 
                     case 'admin':
@@ -49,5 +49,8 @@ class UserController extends CI_Controller {
                 $this->load->view("LoginView", array("invalid_user" => "Correo o contraseña incorrectos."));
             }
         }
+    }
+    public function get_bloques_reservados_carrera($carrera) {
+        return $this->BloquesReservadosModel->get_bloques_reservados_carrera($carrera);
     }
 }
