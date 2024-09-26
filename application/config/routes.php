@@ -55,3 +55,6 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['login'] = 'UserController';
 $route['login/auth'] = 'UserController/auth';
+$route['citas_estudiante/(:num)'] = 'CitasController/citas_estudiante/$1';
+$route['detalle_cita/(:num)'] = 'CitasController/detalle_cita/$1';
+
