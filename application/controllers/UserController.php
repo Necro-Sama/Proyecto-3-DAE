@@ -29,8 +29,8 @@ class UserController extends CI_Controller {
             if ($usuario) {
                 switch ($usuario->user_type) {
                     case 'student':
-                        $bloques = $this->get_bloques_reservados_carrera($usuario->carrera);
-                        $this->load->view("StudentView", array("bloques_ocupados" => $bloques));
+                        $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($usuario->carrera);
+                        $this->load->view("StudentView", array("bloques_no_disponibles" => $bloques_no_disponibles));
                         break;
 
                     case 'admin':
@@ -50,7 +50,7 @@ class UserController extends CI_Controller {
             }
         }
     }
-    public function get_bloques_reservados_carrera($carrera) {
-        return $this->BloquesReservadosModel->get_bloques_reservados_carrera($carrera);
+    public function get_bloques_no_disponibles_carrera($carrera) {
+        return $this->BloquesReservadosModel->get_bloques_no_disponibles_carrera($carrera);
     }
 }

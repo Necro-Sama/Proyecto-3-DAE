@@ -30,8 +30,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     echo form_label('No Estudiante', 'not_student');
     echo form_radio('user_type', 'admin'); 
     echo form_label('Administrador', 'admin');
-    echo form_radio('user_type', 'ta'); 
-    echo form_label('Trabajadora Social', 'ta');
+    echo form_radio('user_type', 'ts'); 
+    echo form_label('Trabajadora Social', 'ts');
     ?>
     <input type="submit" value="Ingresar">
     </form>

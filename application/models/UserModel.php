@@ -13,8 +13,6 @@ class UserModel extends CI_Model {
         $query = $this->db->get();
         if ($query->num_rows() == 1) {
             $usuario = $query->row(0);
-            // echo $usuario->password;
-            // echo password_hash("3333", PASSWORD_DEFAULT);
             if (password_verify($password, $usuario->password)) {
                 return $usuario;
             }
