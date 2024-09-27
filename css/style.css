@@ -1,3 +1,12 @@
 .error {
     color: red;
 }
+.bloque {
+    border: thin solid;
+}
+.bloque_libre {
+    color: green;
+}
+.bloque_reservado {
+    color: red;
+}

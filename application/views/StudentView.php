@@ -13,12 +13,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <p>todo...</p>
 
     <?php
-        foreach (range(1, 12) as $i) {
-            echo "<div>";
-            echo "<div>Número de Bloque: ".$i."</div>";
-            echo "</div>";
+        echo "<table>";
+        foreach (range(1, 12) as $bh) {
+            foreach(range(1, 7) as $d) {
+                
+            }
+            // echo $bloques_ocupados;
+            // echo "<div class='bloque bloque_libre'>";
+            // echo "<div>Número de Bloque: ".$i."</div>";
+            // echo "</div>";
         }
+        echo "</table>";
     ?>
-    
 </body>
 </html>
