@@ -8,12 +8,6 @@ class BloquesReservadosModel extends CI_Model {
     public function get_bloques_no_disponibles_carrera($carrera) {
         $este_lunes = date("Y-m-d", strtotime("last monday"));
         $en_dos_semanas = date("Y-m-d", strtotime("last monday +2 weeks"));
-
-        // $this->db->select("fecha, num_bloque, carrera");
-        // $this->db->from("bloques_reservados");
-        // $this->db->where("carrera", $carrera);
-        // $this->db->where("fecha >=", $este_lunes);
-        // $this->db->where("fecha <", $en_dos_semanas);
         return $this->db->query("
         SELECT * FROM (
             SELECT fecha, num_bloque, COUNT(*) cant FROM bloques_reservados
@@ -27,6 +21,5 @@ class BloquesReservadosModel extends CI_Model {
             WHERE user_type='ts'
             AND carrera=?)
         ", array($carrera, $este_lunes, $en_dos_semanas, $carrera));
-        // return $this->db->get();
     }
 }

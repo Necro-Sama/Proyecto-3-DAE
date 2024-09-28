@@ -10,6 +10,7 @@ class UserController extends CI_Controller {
         $this->load->helper('url');
         $this->load->helper('form');
         $this->load->library('form_validation');
+        $this->load->library('session');
 
         $this->form_validation->set_rules("correo", "Correo", "required|valid_email");
         $this->form_validation->set_rules("contraseña", "Contraseña", "required");
@@ -27,24 +28,12 @@ class UserController extends CI_Controller {
             $tipo_usuario = $this->input->post("user_type");
             $usuario = $this->UserModel->login($correo, $contraseña, $tipo_usuario);
             if ($usuario) {
-                switch ($usuario->user_type) {
-                    case 'student':
-                        $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($usuario->carrera);
-                        $this->load->view("StudentView", array("bloques_no_disponibles" => $bloques_no_disponibles));
-                        break;
+                $this->session->user_type = $usuario->user_type;
+                $this->session->carrera = $usuario->carrera;
+                $this->session->mark_as_flash('user_type');
+                $this->session->mark_as_flash('carrera');
+                redirect("/usuarios/home");
 
-                    case 'admin':
-                        $this->load->view("AdminView");
-                        break;
-
-                    case 'ta':
-                        $this->load->view("TaView");
-                        break;
-                    
-                    default:
-                        # code...
-                        break;
-                }
             } else {
                 $this->load->view("LoginView", array("invalid_user" => "Correo o contraseña incorrectos."));
             }
@@ -52,5 +41,31 @@ class UserController extends CI_Controller {
     }
     public function get_bloques_no_disponibles_carrera($carrera) {
         return $this->BloquesReservadosModel->get_bloques_no_disponibles_carrera($carrera);
+    }
+    public function home() {
+        $user_type = $this->session->user_type;
+        $carrera = $this->session->carrera;
+        switch ($user_type) {
+            case 'student':
+                $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera(
+                    $carrera);
+                $this->load->view(
+                    "StudentView", array(
+                        "bloques_no_disponibles" => $bloques_no_disponibles,
+                        "carrera" => $carrera));
+                break;
+
+            case 'admin':
+                $this->load->view("AdminView");
+                break;
+
+            case 'ts':
+                $this->load->view("TSView");
+                break;
+            
+            default:
+                
+                break;
+        }
     }
 }

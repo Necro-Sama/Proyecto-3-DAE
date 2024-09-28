@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     ?></div>
     <?php echo form_error('err'); ?>
     <?php echo validation_errors(); ?>
-    <?php echo form_open("login/auth"); ?>
+    <?php echo form_open("usuarios/auth"); ?>
     <h2>Correo</h2>
     <input type="email" name="correo" value="<?php echo set_value('correo') ?>">
     <h2>Contraseña</h2>
@@ -32,8 +32,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     echo form_label('Administrador', 'admin');
     echo form_radio('user_type', 'ts'); 
     echo form_label('Trabajadora Social', 'ts');
+    echo "<br>";
+    echo form_submit("Ingresar", "Ingresar");
+    echo form_close();
     ?>
-    <input type="submit" value="Ingresar">
-    </form>
 </body>
 </html>

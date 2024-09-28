@@ -1,12 +1,16 @@
 .error {
     color: red;
 }
+.celda-header {
+    border: thin solid;
+    background: lightblue;
+}
 .bloque {
     border: thin solid;
 }
-.bloque_libre {
-    color: green;
+.bloque-libre {
+    background: lightgreen;
 }
-.bloque_reservado {
-    color: red;
+.bloque-reservado {
+    background: pink;
 }
