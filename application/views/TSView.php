@@ -10,6 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 </head>
 <body>
     <h1>Vista de Trabajadora Social</h1>
+    <?php echo anchor("usuarios/logout", "Cerrar sesión") ?>
     <p>todo...</p>
 </body>
 </html>

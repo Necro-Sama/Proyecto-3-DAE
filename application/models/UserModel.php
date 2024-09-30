@@ -7,31 +7,44 @@ class UserModel extends CI_Model {
         $this->load->library('session');
     }
     public function login($email, $password, $user_type) {
-        $this->db->select("*");
-        $this->db->from("usuarios");
-        $this->db->where("email", $email);
-        $this->db->where("user_type", $user_type);
-        $query = $this->db->get();
-        if ($query->num_rows() == 1) {
-            $usuario = $query->row(0);
-            if (password_verify($password, $usuario->password)) {
-                $token = random_bytes(100);
-                $result = $this->db->query("
-                    INSERT INTO token_usuarios VALUES
-                    (?, ?, NULL)
-                ", array($token, $usuario->id));
-                if ($result) {
-                    return $token;
-                }
-            }
+        $this->session->unset_userdata("error");
+        $this->session->unset_userdata("form_error");
+        $query = $this->db->query("
+            SELECT * FROM usuarios
+            WHERE email = ?
+            AND user_type = ?
+        ", array($email, $user_type));
+        if ($query->num_rows() == 0) {
+            $this->session->error = "Correo o contraseña incorrectos.";
+            return;
         }
+        if ($query->num_rows() > 1) {
+            $this->session->error = "Esta cuenta es inválida.";
+            return;
+        }
+        $usuario = $query->row(0);
+        // Check password
+        if (!password_verify($password, $usuario->password)) {
+            $this->session->error = "Correo o contraseña incorrectos.";
+            return;
+        }
+        $new_token = random_bytes(100);
+        $insert_new_token_result = $this->db->query("
+            INSERT INTO token_usuarios VALUES
+            (?, ?, NULL)
+        ", array($new_token, $usuario->id));
+        if (!$insert_new_token_result) {
+            $this->session->error = "Error interno en el servidor a la hora de generar el token de acceso.";
+            return;
+        }
+        return $new_token;
     }
     public function login_token($token) {
         $query = $this->db->query("
             SELECT * FROM token_usuarios
             WHERE token_id = ?
             AND NOW() > token_create
-            AND NOW() < DATE_ADD(token_create, INTERVAL 45 MINUTE)
+            AND NOW() < DATE_ADD(token_create, INTERVAL 10 MINUTE)
         ", array($token));
         if ($query->num_rows() == 1) {
             $query1 = $this->db->query("
@@ -39,6 +52,18 @@ class UserModel extends CI_Model {
                 WHERE id = ?
             ", array($query->row(0)->user_id));
             return $query1->row(0);
+        } elseif ($query->num_rows() > 1) {
+            $this->session->error = "Usuario ya logeado.";
+        } else {
+            $this->session->error = "Token expirado.";
         }
+    }
+    public function logout($token) {
+        $id_usuario = $this->db->query("
+            DELETE FROM token_usuarios
+            WHERE user_id = (SELECT user_id FROM (SELECT t1.user_id, t1.token_id FROM token_usuarios t1
+                             WHERE t1.token_id = ?) t2)
+        ", array($token));
+        session_destroy();
     }
 }

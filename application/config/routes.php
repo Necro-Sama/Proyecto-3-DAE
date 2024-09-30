@@ -55,5 +55,7 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['usuarios'] = 'UserController';
 $route['usuarios/login'] = 'UserController/login';
+$route['usuarios/logout'] = 'UserController/logout';
 $route['usuarios/auth'] = 'UserController/auth';
 $route['usuarios/home'] = 'UserController/home';
+$route['usuarios/agendar'] = 'UserController/agendar';

@@ -27,14 +27,20 @@ class UserController extends CI_Controller {
         if ($this->logged_in($this->session->token)) {
             redirect("/usuarios/home");
         }
+        session_destroy();
         $this->load->view('LoginView');
+    }
+    public function logout() {
+        $this->UserModel->logout($this->session->token);
+        redirect("/usuarios/login");
     }
     public function auth() {
         if ($this->logged_in($this->session->token)) {
             redirect("/usuarios/home");
         }
         if ($this->form_validation->run() == FALSE) {
-            $this->load->view("LoginView");
+            $this->session->form_error = validation_errors();
+            redirect("/usuarios/login");
         } else {
             $correo = $this->input->post("correo");
             $contraseña = $this->input->post("contraseña");
@@ -43,7 +49,6 @@ class UserController extends CI_Controller {
             if ($token) {
                 $this->session->token = $token;
                 redirect("/usuarios/home");
-
             } else {
                 redirect("/usuarios/login");
             }
@@ -60,8 +65,7 @@ class UserController extends CI_Controller {
 
             switch ($user_type) {
                 case 'student':
-                    $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera(
-                        $carrera);
+                    $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($carrera);
                     $this->load->view(
                         "StudentView", array(
                             "bloques_no_disponibles" => $bloques_no_disponibles,
@@ -84,7 +88,25 @@ class UserController extends CI_Controller {
             redirect("/usuarios/login");
         }
     }
+    public function agendar() {
+        $fecha = $this->input->post("fecha");
+        $num_bloque = $this->input->post("num_bloque");
+        $motivo = $this->input->post("motivo");
+        $usuario = $this->logged_in($this->session->token);
+        if ($usuario) {
+            $result = $this->BloquesReservadosModel->agendar($usuario, $fecha, $num_bloque, $motivo);
+            if (!$result) {
+                $this->session->agendar_error = "Error a la hora de agendar la hora.";
+                $this->session->mark_as_flash("agendar_error");
+            }
+            redirect("/usuarios/home");
+        } else {
+            redirect("/usuarios/login");
+        }
+    }
     public function logged_in($token) {
-        return $this->UserModel->login_token($token);
+        if ($token) {
+            return $this->UserModel->login_token($token);
+        }
     }
 }
