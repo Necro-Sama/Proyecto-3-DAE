@@ -59,3 +59,4 @@ $route['usuarios/logout'] = 'UserController/logout';
 $route['usuarios/auth'] = 'UserController/auth';
 $route['usuarios/home'] = 'UserController/home';
 $route['usuarios/agendar'] = 'UserController/agendar';
+$route['usuarios/googletest'] = 'UserController/googletest';

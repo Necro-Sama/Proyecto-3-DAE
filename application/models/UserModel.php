@@ -6,14 +6,13 @@ class UserModel extends CI_Model {
         $this->load->database();
         $this->load->library('session');
     }
-    public function login($email, $password, $user_type) {
+    public function login($email, $password) {
         $this->session->unset_userdata("error");
         $this->session->unset_userdata("form_error");
         $query = $this->db->query("
-            SELECT * FROM usuarios
-            WHERE email = ?
-            AND user_type = ?
-        ", array($email, $user_type));
+            SELECT * FROM Persona
+            WHERE CORREO = ?
+        ", array($email));
         if ($query->num_rows() == 0) {
             $this->session->error = "Correo o contraseña incorrectos.";
             return;
@@ -24,15 +23,15 @@ class UserModel extends CI_Model {
         }
         $usuario = $query->row(0);
         // Check password
-        if (!password_verify($password, $usuario->password)) {
+        if (!password_verify($password, $usuario->CONTRASEÑA)) {
             $this->session->error = "Correo o contraseña incorrectos.";
             return;
         }
         $new_token = random_bytes(100);
         $insert_new_token_result = $this->db->query("
-            INSERT INTO token_usuarios VALUES
-            (?, ?, NULL)
-        ", array($new_token, $usuario->id));
+            INSERT INTO Token VALUES
+            (NULL, NULL, ?, ?)
+        ", array($usuario->ID_PERSONA, $new_token));
         if (!$insert_new_token_result) {
             $this->session->error = "Error interno en el servidor a la hora de generar el token de acceso.";
             return;

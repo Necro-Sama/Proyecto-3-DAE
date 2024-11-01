@@ -23,6 +23,9 @@ class UserController extends CI_Controller {
             redirect("/usuarios/login");
         }
     }
+    public function googletest() {
+        $this->load->view("googletest");
+    }
     public function login() {
         if ($this->logged_in($this->session->token)) {
             redirect("/usuarios/home");
@@ -44,13 +47,15 @@ class UserController extends CI_Controller {
         } else {
             $correo = $this->input->post("correo");
             $contraseña = $this->input->post("contraseña");
-            $tipo_usuario = $this->input->post("user_type");
-            $token = $this->UserModel->login($correo, $contraseña, $tipo_usuario);
+            // $tipo_usuario = $this->input->post("user_type");
+            $token = $this->UserModel->login($correo, $contraseña);
             if ($token) {
                 $this->session->token = $token;
                 redirect("/usuarios/home");
+                // echo "logeao";
             } else {
                 redirect("/usuarios/login");
+                // echo "sad";
             }
         }
     }

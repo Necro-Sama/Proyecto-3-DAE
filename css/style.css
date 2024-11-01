@@ -1,16 +1,72 @@
-.error {
-    color: red;
+body {
+    /* background: #000; */
+    background: white;
 }
-.celda-header {
-    border: thin solid;
-    background: lightblue;
+.card {
+    background: whitesmoke;
+    /* border: none; */
+    height: auto;
 }
-.bloque {
-    border: thin solid;
+.forms-inputs {
+    position: relative;
 }
-.bloque-libre {
-    background: lightgreen;
+.forms-inputs span {
+    position: absolute;
+    top: -18px;
+    left: 10px;
+    background-color: #fff;
+    padding: 5px 10px;
+    font-size: 15px;
+    /* border: 2px solid whitesmoke; */
+    border-radius: 10px;
 }
-.bloque-reservado {
-    background: pink;
+.forms-inputs input {
+    height: 50px;
+    border: 2px solid #eee;
+}
+.forms-inputs input:focus {
+    box-shadow: none;
+    outline: none;
+    border: 2px solid #000;
+}
+.btn-login {
+    height: 50px;
+    background: #edb01c;
+    font-weight: bolder;
+}
+.btn-insti {
+    height: 50px;
+    background: #dc2626;
+    color: white;
+    font-weight: bolder;
+}
+.success-data {
+    display: flex;
+    flex-direction: column;
+}
+.logo {
+    width: 80px;
+    padding-bottom: 40px;
+}
+
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.separator::before,
+.separator::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #000;
+}
+
+.separator:not(:empty)::before {
+    margin-right: 0.25em;
+}
+
+.separator:not(:empty)::after {
+    margin-left: 0.25em;
 }
