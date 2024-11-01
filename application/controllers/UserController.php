@@ -47,15 +47,14 @@ class UserController extends CI_Controller {
         } else {
             $correo = $this->input->post("correo");
             $contraseña = $this->input->post("contraseña");
-            // $tipo_usuario = $this->input->post("user_type");
+            // echo password_hash($contraseña, PASSWORD_DEFAULT);
+            // return;
             $token = $this->UserModel->login($correo, $contraseña);
             if ($token) {
                 $this->session->token = $token;
                 redirect("/usuarios/home");
-                // echo "logeao";
             } else {
                 redirect("/usuarios/login");
-                // echo "sad";
             }
         }
     }
@@ -63,32 +62,46 @@ class UserController extends CI_Controller {
         return $this->BloquesReservadosModel->get_bloques_no_disponibles_carrera($carrera);
     }
     public function home() {
+        // $this->load->view("StudentView", array());
         $usuario = $this->logged_in($this->session->token);
         if ($usuario) {
-            $user_type = $usuario->user_type;
-            $carrera = $usuario->carrera;
-
-            switch ($user_type) {
-                case 'student':
-                    $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($carrera);
-                    $this->load->view(
-                        "StudentView", array(
-                            "bloques_no_disponibles" => $bloques_no_disponibles,
-                            "carrera" => $carrera));
-                    break;
-
-                case 'admin':
-                    $this->load->view("AdminView");
-                    break;
-
-                case 'ts':
-                    $this->load->view("TSView");
-                    break;
-                
-                default:
-                    
-                    break;
+            // print_r($usuario);
+            // Checkear si es trabajador social
+            $trabajador_social = $this->UserModel->get_trabajador_social($usuario->RUN);
+            print_r($trabajador_social);
+            if ($trabajador_social) {
+                $this->load->view("TSView");
             }
+            // Checkear si es estudiante
+            $estudiante = $this->UserModel->get_estudiante($usuario->RUN);
+            print_r($estudiante);
+            if ($estudiante) {
+                $this->load->view("StudentView");
+            }
+            // $user_type = $usuario->user_type;
+            // $carrera = $usuario->carrera;
+
+            // switch ($user_type) {
+            //     case 'student':
+            //         $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($carrera);
+            //         $this->load->view(
+            //             "StudentView", array(
+            //                 "bloques_no_disponibles" => $bloques_no_disponibles,
+            //                 "carrera" => $carrera));
+            //         break;
+
+            //     case 'admin':
+            //         $this->load->view("AdminView");
+            //         break;
+
+            //     case 'ts':
+            //         $this->load->view("TSView");
+            //         break;
+                
+            //     default:
+                    
+            //         break;
+            // }
         } else {
             redirect("/usuarios/login");
         }

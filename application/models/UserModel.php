@@ -29,9 +29,9 @@ class UserModel extends CI_Model {
         }
         $new_token = random_bytes(100);
         $insert_new_token_result = $this->db->query("
-            INSERT INTO Token VALUES
-            (NULL, NULL, ?, ?)
-        ", array($usuario->ID_PERSONA, $new_token));
+            INSERT INTO TOKEN VALUES
+            (?, NULL, ?)
+        ", array($new_token, $usuario->RUN));
         if (!$insert_new_token_result) {
             $this->session->error = "Error interno en el servidor a la hora de generar el token de acceso.";
             return;
@@ -40,16 +40,16 @@ class UserModel extends CI_Model {
     }
     public function login_token($token) {
         $query = $this->db->query("
-            SELECT * FROM token_usuarios
-            WHERE token_id = ?
-            AND NOW() > token_create
-            AND NOW() < DATE_ADD(token_create, INTERVAL 10 MINUTE)
+            SELECT * FROM TOKEN
+            WHERE TOKEN_ID = ?
+            AND NOW() > FECHA_CREACION
+            AND NOW() < DATE_ADD(FECHA_CREACION, INTERVAL 10 MINUTE)
         ", array($token));
         if ($query->num_rows() == 1) {
             $query1 = $this->db->query("
-                SELECT * FROM usuarios
-                WHERE id = ?
-            ", array($query->row(0)->user_id));
+                SELECT * FROM Persona
+                WHERE RUN = ? 
+            ", array($query->row(0)->RUN));
             return $query1->row(0);
         } elseif ($query->num_rows() > 1) {
             $this->session->error = "Usuario ya logeado.";
@@ -59,10 +59,30 @@ class UserModel extends CI_Model {
     }
     public function logout($token) {
         $id_usuario = $this->db->query("
-            DELETE FROM token_usuarios
-            WHERE user_id = (SELECT user_id FROM (SELECT t1.user_id, t1.token_id FROM token_usuarios t1
-                             WHERE t1.token_id = ?) t2)
+            DELETE FROM TOKEN
+            WHERE RUN = (SELECT RUN FROM (SELECT t1.RUN, t1.TOKEN_ID FROM TOKEN t1
+                                          WHERE t1.TOKEN_ID = ?) t2)
         ", array($token));
         session_destroy();
+    }
+    public function get_trabajador_social($RUN) {
+        $query = $this->db->query("
+            SELECT * FROM TS
+            WHERE RUN = ?
+        ", array($RUN));
+        if (!$query->num_rows()) {
+            return;
+        }
+        return $query->row(0);
+    }
+    public function get_estudiante($RUN) {
+        $query = $this->db->query("
+            SELECT * FROM Estudiante
+            WHERE RUN = ?
+        ", array($RUN));
+        if (!$query->num_rows()) {
+            return;
+        }
+        return $query->row(0);
     }
 }
