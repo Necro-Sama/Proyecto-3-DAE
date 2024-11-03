@@ -7,8 +7,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
     <meta charset="UTF-8">
     <title>Login</title>
     <link rel="stylesheet" type="text/css" href="<?=base_url()?>css/style.css"/>
+    <link rel="stylesheet" href="<?php echo base_url('public/bootstrap/css/bootstrap.min.css'); ?>">
 </head>
 <body>
+    <?php $this->load->view('navbar'); ?> <!-- Incluir el navbar -->
     <h1>Inicio de Sesión de Sistema de Atención DAE</h1>
     <?php echo $this->session->form_error; ?>
     <div class="error"><?php echo $this->session->error; ?></div>
