@@ -1,23 +1,24 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+
 class UserController extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
+        $this->load->library('session');
         $this->load->model("UserModel");
         $this->load->model("BloquesReservadosModel");
         $this->load->helper('url');
         $this->load->helper('form');
         $this->load->library('form_validation');
-        $this->load->library('session');
 
         $this->form_validation->set_rules("correo", "Correo", "required|valid_email");
         $this->form_validation->set_rules("contraseña", "Contraseña", "required");
         $this->form_validation->set_error_delimiters('<div class="error">', '</div>');
     }
     public function index() {
-        if ($this->logged_in($this->session->token)) {
+        if ($this->check_logged_in()) {
             redirect("/usuarios/home");
         } else {
             redirect("/usuarios/login");
@@ -27,10 +28,11 @@ class UserController extends CI_Controller {
         $this->load->view("googletest");
     }
     public function login() {
-        if ($this->logged_in($this->session->token)) {
+        echo password_hash("123456", PASSWORD_DEFAULT);
+        return;
+        if ($this->check_logged_in()) {
             redirect("/usuarios/home");
         }
-        session_destroy();
         $this->load->view('LoginView');
     }
     public function logout() {
@@ -38,7 +40,7 @@ class UserController extends CI_Controller {
         redirect("/usuarios/login");
     }
     public function auth() {
-        if ($this->logged_in($this->session->token)) {
+        if ($this->check_logged_in()) {
             redirect("/usuarios/home");
         }
         if ($this->form_validation->run() == FALSE) {
@@ -47,8 +49,6 @@ class UserController extends CI_Controller {
         } else {
             $correo = $this->input->post("correo");
             $contraseña = $this->input->post("contraseña");
-            // echo password_hash($contraseña, PASSWORD_DEFAULT);
-            // return;
             $token = $this->UserModel->login($correo, $contraseña);
             if ($token) {
                 $this->session->token = $token;
@@ -62,55 +62,55 @@ class UserController extends CI_Controller {
         return $this->BloquesReservadosModel->get_bloques_no_disponibles_carrera($carrera);
     }
     public function home() {
-        // $this->load->view("StudentView", array());
-        $usuario = $this->logged_in($this->session->token);
-        if ($usuario) {
-            // print_r($usuario);
-            // Checkear si es trabajador social
-            $trabajador_social = $this->UserModel->get_trabajador_social($usuario->RUN);
-            print_r($trabajador_social);
-            if ($trabajador_social) {
-                $this->load->view("TSView");
-            }
-            // Checkear si es estudiante
-            $estudiante = $this->UserModel->get_estudiante($usuario->RUN);
-            print_r($estudiante);
-            if ($estudiante) {
-                $this->load->view("StudentView");
-            }
-            // $user_type = $usuario->user_type;
-            // $carrera = $usuario->carrera;
-
-            // switch ($user_type) {
-            //     case 'student':
-            //         $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($carrera);
-            //         $this->load->view(
-            //             "StudentView", array(
-            //                 "bloques_no_disponibles" => $bloques_no_disponibles,
-            //                 "carrera" => $carrera));
-            //         break;
-
-            //     case 'admin':
-            //         $this->load->view("AdminView");
-            //         break;
-
-            //     case 'ts':
-            //         $this->load->view("TSView");
-            //         break;
-                
-            //     default:
-                    
-            //         break;
-            // }
-        } else {
+        $RUN_usuario = $this->check_logged_in();
+        if (!$RUN_usuario) {
+            session_destroy();
             redirect("/usuarios/login");
         }
+        // Checkear si es trabajador social
+        $trabajador_social = $this->UserModel->get_trabajador_social($RUN_usuario);
+        // print_r($trabajador_social);
+        if ($trabajador_social) {
+            $this->load->view("TSView");
+        }
+        // Checkear si es estudiante
+        $estudiante = $this->UserModel->get_estudiante($RUN_usuario);
+        // print_r($estudiante);
+        if ($estudiante) {
+            $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($carrera);
+            $this->load->view("StudentView");
+        }
+        // $user_type = $usuario->user_type;
+        // $carrera = $usuario->carrera;
+
+        // switch ($user_type) {
+        //     case 'student':
+        //         $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($carrera);
+        //         $this->load->view(
+        //             "StudentView", array(
+        //                 "bloques_no_disponibles" => $bloques_no_disponibles,
+        //                 "carrera" => $carrera));
+        //         break;
+
+        //     case 'admin':
+        //         $this->load->view("AdminView");
+        //         break;
+
+        //     case 'ts':
+        //         $this->load->view("TSView");
+        //         break;
+            
+        //     default:
+                
+        //         break;
+        // }
+
     }
     public function agendar() {
         $fecha = $this->input->post("fecha");
         $num_bloque = $this->input->post("num_bloque");
         $motivo = $this->input->post("motivo");
-        $usuario = $this->logged_in($this->session->token);
+        $usuario = $this->check_logged_in();
         if ($usuario) {
             $result = $this->BloquesReservadosModel->agendar($usuario, $fecha, $num_bloque, $motivo);
             if (!$result) {
@@ -125,6 +125,28 @@ class UserController extends CI_Controller {
     public function logged_in($token) {
         if ($token) {
             return $this->UserModel->login_token($token);
+        }
+    }
+    public function check_logged_in() {
+        // $this->session->token;
+        // Check logging normal (token de la base de datos)
+        ECHO " NORMAL TOKEN: ".$this->session->token;
+        if ($this->session->token) {
+            return $this->UserModel->login_token($this->session->token);
+        }
+        // Check google logging
+        // Get $id_token via HTTPS POST.
+        $cred = $this->input->post("credential");
+
+        $g_id_token = $cred ? $cred : $this->session->google_token;
+        echo " GOOGLE TOKEN: ".$g_id_token;
+        if (!$g_id_token) {
+            return;
+        }
+        $g_client = $this->UserModel->check_google_logged_in($g_id_token);
+        if ($g_client) {
+            $this->session->google_token = $g_id_token;
+            return $g_client;
         }
     }
 }

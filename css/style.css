@@ -1,9 +1,9 @@
 body {
     /* background: #000; */
-    background: white;
+    background: whitesmoke;
 }
 .card {
-    background: whitesmoke;
+    background: white;
     /* border: none; */
     height: auto;
 }

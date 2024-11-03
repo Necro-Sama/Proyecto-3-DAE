@@ -1,4 +1,5 @@
 <?php
+require_once FCPATH.'google/vendor/autoload.php';
 class UserModel extends CI_Model {
 
     public function __construct() {
@@ -65,6 +66,16 @@ class UserModel extends CI_Model {
         ", array($token));
         session_destroy();
     }
+    public function get_RUN_from_email($email) {
+        $query = $this->db->query("
+            SELECT * FROM Persona
+            WHERE CORREO = ?
+        ", array($email));
+        if (!$query->num_rows()) {
+            return;
+        }
+        return $query->row(0);
+    }
     public function get_trabajador_social($RUN) {
         $query = $this->db->query("
             SELECT * FROM TS
@@ -84,5 +95,39 @@ class UserModel extends CI_Model {
             return;
         }
         return $query->row(0);
+    }
+    public function check_google_logged_in($id_token) {
+        $CLIENT_ID = "937712052910-utrla4pp1g3pnhcpfn00gi5j01eio5fj.apps.googleusercontent.com";
+        $client = new Google_Client(['client_id' => $CLIENT_ID]);  // Specify the CLIENT_ID of the app that accesses the backend
+        $payload = $client->verifyIdToken($id_token);
+        if ($payload) {
+            // $userid = $payload['sub'];
+            $email = $payload['email'];
+            $email_verified = $payload['email_verified'];
+            if (!$email_verified) {
+                return;
+            }
+            if (!$this->endsWith($email, "uta.cl")) {
+                $this->session->error = "Cuenta de google no es institucional.";
+                return;
+            }
+            $RUN = $this->get_RUN_from_email($email);
+            if (!$RUN) {
+                $this->session->error = "Cuenta de google no registrada.";
+                return;
+            }
+            return $RUN;
+        } else {
+            // Invalid ID token
+            $this->session->error = "Hubo un error con esa cuenta de google.";
+            return;
+        }
+    }
+    function endsWith( $haystack, $needle ) {
+        $length = strlen( $needle );
+        if( !$length ) {
+            return true;
+        }
+        return substr( $haystack, -$length ) === $needle;
     }
 }
