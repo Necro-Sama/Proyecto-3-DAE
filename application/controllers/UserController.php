@@ -8,7 +8,7 @@ class UserController extends CI_Controller {
         parent::__construct();
         $this->load->library('session');
         $this->load->model("UserModel");
-        $this->load->model("BloquesReservadosModel");
+        $this->load->model("BloqueModel");
         $this->load->helper('url');
         $this->load->helper('form');
         $this->load->library('form_validation');
@@ -28,8 +28,8 @@ class UserController extends CI_Controller {
         $this->load->view("googletest");
     }
     public function login() {
-        echo password_hash("123456", PASSWORD_DEFAULT);
-        return;
+        // echo password_hash("random", PASSWORD_DEFAULT);
+        // return;
         if ($this->check_logged_in()) {
             redirect("/usuarios/home");
         }
@@ -75,11 +75,23 @@ class UserController extends CI_Controller {
         }
         // Checkear si es estudiante
         $estudiante = $this->UserModel->get_estudiante($RUN_usuario);
-        // print_r($estudiante);
         if ($estudiante) {
-            $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($carrera);
+            // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
             $this->load->view("StudentView");
+            $this->BloqueModel->get_bloques_carrera($estudiante->COD_CARRERA);
+            $this->load->view("StudentAgendarView");
         }
+        // Checkear si es no estudiante
+
+        $no_estudiante = $this->UserModel->get_no_estudiante($RUN_usuario);
+        if ($no_estudiante) {
+            // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
+            // $this->load->view("NotStudentView");
+            echo "No estudiante";
+            $this->load->view("StudentView");
+            $this->load->view("StudentAgendarView");
+        }
+
         // $user_type = $usuario->user_type;
         // $carrera = $usuario->carrera;
 
@@ -130,7 +142,7 @@ class UserController extends CI_Controller {
     public function check_logged_in() {
         // $this->session->token;
         // Check logging normal (token de la base de datos)
-        ECHO " NORMAL TOKEN: ".$this->session->token;
+        // ECHO " NORMAL TOKEN: ".$this->session->token;
         if ($this->session->token) {
             return $this->UserModel->login_token($this->session->token);
         }
@@ -139,7 +151,7 @@ class UserController extends CI_Controller {
         $cred = $this->input->post("credential");
 
         $g_id_token = $cred ? $cred : $this->session->google_token;
-        echo " GOOGLE TOKEN: ".$g_id_token;
+        // echo " GOOGLE TOKEN: ".$g_id_token;
         if (!$g_id_token) {
             return;
         }

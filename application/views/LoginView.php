@@ -14,6 +14,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
 </head>
 
 <body>
+    <br>
+    <?php
+    // $a = array('cvergarab0', 'jvarayav1', 'kcorrales2', 'mbernales3', 'ncornejoa4', 'palday5', 'petorob6', 'ebrizuela7', 'vvillalobos8', 'yarayar9');
+    // foreach ($a as $v) {
+    //     echo password_hash($v, PASSWORD_DEFAULT).'<br>';
+    // }
+    // echo password_hash("mauri", PASSWORD_DEFAULT);
+    ?>
     <div id="g_id_onload" data-client_id="937712052910-utrla4pp1g3pnhcpfn00gi5j01eio5fj.apps.googleusercontent.com"
         data-context="use" data-ux_mode="popup" data-login_uri="<?= base_url(array('index.php', 'usuarios', 'auth')) ?>"
         data-auto_prompt="false">

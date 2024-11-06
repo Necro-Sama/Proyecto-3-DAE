@@ -11,8 +11,8 @@ class UserModel extends CI_Model {
         $this->session->unset_userdata("error");
         $this->session->unset_userdata("form_error");
         $query = $this->db->query("
-            SELECT * FROM Persona
-            WHERE CORREO = ?
+            SELECT * FROM persona
+            WHERE Correo = ?
         ", array($email));
         if ($query->num_rows() == 0) {
             $this->session->error = "Correo o contraseña incorrectos.";
@@ -24,34 +24,35 @@ class UserModel extends CI_Model {
         }
         $usuario = $query->row(0);
         // Check password
-        if (!password_verify($password, $usuario->CONTRASEÑA)) {
+        if (!password_verify($password, $usuario->Contraseña)) {
             $this->session->error = "Correo o contraseña incorrectos.";
             return;
         }
         $new_token = random_bytes(100);
         $insert_new_token_result = $this->db->query("
-            INSERT INTO TOKEN VALUES
-            (?, NULL, ?)
+            INSERT INTO cookie VALUES
+            (NULL, ?, NULL, ?)
         ", array($new_token, $usuario->RUN));
         if (!$insert_new_token_result) {
             $this->session->error = "Error interno en el servidor a la hora de generar el token de acceso.";
             return;
         }
+        sleep(1);
         return $new_token;
     }
     public function login_token($token) {
         $query = $this->db->query("
-            SELECT * FROM TOKEN
-            WHERE TOKEN_ID = ?
-            AND NOW() > FECHA_CREACION
-            AND NOW() < DATE_ADD(FECHA_CREACION, INTERVAL 10 MINUTE)
+            SELECT * FROM cookie
+            WHERE Token = ?
+            AND NOW() > FechaCreacion
+            AND NOW() < DATE_ADD(FechaCreacion, INTERVAL 10 MINUTE)
         ", array($token));
         if ($query->num_rows() == 1) {
             $query1 = $this->db->query("
-                SELECT * FROM Persona
+                SELECT * FROM persona
                 WHERE RUN = ? 
             ", array($query->row(0)->RUN));
-            return $query1->row(0);
+            return $query1->row(0)->RUN;
         } elseif ($query->num_rows() > 1) {
             $this->session->error = "Usuario ya logeado.";
         } else {
@@ -60,25 +61,35 @@ class UserModel extends CI_Model {
     }
     public function logout($token) {
         $id_usuario = $this->db->query("
-            DELETE FROM TOKEN
-            WHERE RUN = (SELECT RUN FROM (SELECT t1.RUN, t1.TOKEN_ID FROM TOKEN t1
-                                          WHERE t1.TOKEN_ID = ?) t2)
+            DELETE FROM cookie
+            WHERE RUN = (SELECT RUN FROM (SELECT t1.RUN, t1.Token FROM cookie t1
+                                          WHERE t1.Token = ?) t2)
         ", array($token));
         session_destroy();
     }
-    public function get_RUN_from_email($email) {
+    public function get_funcionario($RUN) {
         $query = $this->db->query("
-            SELECT * FROM Persona
-            WHERE CORREO = ?
-        ", array($email));
+            SELECT * FROM funcionario
+            WHERE RUN = ?
+        ", array($RUN));
         if (!$query->num_rows()) {
             return;
         }
         return $query->row(0);
     }
+    public function get_RUN_from_email($email) {
+        $query = $this->db->query("
+            SELECT * FROM persona
+            WHERE Correo = ?
+        ", array($email));
+        if (!$query->num_rows()) {
+            return;
+        }
+        return $query->row(0)->RUN;
+    }
     public function get_trabajador_social($RUN) {
         $query = $this->db->query("
-            SELECT * FROM TS
+            SELECT * FROM trabajadorsocial
             WHERE RUN = ?
         ", array($RUN));
         if (!$query->num_rows()) {
@@ -88,7 +99,17 @@ class UserModel extends CI_Model {
     }
     public function get_estudiante($RUN) {
         $query = $this->db->query("
-            SELECT * FROM Estudiante
+            SELECT * FROM estudiante
+            WHERE RUN = ?
+        ", array($RUN));
+        if (!$query->num_rows()) {
+            return;
+        }
+        return $query->row(0);
+    }
+    public function get_no_estudiante($RUN) {
+        $query = $this->db->query("
+            SELECT * FROM noestudiante
             WHERE RUN = ?
         ", array($RUN));
         if (!$query->num_rows()) {
