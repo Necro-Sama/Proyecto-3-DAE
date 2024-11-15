@@ -78,8 +78,6 @@ class UserController extends CI_Controller {
         if ($estudiante) {
             // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
             $this->load->view("StudentView");
-            $this->BloqueModel->get_bloques_carrera($estudiante->COD_CARRERA);
-            $this->load->view("StudentAgendarView");
         }
         // Checkear si es no estudiante
 
@@ -119,20 +117,22 @@ class UserController extends CI_Controller {
 
     }
     public function agendar() {
-        $fecha = $this->input->post("fecha");
-        $num_bloque = $this->input->post("num_bloque");
-        $motivo = $this->input->post("motivo");
-        $usuario = $this->check_logged_in();
-        if ($usuario) {
-            $result = $this->BloquesReservadosModel->agendar($usuario, $fecha, $num_bloque, $motivo);
-            if (!$result) {
-                $this->session->agendar_error = "Error a la hora de agendar la hora.";
-                $this->session->mark_as_flash("agendar_error");
-            }
-            redirect("/usuarios/home");
-        } else {
-            redirect("/usuarios/login");
-        }
+        $this->load->view("StudentAgendarView");
+        
+        //$fecha = $this->input->post("fecha");
+        //$num_bloque = $this->input->post("num_bloque");
+        //$motivo = $this->input->post("motivo");
+        //$usuario = $this->check_logged_in();
+        //if ($usuario) {
+        //    $result = $this->BloquesReservadosModel->agendar($usuario, $fecha, $num_bloque, $motivo);
+        //    if (!$result) {
+        //        $this->session->agendar_error = "Error a la hora de agendar la hora.";
+        //        $this->session->mark_as_flash("agendar_error");
+        //    }
+        //    redirect("/usuarios/home");
+        //} else {
+        //    redirect("/usuarios/login");
+        //}
     }
     public function logged_in($token) {
         if ($token) {
