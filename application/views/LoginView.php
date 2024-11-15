@@ -16,15 +16,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 <body>
     <?php $this->load->view('navbar'); ?> <!-- Incluir el navbar -->
-    <h1>Inicio de Sesión de Sistema de Atención DAE</h1>
-    <?php echo $this->session->form_error; ?>
-    <div class="error"><?php echo $this->session->error; ?></div>
-    <?php echo form_open("usuarios/auth"); ?>
-    <h2>Correo</h2>
-    <input type="email" name="correo" value="<?php echo set_value('correo') ?>">
-    <h2>Contraseña</h2>
-    <input type="password" name="contraseña" value="<?php echo set_value('contraseña') ?>">
-    <h2>Tipo de Usuario</h2>
     <?php
     // $a = array('cvergarab0', 'jvarayav1', 'kcorrales2', 'mbernales3', 'ncornejoa4', 'palday5', 'petorob6', 'ebrizuela7', 'vvillalobos8', 'yarayar9');
     // foreach ($a as $v) {
