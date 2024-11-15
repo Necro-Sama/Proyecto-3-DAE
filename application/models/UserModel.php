@@ -97,6 +97,16 @@ class UserModel extends CI_Model {
         }
         return $query->row(0);
     }
+    public function get_admin($RUN)
+    {
+        $query = $this->db->query("
+            SELECT * FROM administrador
+            WHERE RUN = ?    
+        ",array($RUN));
+        
+        return $query->num_rows() > 0;
+    }
+
     public function get_estudiante($RUN) {
         $query = $this->db->query("
             SELECT * FROM estudiante

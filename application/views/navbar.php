@@ -25,14 +25,17 @@
             Agendar
           </a>
         </li>
-        <li class="nav-item text-center mx-2 mx-lg-1">
-          <a class="nav-link" href="<?php echo site_url('gestor_ts'); ?>">
-            <div>
-              <i class="far fa-user fa-lg mb-1"></i>
-            </div>
-            Gestor TS
-          </a>
-        </li>
+        <?php if (isset($gestion_ts) && $gestion_ts): ?>
+          <li class="nav-item text-center mx-2 mx-lg-1">
+              <a class="nav-link" href="<?php echo site_url('gestor_ts'); ?>">
+                  <div>
+                      <i class="far fa-user fa-lg mb-1"></i>
+                  </div>
+                  Gestor TS
+              </a>
+          </li>
+        <?php endif; ?>
+
       </ul>
 
       <ul class="navbar-nav ms-auto d-flex flex-row mt-3 mt-lg-0">

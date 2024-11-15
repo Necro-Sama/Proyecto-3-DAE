@@ -134,6 +134,21 @@ class UserController extends CI_Controller {
         //    redirect("/usuarios/login");
         //}
     }
+    public function gestion_ts($RUN_usuario)
+    {
+        return $this->UserModel->get_admin($RUN_usuario);
+    }
+
+    public function cargar_vista()
+    {
+        $RUN_usuario = $this->session->userdata('RUN');
+        $gestion_ts = $this->UserModel->get_admin($RUN_usuario); 
+    
+        $data['gestion_ts'] = $gestion_ts;
+        $this->load->view('navbar', $data); 
+    }
+    
+    
     public function logged_in($token) {
         if ($token) {
             return $this->UserModel->login_token($token);
