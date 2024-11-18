@@ -40,6 +40,16 @@
 
       <ul class="navbar-nav ms-auto d-flex flex-row mt-3 mt-lg-0">
         <li class="nav-item text-center mx-2 mx-lg-1">
+          <a class="nav-link" href="<?php echo site_url('usuarios/Licencia'); ?>">
+            <div>
+              <i class="fas fa-sign-out-alt fa-lg mb-1"></i>
+            </div>
+            Ingresar Licencia
+          </a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ms-auto d-flex flex-row mt-3 mt-lg-0">
+        <li class="nav-item text-center mx-2 mx-lg-1">
           <a class="nav-link" href="<?php echo site_url('usuarios/logout'); ?>">
             <div>
               <i class="fas fa-sign-out-alt fa-lg mb-1"></i>
