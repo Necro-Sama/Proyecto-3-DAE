@@ -60,4 +60,4 @@ $route['usuarios/home'] = 'UserController/home';
 $route['usuarios/agendar'] = 'UserController/agendar';
 $route['usuarios/googletest'] = 'UserController/googletest';
 $route['gestor_ts'] = 'TrabajadorSocialController/index';
-$route['usuarios/licencia'] = 'AdminController/Licencia'
+$route['usuarios/licencia'] = 'AdminController/Licencia';
