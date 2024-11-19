@@ -162,7 +162,6 @@ class UserModel extends CI_Model {
         return substr( $haystack, -$length ) === $needle;
     }
 }
-<<<<<<< Updated upstream
 class Trabajadores_model extends CI_Model {
     public function obtenerTrabajadores() {
         $this->db->select('id, nombre');
@@ -192,28 +191,3 @@ class Licencias_model extends CI_Model {
         return $this->db->insert('Licencia', $data);
     }
 }
-
-
-
-=======
-class Licencias_model extends CI_Model {
-    public function obtenerTrabajadoresSociales() {
-        $this->db->select('p.RUN, p.NOMBRE, p.APELLIDO');
-        $this->db->from('persona p');
-        $this->db->join('funcionario f', 'p.RUN = f.RUN');
-        $this->db->join('trabajadorsocial ts', 'f.RUN = ts.RUN');
-        $query = $this->db->get();
-        return $query->result_array();
-    }
-    public function guardarLicencia($trabajador_id, $fecha_inicio, $fecha_termino) {
-        // Guardar la licencia en la tabla Licencia
-        $data = [
-            'RUN' => $trabajador_id,
-            'FECHA_INI' => $fecha_inicio,
-            'FECHA_TER' => $fecha_termino
-        ];
-        $this->db->insert('licencia', $data); // Inserta en la tabla Licencia
-    }
-}
-
->>>>>>> Stashed changes

@@ -143,12 +143,8 @@ class UserController extends CI_Controller {
     {
         return $this->UserModel->get_admin($RUN_usuario);
     }
-<<<<<<< Updated upstream
-    public function Licencia(){
-=======
     public function Licencia() {
         // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
->>>>>>> Stashed changes
         $this->load->view("LicenciaView");
     }
     public function cargar_vista()
@@ -193,8 +189,6 @@ class Licencias extends CI_Controller {
     public function index() {
         $this->load->model('Licencias_model');
         $data['trabajadores'] = $this->Licencias_model->obtenerTrabajadoresSociales();
-<<<<<<< Updated upstream
-        
         // Depura los datos antes de pasarlos a la vista
         echo '<pre>';
         print_r($data['trabajadores']);
@@ -219,12 +213,9 @@ class Licencias extends CI_Controller {
         } else {
             echo "Error al registrar la licencia.";
         }
-    }
-    
-=======
-
         $this->load->view('LicenciaView', $data);
     }
+    
     public function obtenerTrabajadoresSociales() {
         $query = $this->db->query("
             SELECT p.Nombre, p.Apellido, p.RUN
@@ -236,5 +227,4 @@ class Licencias extends CI_Controller {
         log_message('debug', print_r($result, true)); // Registra los datos
         return $result;
     }
->>>>>>> Stashed changes
 }
