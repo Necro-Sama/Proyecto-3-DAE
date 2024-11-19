@@ -138,7 +138,9 @@ class UserController extends CI_Controller {
     {
         return $this->UserModel->get_admin($RUN_usuario);
     }
-
+    public function licencia_ts($RUN_usuario){
+        $this->load->view("LicenciaView");
+    }
     public function cargar_vista()
     {
         $RUN_usuario = $this->session->userdata('RUN');
