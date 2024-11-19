@@ -36,5 +36,38 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
+        <div class="container mt-5">
+        <h1>Registrar Licencia</h1>
+
+    <form action="<?= base_url('Licencia/guardar') ?>" method="post">
+        <!-- Lista desplegable para seleccionar Trabajador Social -->
+        <label for="trabajador_id">Seleccione Trabajador Social:</label>
+        <select name="trabajador_id" id="trabajador_id" required>
+            <option value="">Seleccione...</option>
+            <?php if (!empty($trabajadores)): ?>
+                <?php foreach ($trabajadores as $trabajador): ?>
+                    <option value="<?= $trabajador['RUN'] ?>">
+                        <?= $trabajador['Nombre'] . ' ' . $trabajador['Apellido'] ?>
+                    </option>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <option value="">No hay Trabajadores Sociales disponibles</option>
+            <?php endif; ?>
+        </select>
+
+        <!-- Campos para las fechas -->
+        <div>
+            <label for="fecha_inicio">Fecha de Inicio:</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+        </div>
+
+        <div>
+            <label for="fecha_termino">Fecha de Término:</label>
+            <input type="date" id="fecha_termino" name="fecha_termino" required>
+        </div>
+
+        <!-- Botón para enviar el formulario -->
+        <button type="submit">Guardar Licencia</button>
+    </form>
 
 </body>

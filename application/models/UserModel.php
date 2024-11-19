@@ -162,3 +162,35 @@ class UserModel extends CI_Model {
         return substr( $haystack, -$length ) === $needle;
     }
 }
+class Trabajadores_model extends CI_Model {
+    public function obtenerTrabajadores() {
+        $this->db->select('id, nombre');
+        $this->db->from('trabajadores_sociales'); // Nombre de tu tabla
+        return $this->db->get()->result_array();
+    }
+}
+class Licencias_model extends CI_Model {
+    public function obtenerTrabajadoresSociales() {
+        // Realizamos un JOIN entre Persona y Trabajadorsocial para obtener los TS
+        $query = $this->db->query("
+            SELECT p.Nombre, p.Apellido
+            FROM persona p
+            JOIN funcionario f ON p.RUN = f.RUN
+            JOIN trabajadorsocial t ON f.RUN = t.RUN");
+        return $query->result_array();
+ // Devuelve el resultado como un arreglo
+    }
+
+    public function guardarLicencia($run, $fecha_inicio, $fecha_termino) {
+        $data = [
+            'RUN' => $run,
+            'FECHA_INI' => $fecha_inicio,
+            'FECHA_TER' => $fecha_termino,
+        ];
+    
+        return $this->db->insert('Licencia', $data);
+    }
+}
+
+
+

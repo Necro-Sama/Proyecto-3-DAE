@@ -73,6 +73,11 @@ class UserController extends CI_Controller {
         if ($trabajador_social) {
             $this->load->view("TSView");
         }
+        $administrador = $this->UserModel->get_admin($RUN_usuario);
+        // print_r($administrador);
+        if ($administrador) {
+            $this->load->view("AdminView");
+        }
         // Checkear si es estudiante
         $estudiante = $this->UserModel->get_estudiante($RUN_usuario);
         if ($estudiante) {
@@ -138,7 +143,7 @@ class UserController extends CI_Controller {
     {
         return $this->UserModel->get_admin($RUN_usuario);
     }
-    public function licencia_ts($RUN_usuario){
+    public function Licencia(){
         $this->load->view("LicenciaView");
     }
     public function cargar_vista()
@@ -178,4 +183,29 @@ class UserController extends CI_Controller {
             return $g_client;
         }
     }
+}
+class Licencias extends CI_Controller {
+    public function index() {
+        $this->load->model('Licencias_model'); // Carga el modelo
+        $data['trabajadores'] = $this->Licencias_model->obtenerTrabajadoresSociales(); // Obtén los datos
+        $this->load->view('LicenciaView', $data); // Carga la vista y pasa los datos
+    }
+    public function guardar() {
+        $this->load->model('Licencias_model');
+    
+        // Recibir datos del formulario
+        $trabajador_id = $this->input->post('trabajador_id');
+        $fecha_inicio = $this->input->post('fecha_inicio');
+        $fecha_termino = $this->input->post('fecha_termino');
+    
+        // Insertar datos en la base de datos
+        $licencia_id = $this->Licencias_model->guardarLicencia($trabajador_id, $fecha_inicio, $fecha_termino);
+    
+        if ($licencia_id) {
+            echo "Licencia registrada con éxito.";
+        } else {
+            echo "Error al registrar la licencia.";
+        }
+    }
+    
 }
