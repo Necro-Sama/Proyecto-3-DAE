@@ -95,56 +95,16 @@ class UserController extends CI_Controller {
             $this->load->view("StudentAgendarView");
         }
 
-        // $user_type = $usuario->user_type;
-        // $carrera = $usuario->carrera;
-
-        // switch ($user_type) {
-        //     case 'student':
-        //         $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($carrera);
-        //         $this->load->view(
-        //             "StudentView", array(
-        //                 "bloques_no_disponibles" => $bloques_no_disponibles,
-        //                 "carrera" => $carrera));
-        //         break;
-
-        //     case 'admin':
-        //         $this->load->view("AdminView");
-        //         break;
-
-        //     case 'ts':
-        //         $this->load->view("TSView");
-        //         break;
-            
-        //     default:
-                
-        //         break;
-        // }
-
     }
     public function agendar() {
         $this->load->view("StudentAgendarView");
-        
-        //$fecha = $this->input->post("fecha");
-        //$num_bloque = $this->input->post("num_bloque");
-        //$motivo = $this->input->post("motivo");
-        //$usuario = $this->check_logged_in();
-        //if ($usuario) {
-        //    $result = $this->BloquesReservadosModel->agendar($usuario, $fecha, $num_bloque, $motivo);
-        //    if (!$result) {
-        //        $this->session->agendar_error = "Error a la hora de agendar la hora.";
-        //        $this->session->mark_as_flash("agendar_error");
-        //    }
-        //    redirect("/usuarios/home");
-        //} else {
-        //    redirect("/usuarios/login");
-        //}
+
     }
     public function gestion_ts($RUN_usuario)
     {
         return $this->UserModel->get_admin($RUN_usuario);
     }
     public function Licencia() {
-        // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
         $this->load->view("LicenciaView");
     }
     public function cargar_vista()
@@ -163,18 +123,14 @@ class UserController extends CI_Controller {
         }
     }
     public function check_logged_in() {
-        // $this->session->token;
-        // Check logging normal (token de la base de datos)
-        // ECHO " NORMAL TOKEN: ".$this->session->token;
+
         if ($this->session->token) {
             return $this->UserModel->login_token($this->session->token);
         }
-        // Check google logging
-        // Get $id_token via HTTPS POST.
+
         $cred = $this->input->post("credential");
 
         $g_id_token = $cred ? $cred : $this->session->google_token;
-        // echo " GOOGLE TOKEN: ".$g_id_token;
         if (!$g_id_token) {
             return;
         }
@@ -189,23 +145,15 @@ class Licencias extends CI_Controller {
     public function index() {
         $this->load->model('Licencias_model');
         $data['trabajadores'] = $this->Licencias_model->obtenerTrabajadoresSociales();
-        // Depura los datos antes de pasarlos a la vista
-        echo '<pre>';
-        print_r($data['trabajadores']);
-        echo '</pre>';
-        die();
-        
         $this->load->view('LicenciaView', $data);
     }
     public function guardar() {
         $this->load->model('Licencias_model');
     
-        // Recibir datos del formulario
         $trabajador_id = $this->input->post('trabajador_id');
         $fecha_inicio = $this->input->post('fecha_inicio');
         $fecha_termino = $this->input->post('fecha_termino');
     
-        // Insertar datos en la base de datos
         $licencia_id = $this->Licencias_model->guardarLicencia($trabajador_id, $fecha_inicio, $fecha_termino);
     
         if ($licencia_id) {
@@ -214,17 +162,5 @@ class Licencias extends CI_Controller {
             echo "Error al registrar la licencia.";
         }
         $this->load->view('LicenciaView', $data);
-    }
-    
-    public function obtenerTrabajadoresSociales() {
-        $query = $this->db->query("
-            SELECT p.Nombre, p.Apellido, p.RUN
-            FROM persona p
-            JOIN funcionario f ON p.RUN = f.RUN
-            JOIN trabajadorsocial t ON f.RUN = t.RUN
-        ");
-        $result = $query->result_array();
-        log_message('debug', print_r($result, true)); // Registra los datos
-        return $result;
     }
 }
