@@ -186,9 +186,16 @@ class UserController extends CI_Controller {
 }
 class Licencias extends CI_Controller {
     public function index() {
-        $this->load->model('Licencias_model'); // Carga el modelo
-        $data['trabajadores'] = $this->Licencias_model->obtenerTrabajadoresSociales(); // Obtén los datos
-        $this->load->view('LicenciaView', $data); // Carga la vista y pasa los datos
+        $this->load->model('Licencias_model');
+        $data['trabajadores'] = $this->Licencias_model->obtenerTrabajadoresSociales();
+        
+        // Depura los datos antes de pasarlos a la vista
+        echo '<pre>';
+        print_r($data['trabajadores']);
+        echo '</pre>';
+        die();
+        
+        $this->load->view('LicenciaView', $data);
     }
     public function guardar() {
         $this->load->model('Licencias_model');

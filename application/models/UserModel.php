@@ -171,14 +171,14 @@ class Trabajadores_model extends CI_Model {
 }
 class Licencias_model extends CI_Model {
     public function obtenerTrabajadoresSociales() {
-        // Realizamos un JOIN entre Persona y Trabajadorsocial para obtener los TS
         $query = $this->db->query("
-            SELECT p.Nombre, p.Apellido
+            SELECT p.Nombre, p.Apellido, p.RUN
             FROM persona p
             JOIN funcionario f ON p.RUN = f.RUN
-            JOIN trabajadorsocial t ON f.RUN = t.RUN");
-        return $query->result_array();
- // Devuelve el resultado como un arreglo
+            JOIN trabajadorsocial t ON f.RUN = t.RUN
+        ");
+        $result = $query->result_array();
+        return $result;
     }
 
     public function guardarLicencia($run, $fecha_inicio, $fecha_termino) {
