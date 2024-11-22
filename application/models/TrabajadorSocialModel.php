@@ -14,6 +14,7 @@ class TrabajadorSocialModel extends CI_Model {
         $this->db->from('trabajadorsocial');
         $this->db->join('funcionario', 'trabajadorsocial.RUN = funcionario.RUN', 'inner');
         $this->db->join('persona', 'funcionario.RUN = persona.RUN', 'inner');
+        return $this->db->get()->result_array(); 
     }
     public function agregarPersona($personaData) {
         $this->db->insert('persona', $personaData);
