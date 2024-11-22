@@ -29,7 +29,7 @@
                 <td>
                     <!-- Botón para editar -->
                     <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#trabajadorModal"
-                        onclick="editarTrabajador('<?php echo $trabajador['RUN']; ?>', '<?php echo $trabajador['Nombre']; ?>', '<?php echo $trabajador['Apellido']; ?>')">
+                        onclick="editarTrabajador('<?=$trabajador['RUN']?>', '<?=$trabajador['Nombre']?>', '<?=$trabajador['Apellido']?>', '<?=$trabajador['Correo']?>', '<?=$trabajador['Telefono']?>')">
                         Editar
                     </button>
                     <!-- Botón para eliminar -->
@@ -83,7 +83,6 @@
         }
 
         function editarTrabajador(run, nombre, apellido, correo, telefono) {
-            document.getElementById('RUN').value = run;
             document.getElementById('Nombre').value = nombre;
             document.getElementById('Apellido').value = apellido;
             document.getElementById('Correo').value = correo;

@@ -10,8 +10,8 @@ class TrabajadorSocialController extends CI_Controller {
     }
 
     public function index() {
-        $data['trabajadores'] = $this->TrabajadorSocialModel->obtenerTrabajadoresSociales();
-        $this->load->view('gestor_ts', $data);
+        $trabajadores = $this->TrabajadorSocialModel->obtenerTrabajadoresSociales();
+        $this->load->view('gestor_ts', array("trabajadores" => $trabajadores));
     }
 
     public function agregar() {
