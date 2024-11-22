@@ -10,21 +10,11 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <script src="https://accounts.google.com/gsi/client" async></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="<?php echo base_url('public/bootstrap/css/bootstrap.min.css'); ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url(array('css', 'style.css')) ?>" />
-    <link rel="stylesheet" href="<?php echo base_url('public/bootstrap/css/bootstrap.min.css'); ?>">
 </head>
 
 <body>
-    <?php $this->load->view('navbar'); ?> <!-- Incluir el navbar -->
-    <h1>Inicio de Sesión de Sistema de Atención DAE</h1>
-    <?php echo $this->session->form_error; ?>
-    <div class="error"><?php echo $this->session->error; ?></div>
-    <?php echo form_open("usuarios/auth"); ?>
-    <h2>Correo</h2>
-    <input type="email" name="correo" value="<?php echo set_value('correo') ?>">
-    <h2>Contraseña</h2>
-    <input type="password" name="contraseña" value="<?php echo set_value('contraseña') ?>">
-    <h2>Tipo de Usuario</h2>
     <?php
     // $a = array('cvergarab0', 'jvarayav1', 'kcorrales2', 'mbernales3', 'ncornejoa4', 'palday5', 'petorob6', 'ebrizuela7', 'vvillalobos8', 'yarayar9');
     // foreach ($a as $v) {

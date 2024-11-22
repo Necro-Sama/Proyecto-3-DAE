@@ -29,12 +29,12 @@
             <?php foreach ($trabajadores as $trabajador): ?>
             <tr>
                 <td><?php echo $trabajador['RUN']; ?></td>
-                <td><?php echo $trabajador['NOMBRE_PER']; ?></td>
-                <td><?php echo $trabajador['APELLID_PER']; ?></td>
+                <td><?php echo $trabajador['Nombre']; ?></td>
+                <td><?php echo $trabajador['Apellido']; ?></td>
                 <td>
                     <!-- Botón para editar -->
                     <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#trabajadorModal"
-                        onclick="editarTrabajador('<?php echo $trabajador['RUN']; ?>', '<?php echo $trabajador['NOMBRE_PER']; ?>', '<?php echo $trabajador['APELLID_PER']; ?>')">
+                        onclick="editarTrabajador('<?php echo $trabajador['RUN']; ?>', '<?php echo $trabajador['Nombre']; ?>', '<?php echo $trabajador['Apellido']; ?>')">
                         Editar
                     </button>
                     <!-- Botón para eliminar -->
@@ -49,7 +49,7 @@
     <div class="modal fade" id="trabajadorModal" tabindex="-1" aria-labelledby="trabajadorModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-            <form id="trabajadorForm" method="post" action="<?php echo site_url('TrabajadorSocialController/editar/' . $trabajador['ID_TS']); ?>">
+            <form id="trabajadorForm" method="post" action="<?php echo site_url('TrabajadorSocialController/editar/' . $trabajador['RUN']); ?>">
                 <div class="modal-header">
                     <h5 class="modal-title" id="trabajadorModalLabel">Editar Trabajador Social</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -57,19 +57,19 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="Nombre" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" name="Nombre" id="Nombre" value="<?php echo $trabajador['NOMBRE_PER']; ?>" required>
+                        <input type="text" class="form-control" name="Nombre" id="Nombre" value="<?php echo $trabajador['Nombre']; ?>" required>
                     </div>
                     <div class="mb-3">
                         <label for="Apellido" class="form-label">Apellido</label>
-                        <input type="text" class="form-control" name="Apellido" id="Apellido" value="<?php echo $trabajador['APELLID_PER']; ?>" required>
+                        <input type="text" class="form-control" name="Apellido" id="Apellido" value="<?php echo $trabajador['Apellido']; ?>" required>
                     </div>
                     <div class="mb-3">
                         <label for="Correo" class="form-label">Correo</label>
-                        <input type="email" class="form-control" name="Correo" id="Correo" value="<?php echo $trabajador['CORREO']; ?>" required>
+                        <input type="email" class="form-control" name="Correo" id="Correo" value="<?php echo $trabajador['Correo']; ?>" required>
                     </div>
                     <div class="mb-3">
                         <label for="Telefono" class="form-label">Teléfono</label>
-                        <input type="text" class="form-control" name="Telefono" id="Telefono" value="<?php echo $trabajador['TELEFONO']; ?>" required>
+                        <input type="text" class="form-control" name="Telefono" id="Telefono" value="<?php echo $trabajador['Telefono']; ?>" required>
                     </div>
                 </div>
                 <div class="modal-footer">

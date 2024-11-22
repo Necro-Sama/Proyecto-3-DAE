@@ -67,6 +67,7 @@ class UserController extends CI_Controller {
             session_destroy();
             redirect("/usuarios/login");
         }
+        $this->load->view('navbar');
         // Checkear si es trabajador social
         $trabajador_social = $this->UserModel->get_trabajador_social($RUN_usuario);
         // print_r($trabajador_social);
@@ -77,9 +78,9 @@ class UserController extends CI_Controller {
         $estudiante = $this->UserModel->get_estudiante($RUN_usuario);
         if ($estudiante) {
             // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
-            $this->load->view("StudentView");
-            $this->BloqueModel->get_bloques_carrera($estudiante->COD_CARRERA);
-            $this->load->view("StudentAgendarView");
+            $this->load->view("StudentHome");
+            // $this->BloqueModel->get_bloques_carrera($estudiante->COD_CARRERA);
+            // $this->load->view("StudentAgendarView");
         }
         // Checkear si es no estudiante
 
@@ -119,6 +120,15 @@ class UserController extends CI_Controller {
 
     }
     public function agendar() {
+        if (!$this->check_logged_in()) {
+            session_destroy();
+            redirect("/usuarios/login");
+        }
+        $this->load->view('navbar');
+        $this->load->view('StudentAgendarView');
+    }
+
+    public function accion_agendar() {
         $fecha = $this->input->post("fecha");
         $num_bloque = $this->input->post("num_bloque");
         $motivo = $this->input->post("motivo");
