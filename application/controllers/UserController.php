@@ -24,9 +24,6 @@ class UserController extends CI_Controller {
             redirect("/usuarios/login");
         }
     }
-    public function googletest() {
-        $this->load->view("googletest");
-    }
     public function login() {
         // echo password_hash("random", PASSWORD_DEFAULT);
         // return;
@@ -101,6 +98,7 @@ class UserController extends CI_Controller {
 
     }
     public function agendar() {
+<<<<<<< Updated upstream
         $this->load->view("StudentAgendarView");
     }
     public function gestion_ts($RUN_usuario)
@@ -115,11 +113,15 @@ class UserController extends CI_Controller {
         $data['gestion_ts'] = $gestion_ts;
         $this->load->view('navbar', $data); 
         if (!$this->check_logged_in()) {
+=======
+        $usuario = $this->check_logged_in();
+        if (!$usuario) {
+>>>>>>> Stashed changes
             session_destroy();
             redirect("/usuarios/login");
         }
         $this->load->view('navbar');
-        $this->load->view('StudentAgendarView');
+        $this->load->view('StudentAgendarView', array("RUN_ESTUDIANTE" => $usuario));
     }
 
     public function accion_agendar() {

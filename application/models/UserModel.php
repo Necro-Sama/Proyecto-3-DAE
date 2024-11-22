@@ -109,8 +109,9 @@ class UserModel extends CI_Model {
 
     public function get_estudiante($RUN) {
         $query = $this->db->query("
-            SELECT * FROM estudiante
-            WHERE RUN = ?
+            SELECT e.COD_CARRERA, p.* FROM persona p, estudiante e
+            WHERE p.RUN = e.RUN
+            AND p.RUN = ?
         ", array($RUN));
         if (!$query->num_rows()) {
             return;

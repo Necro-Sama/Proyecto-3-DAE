@@ -1,12 +1,15 @@
 <?php
-class BloqueModel extends CI_Model {
-
-    public function __construct() {
+class BloqueModel extends CI_Model
+{
+    public function __construct()
+    {
         parent::__construct();
         $this->load->database();
     }
-    public function get_bloques_carrera($COD_CARRERA) {
-
+    public function get_bloques_carrera(
+        $COD_CARRERA,
+        $mostrar_semana_actual = true
+    ) {
         // $result_bloqueatencion = $this->db->query("
         // SELECT * FROM bloqueatencion
         // ")->result_array();
@@ -21,13 +24,80 @@ class BloqueModel extends CI_Model {
         // SELECT * FROM trabajadorsocial
         // ")->result_array();
         // print_r($result_ts);
-        $RUN_trabajadorsocial= $this->db->query("
-        SELECT * FROM calendariosemanal
-        WHERE RUNTS = (SELECT RUNTS FROM carrera
-                       WHERE COD_CARRERA = ?)
-        AND FechaInicioSemana = TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY))
-        ", $COD_CARRERA)->row(0);
-        print_r($RUN_trabajadorsocial);
+
+        // FechaInicioSemana = TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY))
+        $carrera = $this->db
+            ->query(
+                "
+                SELECT * FROM carrera
+                WHERE COD_CARRERA = ?
+                ",
+                $COD_CARRERA
+            )
+            ->row(0);
+        // print_r($carrera);
+        if ($mostrar_semana_actual) {
+            $bloquesatencion = $this->db
+                ->query(
+                    "
+                    SELECT bl.*, bla.* FROM calendariosemanal ca, bloque bl, bloqueatencion bla
+                    WHERE ca.RUNTS = ? OR ca.RUNTS = ?
+                    AND ca.FechaInicioSemana = TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY))
+                    AND bl.FechaInicioSemana = ca.FechaInicioSemana
+                    AND bl.RUNTS = ca.RUNTS
+                    AND bl.ID = bla.ID
+                    ",
+                    [$carrera->RUNTS, $carrera->ReemplazaRUNTS]
+                )
+                ->result_array();
+            
+            $bloquesbloqueados = $this->db
+                ->query(
+                    "
+                    SELECT bl.*, blb.* FROM calendariosemanal ca, bloque bl, bloquebloqueado blb
+                    WHERE ca.RUNTS = ? OR ca.RUNTS = ?
+                    AND ca.FechaInicioSemana = TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY))
+                    AND bl.FechaInicioSemana = ca.FechaInicioSemana
+                    AND bl.RUNTS = ca.RUNTS
+                    AND bl.ID = blb.ID
+                    ",
+                    [$carrera->RUNTS, $carrera->ReemplazaRUNTS]
+                )
+                ->result_array();
+        } else {
+            $calendarios = $this->db
+                ->query(
+                    "
+                    SELECT * FROM calendariosemanal
+                    WHERE RUNTS = ?
+                    OR RUNTS = ?
+                    ",
+                    [$carrera->RUNTS, $carrera->ReemplazaRUNTS]
+                )
+                ->result_array();
+        }
+        echo "BLOQUES ATENCION:";
+        print_r($bloquesatencion);
+        echo "<br>";
+        echo "BLOQUES BLOQUEADOS: ";
+        print_r($bloquesbloqueados);
+        echo "<br>";
+
+
+        // $bloques = $this->db
+        //     ->query(
+        //         "
+        //         SELECT * FROM bloque b, bloqueatencion ba
+        //         WHERE b.ID = ba.ID
+        //         "
+        //     )
+        //     ->result_array();
+        // print_r($bloques);
+        // $RUN_trabajadorsocial= $this->db->query("
+        //     SELECT * FROM trabajadorsocial ts, trabajadorsocial tsreem
+        //     WHERE ts
+        // ", $COD_CARRERA)->result_array();
+        // print_r($RUN_trabajadorsocial);
 
         // return $result_bloqueatencion;
     }
