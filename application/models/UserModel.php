@@ -163,20 +163,13 @@ class UserModel extends CI_Model {
     }
 }
 class Trabajadores_model extends CI_Model {
-    public function obtenerTrabajadores() {
-        $this->db->select('id, nombre');
-        $this->db->from('trabajadores_sociales'); // Nombre de tu tabla
-        return $this->db->get()->result_array();
-    }
-}
-class Licencias_model extends CI_Model {
+    // Seccion licencias
     public function obtenerTrabajadoresSociales() {
-        $query = $this->db->query("
-            SELECT p.Nombre, p.Apellido, p.RUN
-            FROM persona p
-            JOIN funcionario f ON p.RUN = f.RUN
-            JOIN trabajadorsocial t ON f.RUN = t.RUN
-        ");
+        $query = $this->db->query('
+        SELECT p.Nombre,p.Apellido,p.RUN FROM persona p
+        join trabajadorsocial t
+        on (p.RUN = t.RUN)
+        '); 
         $result = $query->result_array();
         return $result;
     }

@@ -98,38 +98,29 @@ class UserController extends CI_Controller {
     }
     public function agendar() {
         $this->load->view("StudentAgendarView");
-
     }
     public function gestion_ts($RUN_usuario)
     {
         return $this->UserModel->get_admin($RUN_usuario);
     }
-    public function Licencia() {
-        $this->load->view("LicenciaView");
-    }
+
     public function cargar_vista()
     {
         $RUN_usuario = $this->session->userdata('RUN');
         $gestion_ts = $this->UserModel->get_admin($RUN_usuario); 
-    
         $data['gestion_ts'] = $gestion_ts;
         $this->load->view('navbar', $data); 
     }
-    
-    
     public function logged_in($token) {
         if ($token) {
             return $this->UserModel->login_token($token);
         }
     }
     public function check_logged_in() {
-
         if ($this->session->token) {
             return $this->UserModel->login_token($this->session->token);
         }
-
         $cred = $this->input->post("credential");
-
         $g_id_token = $cred ? $cred : $this->session->google_token;
         if (!$g_id_token) {
             return;
@@ -140,21 +131,22 @@ class UserController extends CI_Controller {
             return $g_client;
         }
     }
-}
-class Licencias extends CI_Controller {
-    public function index() {
-        $this->load->model('Licencias_model');
-        $data['trabajadores'] = $this->Licencias_model->obtenerTrabajadoresSociales();
-        $this->load->view('LicenciaView', $data);
-    }
+
+    // Seccion licencias
+
+    public function mostrarTS() {
+            $this->load->model('Trabajadores_model');
+            $trabajadores = $this->Trabajadores_model->obtenerTrabajadoresSociales();
+          
+            return $trabajadores;
+        }
     public function guardar() {
-        $this->load->model('Licencias_model');
     
         $trabajador_id = $this->input->post('trabajador_id');
         $fecha_inicio = $this->input->post('fecha_inicio');
         $fecha_termino = $this->input->post('fecha_termino');
     
-        $licencia_id = $this->Licencias_model->guardarLicencia($trabajador_id, $fecha_inicio, $fecha_termino);
+        $licencia_id = $this->guardarLicencia($trabajador_id, $fecha_inicio, $fecha_termino);
     
         if ($licencia_id) {
             echo "Licencia registrada con éxito.";
@@ -162,5 +154,9 @@ class Licencias extends CI_Controller {
             echo "Error al registrar la licencia.";
         }
         $this->load->view('LicenciaView', $data);
+    }    
+    public function Licencia() {
+        $data["trabajadores"] = $this->mostrarTS();
+        $this->load->view("LicenciaView",$data);
     }
 }

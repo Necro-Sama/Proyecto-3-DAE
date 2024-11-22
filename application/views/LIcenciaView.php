@@ -39,7 +39,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
         <div class="container mt-5">
         <h1>Registrar Licencia</h1>
 
-    <form action="<?= base_url('Licencia/guardar') ?>" method="post">
+    <form action="<?= base_url('guardar') ?>" method="post">
         <!-- Lista desplegable para seleccionar Trabajador Social -->
         <label for="trabajador_id">Seleccione Trabajador Social:</label>
         <select name="trabajador_id" id="trabajador_id" required>
