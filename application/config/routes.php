@@ -61,3 +61,4 @@ $route['usuarios/agendar'] = 'UserController/agendar';
 $route['usuarios/googletest'] = 'UserController/googletest';
 $route['gestor_ts'] = 'TrabajadorSocialController/index';
 $route['usuarios/Licencia'] = 'UserController/Licencia';
+$route['usuarios/guardar'] = 'UserController/guardar';

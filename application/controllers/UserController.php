@@ -67,7 +67,7 @@ class UserController extends CI_Controller {
             session_destroy();
             redirect("/usuarios/login");
         }
-        $this->load->view('navbar');
+        // $this->load->view('navbar');
         // Checkear si es trabajador social
         $trabajador_social = $this->UserModel->get_trabajador_social($RUN_usuario);
         // print_r($trabajador_social);
@@ -83,7 +83,7 @@ class UserController extends CI_Controller {
         $estudiante = $this->UserModel->get_estudiante($RUN_usuario);
         if ($estudiante) {
             // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
-            $this->load->view("StudentView");
+            // $this->load->view("StudentView");
             $this->load->view("StudentHome");
             // $this->BloqueModel->get_bloques_carrera($estudiante->COD_CARRERA);
             // $this->load->view("StudentAgendarView");
@@ -96,7 +96,7 @@ class UserController extends CI_Controller {
             // $this->load->view("NotStudentView");
             echo "No estudiante";
             $this->load->view("StudentView");
-            $this->load->view("StudentAgendarView");
+            // $this->load->view("StudentAgendarView");
         }
 
     }
@@ -172,7 +172,7 @@ class UserController extends CI_Controller {
         $trabajador_id = $this->input->post('trabajador_id');
         $fecha_inicio = $this->input->post('fecha_inicio');
         $fecha_termino = $this->input->post('fecha_termino');
-    
+
         $licencia_id = $this->guardarLicencia($trabajador_id, $fecha_inicio, $fecha_termino);
     
         if ($licencia_id) {

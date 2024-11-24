@@ -175,12 +175,15 @@ class Trabajadores_model extends CI_Model {
     }
 
     public function guardarLicencia($run, $fecha_inicio, $fecha_termino) {
-        $data = [
+        $data["Licencia"] = [
             'RUN' => $run,
             'FECHA_INI' => $fecha_inicio,
             'FECHA_TER' => $fecha_termino,
         ];
-    
+        $this->db->query('
+        update persona set Activo = 0
+        where RUN = ?
+        ',array($run));
         return $this->db->insert('Licencia', $data);
     }
 }
