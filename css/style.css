@@ -71,5 +71,11 @@ body {
     margin-left: 0.25em;
 }
 .dia {
-    background: #edb01c;
+    background: #fddeaa;
+}
+.fila1 {
+    background: white;
+}
+.fila2 {
+    background: #fbf1d0;
 }
