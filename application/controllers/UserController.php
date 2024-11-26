@@ -83,7 +83,7 @@ class UserController extends CI_Controller
             session_destroy();
             redirect("/usuarios/login");
         }
-        $this->load->view("navbar");
+        // $this->load->view("navbar");
         // Checkear si es trabajador social
         $trabajador_social = $this->UserModel->get_trabajador_social(
             $RUN_usuario

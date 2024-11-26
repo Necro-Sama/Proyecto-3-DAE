@@ -68,9 +68,10 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     $bloques = $this->BloqueModel->get_bloques_carrera(
         $estudiante->COD_CARRERA
     );
-    print_r($bloques);
+    // print_r($bloques);
     ?>
     <p>RUN estudiante: <?= $RUN_ESTUDIANTE ?></p>
+    
     <div class="container">
         <h3>Bloques disponibles</h3>
         <table class="text-center">
