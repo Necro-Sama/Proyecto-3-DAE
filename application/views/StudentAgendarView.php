@@ -74,21 +74,17 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
                     <option selected>Seleccionar Motivo...</option>
                     <?php
                     $motivos = [
-                        "Gratuidad Mineduc" => "Gratuidad Mineduc",
-                        "Becas de arancel Mineduc" =>
-                            "Becas de arancel Mineduc",
-                        "Fondo Solidario de Crédito Universitario" =>
-                            "Fondo Solidario de Crédito Universitario",
-                        "Beneficios Junaeb (BAES y Becas de mantención)" =>
-                            "Beneficios Junaeb (BAES y Becas de mantención)",
-                        "Beca Fotocopia UTA" => "Beca Fotocopia UTA",
-                        "Beca Alimentación UTA" => "Beca Alimentación UTA",
-                        "Beca Residencia UTA" => "Beca Residencia UTA",
-                        "Beca Internado UTA" => "Beca Internado UTA",
-                        "Beca Ayuda Estudiantil UTA" =>
-                            "Beca Ayuda Estudiantil UTA",
-                        "Beca PSU-PDT-PAES UTA" => "Beca PSU-PDT-PAES UTA",
-                        "Otro" => "Otro",
+                        "Gratuidad Mineduc",
+                        "Becas de arancel Mineduc",
+                        "Fondo Solidario de Crédito Universitario",
+                        "Beneficios Junaeb (BAES y Becas de mantención)",
+                        "Beca Fotocopia UTA",
+                        "Beca Alimentación UTA",
+                        "Beca Residencia UTA",
+                        "Beca Internado UTA",
+                        "Beca Ayuda Estudiantil UTA",
+                        "Beca PSU-PDT-PAES UTA",
+                        "Otro",
                     ];
                     foreach ($motivos as $key => $value): ?>
                         <option value="<?= $key ?>"><?= $value ?></option>

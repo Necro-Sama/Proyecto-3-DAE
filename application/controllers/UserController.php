@@ -199,21 +199,20 @@ class UserController extends CI_Controller
             $this->session->mark_as_flash("agendar_error");
             redirect("/usuarios/agendar");
         }
-        $result = $this->BloqueModel->agendar_estudiante(
-            $usuario,
-            $dia,
-            $num_bloque,
-            $motivos[$motivo - 1]
-        );
-        // echo $num_bloque . "," . $dia . "," . $motivos[$motivo - 1];
-        echo "RESULT: " . $result;
-        if (!$result) {
-            $this->session->agendar_error =
-                "Error a la hora de agendar la hora.";
+        try {
+            $this->BloqueModel->agendar_estudiante(
+                $usuario,
+                $dia,
+                $num_bloque,
+                $motivos[$motivo + 0]
+            );
+        } catch (Exception $e) {
+            $this->session->agendar_error = $e->getMessage();
             $this->session->mark_as_flash("agendar_error");
         }
-        redirect("/usuarios/agendar");
 
+        // echo $num_bloque . "," . $dia . "," . $motivos[$motivo - 1];
+        redirect("/usuarios/agendar");
     }
     public function logged_in($token)
     {
@@ -238,9 +237,6 @@ class UserController extends CI_Controller
         }
     }
 
-    
-    
-
     // Seccion licencias
 
     public function mostrarTS()
@@ -261,11 +257,9 @@ class UserController extends CI_Controller
             $fecha_inicio,
             $fecha_termino
         );
-        
 
         if ($data) {
             echo "Licencia registrada con éxito.";
-            
         } else {
             echo "Error al registrar la licencia.";
         }

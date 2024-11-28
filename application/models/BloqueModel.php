@@ -90,13 +90,13 @@ class BloqueModel extends CI_Model
             "bloqueados" => $bloquesbloqueados,
         ];
     }
-    public function get_bloques_colisionando($carrera, $intervalo_colision)
+    public function get_bloques_colisionando($carrera, $dia, $horario)
     {
-        return $this->db
+        $bloques_atencion = $this->db
             ->query(
                 "
                 SELECT
-                    COUNT(*) cant
+                    *
                 FROM
                     bloque bl
                 JOIN
@@ -111,23 +111,96 @@ class BloqueModel extends CI_Model
                         RUNTS = ?
                 )
                 AND
-                    ? < FechaTermino
+                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE < FechaTermino
                 AND
-                    ? > FechaInicio
+                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE > FechaInicio
                 ",
                 [
                     $carrera->RUNTS,
                     $carrera->ReemplazaRUNTS,
-                    $intervalo_colision[0],
-                    $intervalo_colision[1],
+                    $dia,
+                    $horario[0][0],
+                    $horario[0][1],
+                    $dia,
+                    $horario[1][0],
+                    $horario[1][1],
                 ]
             )
-            ->row(0)->cant;
+            ->result();
+        $bloques_bloqueados = $this->db
+            ->query(
+                "
+                SELECT
+                    *
+                FROM
+                    bloque bl
+                JOIN
+                    bloquebloqueado blb
+                ON
+                    blb.ID = bl.ID
+                WHERE
+                    FechaInicioSemana = TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY))
+                AND (
+                        RUNTS = ?
+                    OR
+                        RUNTS = ?
+                )
+                AND
+                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE < FechaTermino
+                AND
+                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE > FechaInicio
+                ",
+                [
+                    $carrera->RUNTS,
+                    $carrera->ReemplazaRUNTS,
+                    $dia,
+                    $horario[0][0],
+                    $horario[0][1],
+                    $dia,
+                    $horario[1][0],
+                    $horario[1][1],
+                ]
+            )
+            ->result();
+        return [
+            "atencion" => $bloques_atencion,
+            "bloqueado" => $bloques_bloqueados,
+        ];
     }
     // Agenda solo para la semana actual
     function agendar_estudiante($RUN_estudiante, $dia, $bloque_horario, $motivo)
     {
-        echo $RUN_estudiante, $dia, $bloque_horario, $motivo, "<br>";
+        $horarios = [
+            1 => [["08", "00"], ["08", "45"]],
+            2 => [["08", "45"], ["09", "30"]],
+            3 => [["09", "40"], ["10", "25"]],
+            4 => [["10", "25"], ["11", "10"]],
+            5 => [["11", "20"], ["12", "05"]],
+            6 => [["12", "05"], ["12", "50"]],
+            7 => [["14", "45"], ["15", "30"]],
+            8 => [["15", "30"], ["16", "15"]],
+            9 => [["16", "20"], ["17", "05"]],
+            10 => [["17", "05"], ["17", "50"]],
+            11 => [["17", "55"], ["18", "40"]],
+            12 => [["18", "40"], ["19", "25"]],
+        ];
+        $dia_to_num = [
+            "Lunes" => 0,
+            "Martes" => 1,
+            "Miércoles" => 2,
+            "Jueves" => 3,
+            "Viernes" => 4,
+        ];
+        // echo $RUN_estudiante,
+        //     ", (",
+        //     $dia,
+        //     ", ",
+        //     $dia_to_num[$dia],
+        //     "), ",
+        //     $bloque_horario,
+        //     ", ",
+        //     $motivo,
+        //     "<br>";
         $estudiante = $this->db
             ->query(
                 // "
@@ -159,18 +232,114 @@ class BloqueModel extends CI_Model
             )
             ->row(0);
         // print_r($estudiante);
-        $bloques = $this->get_bloques_carrera($estudiante->COD_CARRERA);
-        // print_r($bloques);
-        $bloques_atencion = $bloques["atencion"];
-        $bloques_bloqueado = $bloques["bloqueados"];
-        foreach ($bloques_atencion as $bloque) {
-            print_r($bloque);
-            echo "<br>";
+        // $bloques = $this->get_bloques_carrera($estudiante->COD_CARRERA);
+        // // print_r($bloques);
+        // $bloques_atencion = $bloques["atencion"];
+        // $bloques_bloqueado = $bloques["bloqueados"];
+        // foreach ($bloques_atencion as $bloque) {
+        //     print_r($bloque);
+        //     echo "<br>";
+        //     echo "<br>";
+        //     echo "<br>";
+        //     echo "<br>";
+        //     echo "<br>";
+        // }
+        $bloques_overlap = $this->get_bloques_colisionando(
+            $carrera,
+            $dia_to_num[$dia],
+            $horarios[$bloque_horario]
+        );
+        foreach ($bloques_overlap["atencion"] as $bloque) {
+            if ($bloque->RUNCliente == $RUN_estudiante) {
+                throw new Exception(
+                    "No puedes agendar dos veces en la misma hora."
+                );
+            }
         }
-        $cant_overlap = $this->get_bloques_colisionando($carrera, [
-            "2024-11-26 09:40:00",
-            "2024-11-26 10:25:00",
-        ]);
+        // echo count($bloques_overlap["atencion"]);
+        if (
+            count($bloques_overlap["atencion"]) +
+                count($bloques_overlap["bloqueado"]) >=
+            2
+        ) {
+            throw new Exception("Horario no disponible.");
+        }
+        if (
+            count($bloques_overlap["atencion"]) +
+                count($bloques_overlap["bloqueado"]) ==
+            0
+        ) {
+            // Agendar con TS asignada
+            $run_ts = $carrera->RUNTS;
+        } else {
+            // Agendar con la TS reemplazante si el bloque NO asociado a este, sino, agendarlo a TS asignada
+            if (count($bloques_overlap["bloqueado"])) {
+                if ($bloques_overlap["bloqueado"][0]->RUNTS == $carrera->ReemplazaRUNTS) {
+                    $run_ts = $carrera->RUNTS;
+                } else {
+                    $run_ts = $carrera->ReemplazaRUNTS;
+                }
+            }
+            elseif (count($bloques_overlap["atencion"])) {
+                if ($bloques_overlap["atencion"][0]->RUNTS == $carrera->ReemplazaRUNTS) {
+                    $run_ts = $carrera->RUNTS;
+                } else {
+                    $run_ts = $carrera->ReemplazaRUNTS;
+                }
+            }
+        }
+        $h = $horarios[$bloque_horario];
+        if (
+            !$this->db->query(
+                "
+                INSERT INTO bloque VALUES (
+                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE,
+                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE,
+                    NULL,
+                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)),
+                    ?
+                )
+                ",
+                [
+                    $dia_to_num[$dia],
+                    $h[0][0],
+                    $h[0][1],
+                    $dia_to_num[$dia],
+                    $h[1][0],
+                    $h[1][1],
+                    $run_ts,
+                ]
+            )
+        ) {
+            throw new Exception(
+                "ERROR " .
+                    $this->db->error()->code .
+                    ": " .
+                    $this->db->error()->message
+            );
+        }
+        $insert_id = $this->db->insert_id();
+        if (
+            !$this->db->query(
+                "
+                INSERT INTO bloqueatencion VALUES (
+                    'Reservado',
+                    ?,
+                    ?,
+                    ?
+                )
+                ",
+                [$motivo, $insert_id, $RUN_estudiante]
+            )
+        ) {
+            throw new Exception(
+                "DB ERROR " .
+                    $this->db->error()->code .
+                    ": " .
+                    $this->db->error()->message
+            );
+        }
+        // print_r($bloques_overlap);
         // $res = $this->db
         // ->query(
         //     "
