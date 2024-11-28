@@ -181,16 +181,20 @@ class UserController extends CI_Controller
         $num_bloque = $this->input->post("bloque_horario");
         $dia = $this->input->post("dia");
         $motivo = $this->input->post("motivo");
-        echo $num_bloque . "," . $dia . "," . $motivos[$motivo - 1];
 
-        
+        if (!is_numeric($motivo)) {
+            $this->session->agendar_error = "Por favor seleccione un Motivo.";
+            $this->session->mark_as_flash("agendar_error");
+            redirect("/usuarios/agendar");
+        }
         $result = $this->BloqueModel->agendar_estudiante(
             $usuario,
             $dia,
             $num_bloque,
             $motivos[$motivo - 1]
         );
-        echo "RESULT: ".$result;
+        // echo $num_bloque . "," . $dia . "," . $motivos[$motivo - 1];
+        echo "RESULT: " . $result;
         if (!$result) {
             $this->session->agendar_error =
                 "Error a la hora de agendar la hora.";

@@ -2,7 +2,7 @@
 <nav class="navbar navbar-expand-lg" style="background-color: #060eae;">
   <div class="container-fluid">
     <a class="navbar-brand fw-bold" href="#" style="color: #fdd188;">
-      <img src="<?php echo base_url('assets/img/dae-logo.png'); ?>" style="height: 30px; margin-right: 10px;">
+      <img src="<?= base_url('dae-logo.png') ?>" style="height: 30px; margin-right: 10px;">
       Sistema DAE
     </a>
 
