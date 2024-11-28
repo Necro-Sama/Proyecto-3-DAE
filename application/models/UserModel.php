@@ -162,6 +162,14 @@ class UserModel extends CI_Model {
         }
         return substr( $haystack, -$length ) === $needle;
     }
+    public function get_datos($run) {
+        $query = $this->db->query('
+            SELECT * FROM persona
+            WHERE RUN = ?
+        ', array($run));
+    
+        return $query->row_array(); // Devuelve un arreglo asociativo con los datos
+    }
 }
 class Trabajadores_model extends CI_Model {
     // Seccion licencias

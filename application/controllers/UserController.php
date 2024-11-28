@@ -103,7 +103,10 @@ class UserController extends CI_Controller
         if ($estudiante) {
             // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
             // $this->load->view("StudentView");
-            $this->load->view("StudentHome");
+            // $this->load->view("StudentHome");
+                    
+            $persona = $this->UserModel->get_datos($RUN_usuario);
+            $this->load->view('StudentHome', ['persona' => $persona]);
             // $this->BloqueModel->get_bloques_carrera($estudiante->COD_CARRERA);
             // $this->load->view("StudentAgendarView");
         }
@@ -218,6 +221,9 @@ class UserController extends CI_Controller
             return $g_client;
         }
     }
+
+    
+    
 
     // Seccion licencias
 
