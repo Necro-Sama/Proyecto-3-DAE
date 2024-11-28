@@ -162,13 +162,38 @@ class UserModel extends CI_Model {
         }
         return substr( $haystack, -$length ) === $needle;
     }
-    public function get_datos($run) {
-        $query = $this->db->query('
-            SELECT * FROM persona
-            WHERE RUN = ?
-        ', array($run));
-    
-        return $query->row_array(); // Devuelve un arreglo asociativo con los datos
+    public function getPersona($run) {
+        // Obtener datos básicos de la tabla `persona`
+        $query = $this->db->get_where('persona', ['RUN' => $run]);
+        return $query->row_array();
+    }
+
+    public function getEstudiante($run) {
+        // Obtener datos adicionales de estudiante
+        $this->db->select('c.COD_CARRERA');
+        $this->db->from('estudiante e');
+        $this->db->join('carrera c', 'e.COD_CARRERA = c.COD_CARRERA');
+        $this->db->where('e.RUN', $run);
+        $query = $this->db->get();
+        return $query->row_array();
+    }
+
+    public function getFuncionario($run) {
+        // Obtener datos adicionales de funcionario
+        $this->db->select('cargo');
+        $this->db->from('funcionario');
+        $this->db->where('RUN', $run);
+        $query = $this->db->get();
+        return $query->row_array();
+    }
+
+    public function getAdministrador($run) {
+        // Obtener datos adicionales de administrador
+        $this->db->select('cargo');
+        $this->db->from('administrador');
+        $this->db->where('RUN', $run);
+        $query = $this->db->get();
+        return $query->row_array();
     }
 }
 class Trabajadores_model extends CI_Model {

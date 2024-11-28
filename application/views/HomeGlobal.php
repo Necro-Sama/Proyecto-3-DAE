@@ -17,7 +17,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     <?php $this->load->view('navbar'); ?>
 
     <div class="container mt-4">
-        <h1 class="text-center mb-4">Home de Estudiante</h1>
+        <h1 class="text-center mb-4">Home general</h1>
         
         <!-- Incluir la tarjeta del usuario -->
         <?php $this->load->view('user_card', ['persona' => $persona]); ?>

@@ -89,37 +89,49 @@ class UserController extends CI_Controller
         $trabajador_social = $this->UserModel->get_trabajador_social(
             $RUN_usuario
         );
+        $data['persona'] = $this->UserModel->getPersona($RUN_usuario);
+        if ($this->UserModel->getEstudiante($RUN_usuario)) {
+            $data['tipo'] = 'Estudiante';
+            $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
+        } elseif ($this->UserModel->getFuncionario($RUN_usuario)) {
+            $data['tipo'] = 'Funcionario';
+            $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
+        } elseif ($this->UserModel->getAdministrador($RUN_usuario)) {
+            $data['tipo'] = 'Administrador';
+            $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
+        }
+        $this->load->view('HomeGlobal', $data);
         // print_r($trabajador_social);
-        if ($trabajador_social) {
-            $this->load->view("TSView");
-        }
-        $administrador = $this->UserModel->get_admin($RUN_usuario);
-        // print_r($administrador);
-        if ($administrador) {
-            $this->load->view("AdminView");
-        }
-        // Checkear si es estudiante
-        $estudiante = $this->UserModel->get_estudiante($RUN_usuario);
-        if ($estudiante) {
-            // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
-            // $this->load->view("StudentView");
-            // $this->load->view("StudentHome");
+        // if ($trabajador_social) {
+        //     $this->load->view("TSView");
+        // }
+        // $administrador = $this->UserModel->get_admin($RUN_usuario);
+        // // print_r($administrador);
+        // if ($administrador) {
+        //     $this->load->view("AdminView");
+        // }
+        // // Checkear si es estudiante
+        // $estudiante = $this->UserModel->get_estudiante($RUN_usuario);
+        // if ($estudiante) {
+        //     // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
+        //     // $this->load->view("StudentView");
+        //     // $this->load->view("StudentHome");
                     
-            $persona = $this->UserModel->get_datos($RUN_usuario);
-            $this->load->view('StudentHome', ['persona' => $persona]);
-            // $this->BloqueModel->get_bloques_carrera($estudiante->COD_CARRERA);
-            // $this->load->view("StudentAgendarView");
-        }
-        // Checkear si es no estudiante
+        // 
+        // $this->load->view('StudentHome', ['persona' => $persona]);
+        //     // $this->BloqueModel->get_bloques_carrera($estudiante->COD_CARRERA);
+        //     // $this->load->view("StudentAgendarView");
+        // }
+        // // Checkear si es no estudiante
 
-        $no_estudiante = $this->UserModel->get_no_estudiante($RUN_usuario);
-        if ($no_estudiante) {
-            // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
-            // $this->load->view("NotStudentView");
-            echo "No estudiante";
-            $this->load->view("StudentView");
-            $this->load->view("StudentAgendarView");
-        }
+        // $no_estudiante = $this->UserModel->get_no_estudiante($RUN_usuario);
+        // if ($no_estudiante) {
+        //     // $bloques_no_disponibles = $this->get_bloques_no_disponibles_carrera($estudiante->COD_CARRERA);
+        //     // $this->load->view("NotStudentView");
+        //     echo "No estudiante";
+        //     $this->load->view("StudentView");
+        //     $this->load->view("StudentAgendarView");
+        // }
     }
     public function agendar()
     {
