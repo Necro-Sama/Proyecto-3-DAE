@@ -243,10 +243,11 @@ class UserController extends CI_Controller
 
         if ($data) {
             echo "Licencia registrada con éxito.";
+            
         } else {
             echo "Error al registrar la licencia.";
         }
-        $this->load->view("LicenciaView", $data);
+        $this->Licencia();
     }
     public function Licencia()
     {

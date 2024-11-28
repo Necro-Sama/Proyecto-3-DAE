@@ -181,7 +181,18 @@ class Trabajadores_model extends CI_Model {
             'FECHA_INI' => $fecha_inicio,
             'FECHA_TER' => $fecha_termino,
         ];
-    
+        if($this->ConsultaEstado($run)){
+            $this->db->query('
+            UPDATE persona  set Activo = 0 where RUN = ?
+            ', array($run));
+        }
         return $this->db->insert('Licencia', $data);
+    }
+    public function ConsultaEstado($run){
+    
+        return $this->db->query('
+        SELECT Activo from persona
+        where RUN =?
+        ',array($run));
     }
 }
