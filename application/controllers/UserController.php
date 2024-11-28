@@ -192,7 +192,7 @@ class UserController extends CI_Controller
                 "Error a la hora de agendar la hora.";
             $this->session->mark_as_flash("agendar_error");
         }
-        // redirect("/usuarios/agendar");
+        redirect("/usuarios/agendar");
 
     }
     public function logged_in($token)
