@@ -1,0 +1,39 @@
+table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    max-height: calc(100vh - 150px); /* Ajusta la altura máxima a la ventana */
+    overflow-y: auto; /* Permite scroll si es necesario */
+    border: 2px solid #000; /* Añade un borde a toda la tabla */
+}
+
+th, td {
+    padding: 5px;
+    text-align: center;
+    font-size: 12px;
+    border: 1px solid #000; /* Añade bordes a cada celda */
+}
+
+thead th {
+    background-color: #FFD700;
+    color: #000;
+    border: 2px solid #000; /* Bordes más gruesos en el encabezado */
+}
+
+tbody tr:nth-child(even) {
+    background-color: #FFF7CC;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #FFF2B3;
+}
+
+button {
+    font-size: 10px;
+    padding: 5px;
+    cursor: pointer;
+    border: 1px solid #000; /* Bordes a los botones */
+}
+.error {
+    background-color: red;
+}
