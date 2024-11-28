@@ -9,6 +9,7 @@ class UserController extends CI_Controller
         $this->load->library("session");
         $this->load->model("UserModel");
         $this->load->model("BloqueModel");
+        $this->load->model("Trabajadores_model");
         $this->load->helper("url");
         $this->load->helper("form");
         $this->load->library("form_validation");
@@ -233,13 +234,14 @@ class UserController extends CI_Controller
         $fecha_inicio = $this->input->post("fecha_inicio");
         $fecha_termino = $this->input->post("fecha_termino");
 
-        $licencia_id = $this->guardarLicencia(
+        $data["licencia_id"] = $this->Trabajadores_model->guardarLicencia(
             $trabajador_id,
             $fecha_inicio,
             $fecha_termino
         );
+        
 
-        if ($licencia_id) {
+        if ($data) {
             echo "Licencia registrada con éxito.";
         } else {
             echo "Error al registrar la licencia.";

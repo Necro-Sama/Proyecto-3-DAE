@@ -30,7 +30,7 @@
           </a>
         </li>
         <li class="nav-item text-center mx-2 mx-lg-1">
-          <a class="nav-link" href="<?php echo site_url('gestor_ts'); ?>" style="color: #fbf1d0;">
+          <a class="nav-link" href="<?php echo site_url('usuarios/gestor_ts'); ?>" style="color: #fbf1d0;">
             <div>
               <i class="far fa-user fa-lg mb-1" style="color: #fddeaa;"></i>
             </div>

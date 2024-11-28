@@ -74,7 +74,7 @@
 
 <div class="form-container">
     <h1>Registrar Licencia</h1>
-    <form action="<?= base_url('guardar') ?>" method="post">
+    <form action="<?= site_url('usuarios/guardar') ?>" method="post">
         <!-- Lista desplegable para seleccionar Trabajador Social -->
         <div class="form-group">
             <label for="trabajador_id">Seleccione Trabajador Social:</label>
