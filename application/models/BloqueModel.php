@@ -303,10 +303,10 @@ class BloqueModel extends CI_Model
             $this->db
                 ->query(
                     "SELECT
-                    (TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE) > NOW()",
+                    (TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE) < NOW() AS xd",
                     [$dia_to_num[$dia], $h[0][0], $h[0][1]]
                 )
-                ->result()
+                ->row(0)->xd
         ) {
             throw new Exception("Fecha inválida.");
         }
