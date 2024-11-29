@@ -45,7 +45,7 @@ class UserModel extends CI_Model {
             SELECT * FROM cookie
             WHERE Token = ?
             AND NOW() > FechaCreacion
-            AND NOW() < DATE_ADD(FechaCreacion, INTERVAL 10 MINUTE)
+            AND NOW() < DATE_ADD(FechaCreacion, INTERVAL 30 MINUTE)
         ", array($token));
         if ($query->num_rows() == 1) {
             $query1 = $this->db->query("

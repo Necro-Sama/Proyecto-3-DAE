@@ -267,6 +267,9 @@ class UserController extends CI_Controller
     }
     public function Licencia()
     {
+        if (!$this->check_logged_in()) {
+            redirect("/usuarios/login");
+        }
         $data["trabajadores"] = $this->mostrarTS();
         $this->load->view("LicenciaView", $data);
     }

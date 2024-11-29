@@ -6,10 +6,14 @@ class TrabajadorSocialController extends CI_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->model('TrabajadorSocialModel');
+        $this->load->model('UserModel');
         $this->load->helper('url');
     }
 
     public function index() {
+        if (!$this->check_logged_in()) {
+            redirect("/usuarios/login");
+        }
         $trabajadores = $this->TrabajadorSocialModel->obtenerTrabajadoresSociales();
         $this->load->view('gestor_ts', array("trabajadores" => $trabajadores));
     }
@@ -45,5 +49,21 @@ class TrabajadorSocialController extends CI_Controller {
         redirect('gestor_ts');
     }
     
+    public function check_logged_in()
+    {
+        if ($this->session->token) {
+            return $this->UserModel->login_token($this->session->token);
+        }
+        $cred = $this->input->post("credential");
+        $g_id_token = $cred ? $cred : $this->session->google_token;
+        if (!$g_id_token) {
+            return;
+        }
+        $g_client = $this->UserModel->check_google_logged_in($g_id_token);
+        if ($g_client) {
+            $this->session->google_token = $g_id_token;
+            return $g_client;
+        }
+    }
 }
 ?>
