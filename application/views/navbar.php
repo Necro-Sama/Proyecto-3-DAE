@@ -1,7 +1,12 @@
 <!-- Navbar -->
+
+<?php
+// print_r($t);
+?>
+
 <nav class="navbar navbar-expand-lg" style="background-color: #060eae;">
   <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="#" style="color: #fdd188;">
+    <a class="navbar-brand fw-bold" href="<?= site_url('usuarios/home') ?>" style="color: #fdd188;">
       <img src="<?= base_url('dae-logo.png') ?>" style="height: 30px; margin-right: 10px;">
       Sistema DAE
     </a>
@@ -21,6 +26,7 @@
             Home
           </a>
         </li>
+        <?php { ?>
         <li class="nav-item text-center mx-2 mx-lg-1">
           <a class="nav-link" href="<?php echo site_url('usuarios/agendar'); ?>" style="color: #fbf1d0;">
             <div>
@@ -29,6 +35,7 @@
             Agendar
           </a>
         </li>
+        <?php } ?>
         <li class="nav-item text-center mx-2 mx-lg-1">
           <a class="nav-link" href="<?php echo site_url('usuarios/gestor_ts'); ?>" style="color: #fbf1d0;">
             <div>
