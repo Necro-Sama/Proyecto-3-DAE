@@ -191,23 +191,8 @@ class BloqueModel extends CI_Model
             "Jueves" => 3,
             "Viernes" => 4,
         ];
-        // echo $RUN_estudiante,
-        //     ", (",
-        //     $dia,
-        //     ", ",
-        //     $dia_to_num[$dia],
-        //     "), ",
-        //     $bloque_horario,
-        //     ", ",
-        //     $motivo,
-        //     "<br>";
         $estudiante = $this->db
             ->query(
-                // "
-                // SELECT e.COD_CARRERA, p.* FROM persona p, estudiante e
-                // WHERE p.RUN = e.RUN
-                // AND p.RUN = ?
-                // ",
                 "
                 SELECT
                     *
@@ -231,18 +216,6 @@ class BloqueModel extends CI_Model
                 $estudiante->COD_CARRERA
             )
             ->row(0);
-        // print_r($estudiante);
-        // $bloques = $this->get_bloques_carrera($estudiante->COD_CARRERA);
-        // // print_r($bloques);
-        // $bloques_atencion = $bloques["atencion"];
-        // $bloques_bloqueado = $bloques["bloqueados"];
-        // foreach ($bloques_atencion as $bloque) {
-        //     print_r($bloque);
-        //     echo "<br>";
-        //     echo "<br>";
-        //     echo "<br>";
-        //     echo "<br>";
-        //     echo "<br>";
         // }
         $bloques_overlap = $this->get_bloques_colisionando(
             $carrera,
@@ -274,14 +247,19 @@ class BloqueModel extends CI_Model
         } else {
             // Agendar con la TS reemplazante si el bloque NO asociado a este, sino, agendarlo a TS asignada
             if (count($bloques_overlap["bloqueado"])) {
-                if ($bloques_overlap["bloqueado"][0]->RUNTS == $carrera->ReemplazaRUNTS) {
+                if (
+                    $bloques_overlap["bloqueado"][0]->RUNTS ==
+                    $carrera->ReemplazaRUNTS
+                ) {
                     $run_ts = $carrera->RUNTS;
                 } else {
                     $run_ts = $carrera->ReemplazaRUNTS;
                 }
-            }
-            elseif (count($bloques_overlap["atencion"])) {
-                if ($bloques_overlap["atencion"][0]->RUNTS == $carrera->ReemplazaRUNTS) {
+            } elseif (count($bloques_overlap["atencion"])) {
+                if (
+                    $bloques_overlap["atencion"][0]->RUNTS ==
+                    $carrera->ReemplazaRUNTS
+                ) {
                     $run_ts = $carrera->RUNTS;
                 } else {
                     $run_ts = $carrera->ReemplazaRUNTS;
@@ -289,6 +267,49 @@ class BloqueModel extends CI_Model
             }
         }
         $h = $horarios[$bloque_horario];
+        $licencias = $this->db
+            ->query(
+                "
+                SELECT
+                    l.*
+                FROM
+                    Licencia l
+                JOIN
+                    persona ts
+                ON
+                    l.RUN = ts.RUN
+                WHERE
+                    l.RUN = ?
+                AND
+                    (TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE) < TIMESTAMP(l.FECHA_TER)
+                AND
+                    (TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE) > TIMESTAMP(l.FECHA_INI)
+                ",
+                [
+                    $run_ts,
+                    $dia_to_num[$dia],
+                    $h[0][0],
+                    $h[0][1],
+                    $dia_to_num[$dia],
+                    $h[1][0],
+                    $h[1][1],
+                ]
+            )
+            ->result();
+        if (count($licencias)) {
+            throw new Exception("Horario no disponible.");
+        }
+        if (
+            $this->db
+                ->query(
+                    "SELECT
+                    (TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE) < NOW()",
+                    [$dia_to_num[$dia], $h[0][0], $h[0][1]]
+                )
+                ->result()
+        ) {
+            throw new Exception("Fecha inválida.");
+        }
         if (
             !$this->db->query(
                 "
