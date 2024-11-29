@@ -20,7 +20,7 @@
         }
         /* Encabezado de tabla */
         .table-dark {
-            background-color: #060eae; /* Azul 1 */
+            background-color: #060eae !important; /* Azul 1 */
             color: white;
         }
         /* Filas de la tabla */

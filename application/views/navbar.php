@@ -1,12 +1,7 @@
-<!-- Navbar -->
-
-<?php
-// print_r($t);
-?>
-
-<nav class="navbar navbar-expand-lg" style="background-color: #060eae;">
+<nav class="navbar navbar-expand-lg custom-navbar">
   <div class="container-fluid">
-    <a class="navbar-brand fw-bold" href="<?= site_url('usuarios/home') ?>" style="color: #fdd188;">
+    <!-- Logo y título -->
+    <a class="navbar-brand fw-bold logo-section" href="<?= site_url('usuarios/home') ?>">
       <img src="<?= base_url('dae-logo.png') ?>" style="height: 30px; margin-right: 10px;">
       Sistema DAE
     </a>
@@ -19,25 +14,23 @@
       <!-- Opciones de la izquierda -->
       <ul class="navbar-nav me-auto d-flex flex-row mt-3 mt-lg-0">
         <li class="nav-item text-center mx-2 mx-lg-1">
-          <a class="nav-link" href="<?php echo site_url('usuarios/home'); ?>" style="color: #fbf1d0;">
+          <a class="nav-link" href="<?php echo site_url('usuarios/home'); ?>" >
             <div>
               <i class="fas fa-home fa-lg mb-1" style="color: #fddeaa;"></i>
             </div>
             Home
           </a>
         </li>
-        <?php { ?>
         <li class="nav-item text-center mx-2 mx-lg-1">
-          <a class="nav-link" href="<?php echo site_url('usuarios/agendar'); ?>" style="color: #fbf1d0;">
+          <a class="nav-link" href="<?php echo site_url('usuarios/agendar'); ?>" >
             <div>
               <i class="far fa-calendar fa-lg mb-1" style="color: #fddeaa;"></i>
             </div>
             Agendar
           </a>
         </li>
-        <?php } ?>
         <li class="nav-item text-center mx-2 mx-lg-1">
-          <a class="nav-link" href="<?php echo site_url('usuarios/gestor_ts'); ?>" style="color: #fbf1d0;">
+          <a class="nav-link" href="<?php echo site_url('usuarios/gestor_ts'); ?>" >
             <div>
               <i class="far fa-user fa-lg mb-1" style="color: #fddeaa;"></i>
             </div>
@@ -45,7 +38,7 @@
           </a>
         </li>
         <li class="nav-item text-center mx-2 mx-lg-1">
-          <a class="nav-link" href="<?php echo site_url('usuarios/Licencia'); ?>" style="color: #fbf1d0;">
+          <a class="nav-link" href="<?php echo site_url('usuarios/Licencia'); ?>" >
             <div>
               <i class="fas fa-file-alt fa-lg mb-1" style="color: #fddeaa;"></i>
             </div>
@@ -56,7 +49,7 @@
       <!-- Opciones de la derecha -->
       <ul class="navbar-nav ms-auto d-flex flex-row mt-3 mt-lg-0">
         <li class="nav-item text-center mx-2 mx-lg-1">
-          <a class="nav-link" href="<?php echo site_url('usuarios/logout'); ?>" style="color: #fbf1d0;">
+          <a class="nav-link" href="<?php echo site_url('usuarios/logout'); ?>">
             <div>
               <i class="fas fa-sign-out-alt fa-lg mb-1" style="color: #fddeaa;"></i>
             </div>
@@ -67,4 +60,28 @@
     </div>
   </div>
 </nav>
-<!-- Navbar -->
+
+<style>
+/* Fondo de la navbar y borde negro */
+.custom-navbar {
+  background-color: #2B309E;
+  border: 1px solid black; /* Borde negro alrededor de la navbar */
+}
+
+/* Fondo blanco para la sección del logo */
+.logo-section {
+  background-color: white;
+  padding: 5px 10px; /* Espaciado interno opcional */
+  border-radius: 5px; /* Bordes redondeados para estética */
+  color: black;
+}
+
+/* Para mantener los colores legibles en el texto */
+.logo-section:hover {
+  text-decoration: none;
+  color: black;
+}
+.nav-link{
+  color:white;
+}
+</style>

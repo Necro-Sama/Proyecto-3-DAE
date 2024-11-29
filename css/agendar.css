@@ -1,10 +1,11 @@
 table {
     width: 100%;
     table-layout: fixed;
-    border-collapse: collapse;
-    max-height: calc(100vh - 150px); /* Ajusta la altura máxima a la ventana */
-    overflow-y: auto; /* Permite scroll si es necesario */
-    border: 2px solid #000; /* Añade un borde a toda la tabla */
+    border-collapse: separate; /* Cambiado a 'separate' para que el border-radius funcione */
+    border-spacing: 0; /* Elimina los espacios entre celdas */
+    border: 1px solid #000; /* Añade un borde a toda la tabla */
+    border-radius: 10px; /* Bordes redondeados en la tabla */
+    overflow: hidden; /* Para que el contenido respete los bordes redondeados */
 }
 
 th, td {
@@ -14,10 +15,10 @@ th, td {
     border: 1px solid #000; /* Añade bordes a cada celda */
 }
 
-thead th {
-    background-color: #FFD700;
+thead {
+    background-color: #FBF1D0;
     color: #000;
-    border: 2px solid #000; /* Bordes más gruesos en el encabezado */
+    border-radius: 10px 10px 0 0; /* Bordes redondeados solo en la parte superior */
 }
 
 tbody tr:nth-child(even) {
@@ -33,7 +34,14 @@ button {
     padding: 5px;
     cursor: pointer;
     border: 1px solid #000; /* Bordes a los botones */
+    border-radius: 5px; /* Bordes redondeados para los botones */
 }
+
+.modal-content {
+    border-radius: 15px; /* Bordes redondeados para el modal */
+}
+
 .error {
     background-color: red;
+    border-radius: 5px; /* Bordes redondeados para el mensaje de error */
 }

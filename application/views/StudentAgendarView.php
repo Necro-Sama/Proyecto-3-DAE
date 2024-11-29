@@ -55,50 +55,52 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Agendar</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form method="post" accept-charset="utf-8" action="<?= site_url() ?>/usuarios/accion_agendar">
-            <div class="modal-body">
-                <label for="dia">Día: </label>
-                <input type="text" name="dia" id="dia" readonly>
-                <br>
-                <label for="bloque_horario">Bloque Horario: </label>
-                <input type="text" name="bloque_horario" id="bloque_horario" readonly>
-                <br>
-                <label for="motivo">Motivo: </label>
-                <select class="form-select" aria-label="Default select example" name="motivo">
-                    <option selected>Seleccionar Motivo...</option>
-                    <?php
-                    $motivos = [
-                        "Gratuidad Mineduc",
-                        "Becas de arancel Mineduc",
-                        "Fondo Solidario de Crédito Universitario",
-                        "Beneficios Junaeb (BAES y Becas de mantención)",
-                        "Beca Fotocopia UTA",
-                        "Beca Alimentación UTA",
-                        "Beca Residencia UTA",
-                        "Beca Internado UTA",
-                        "Beca Ayuda Estudiantil UTA",
-                        "Beca PSU-PDT-PAES UTA",
-                        "Otro",
-                    ];
-                    foreach ($motivos as $key => $value): ?>
-                        <option value="<?= $key ?>"><?= $value ?></option>
-                    <?php endforeach;
-                    ?>
-                </select>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <input type="submit" class="btn btn-primary" name="agendar" value="Agendar" />
-            </div>
-            </form>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Agendar</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="post" accept-charset="utf-8" action="<?= site_url() ?>/usuarios/accion_agendar">
+                    <div class="modal-body">
+                        <label for="dia">Día: </label>
+                        <input type="text" name="dia" id="dia" readonly>
+                        <br>
+                            <label for="bloque_horario">Bloque Horario: </label>
+                            <input type="text" name="bloque_horario" id="bloque_horario" readonly>
+                        <br>
+                        <label for="motivo">Motivo: </label>
+                        <select class="form-select" aria-label="Default select example" name="motivo">
+                            <option selected>Seleccionar Motivo...</option>
+                            <?php
+                            $motivos = [
+                                "Gratuidad Mineduc",
+                                "Becas de arancel Mineduc",
+                                "Fondo Solidario de Crédito Universitario",
+                                "Beneficios Junaeb (BAES y Becas de mantención)",
+                                "Beca Fotocopia UTA",
+                                "Beca Alimentación UTA",
+                                "Beca Residencia UTA",
+                                "Beca Internado UTA",
+                                "Beca Ayuda Estudiantil UTA",
+                                "Beca PSU-PDT-PAES UTA",
+                                "Otro",
+                            ];
+                            foreach ($motivos as $key => $value): ?>
+                                <option value="<?= $key ?>"><?= $value ?></option>
+                            <?php endforeach;
+                            ?>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <input type="submit" class="btn btn-primary" name="agendar" value="Agendar" />
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </body>
 </html>
+<style
+></style>
