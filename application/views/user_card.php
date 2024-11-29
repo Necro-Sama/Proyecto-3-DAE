@@ -5,17 +5,18 @@
                 <?php echo $persona['Nombre'] . ' ' . $persona['Apellido']; ?>
             </h5>
             <div class="card-text" style="padding: 10px; background-color: #fddeaa;">
-                <p><strong>RUN:</strong> <?php echo $persona['rut']; ?></p>
+                <p><strong>RUN:</strong> <?php echo $persona['RUN']; ?></p>
                 <p><strong>Teléfono:</strong> <?php echo $persona['Telefono']; ?></p>
                 <p><strong>Correo:</strong> <?php echo $persona['Correo']; ?></p>
 
                 <?php if ($tipo === 'Estudiante') { ?>
-                    <p><strong>Carrera:</strong> <?php echo $detalle['OM_CARRERA']; ?></p>
-                <?php } elseif ($tipo === 'Funcionario') { ?>
+                    <p><strong>Carrera:</strong> <?php echo $detalle['COD_CARRERA'];
+                    echo " -    ".$detalle['Nombre']; ?></p>
+                <?php }/* elseif ($tipo === 'trabajadorsocial') { ?> -->
                     <p><strong>Cargo:</strong> <?php echo $detalle['cargo']; ?></p>
                 <?php } elseif ($tipo === 'Administrador') { ?>
                     <p><strong>Cargo:</strong> <?php echo $detalle['cargo']; ?></p>
-                <?php } ?>
+                <?php }*/ ?>
             </div>
         </div>
     </div>

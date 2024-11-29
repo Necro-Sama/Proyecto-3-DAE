@@ -170,7 +170,7 @@ class UserModel extends CI_Model {
 
     public function getEstudiante($run) {
         // Obtener datos adicionales de estudiante
-        $this->db->select('c.COD_CARRERA');
+        $this->db->select('c.COD_CARRERA,c.Nombre');
         $this->db->from('estudiante e');
         $this->db->join('carrera c', 'e.COD_CARRERA = c.COD_CARRERA');
         $this->db->where('e.RUN', $run);
@@ -180,16 +180,16 @@ class UserModel extends CI_Model {
 
     public function getFuncionario($run) {
         // Obtener datos adicionales de funcionario
-        $this->db->select('cargo');
-        $this->db->from('funcionario');
+        $this->db->select('*');
+        $this->db->from('trabajadorsocial');
         $this->db->where('RUN', $run);
         $query = $this->db->get();
-        return $query->row_array();
+        return "Trabajador Social";
     }
 
     public function getAdministrador($run) {
         // Obtener datos adicionales de administrador
-        $this->db->select('cargo');
+        $this->db->select('*');
         $this->db->from('administrador');
         $this->db->where('RUN', $run);
         $query = $this->db->get();
