@@ -15,13 +15,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 </head>
 
 <body>
-    <?php
-    // $a = array('cvergarab0', 'jvarayav1', 'kcorrales2', 'mbernales3', 'ncornejoa4', 'palday5', 'petorob6', 'ebrizuela7', 'vvillalobos8', 'yarayar9');
-    // foreach ($a as $v) {
-    //     echo password_hash($v, PASSWORD_DEFAULT).'<br>';
-    // }
-    // echo password_hash("mauri", PASSWORD_DEFAULT);
-    ?>
     <div id="g_id_onload" data-client_id="937712052910-utrla4pp1g3pnhcpfn00gi5j01eio5fj.apps.googleusercontent.com"
         data-context="use" data-ux_mode="popup" data-login_uri="<?= base_url(array('index.php', 'usuarios', 'auth')) ?>"
         data-auto_prompt="false">
@@ -40,12 +33,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
             <div class="col-md-6">
                 <div class="card px-5 py-5">
                     <div class="text-center d-flex flex-column">
-                        <h3>Sistema de agenda de hora DAE</h3>
+                        <h4>Sistema de Agenda de Hora</h4>
+                        <h3>Direccion De Asuntos Estudiantiles</h3>
                         <?= $this->session->form_error ?>
                         <?= $this->session->error ?>
                         <span class="text-center fs-1">
                             <img class="logo" src="https://portal.uta.cl/assets/images/logo/logo-uta.svg">
                         </span>
+                        
                     </div>
                     <?= form_open("usuarios/auth"); ?>
                     <div class="form-data">
@@ -60,7 +55,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                 value="<?= set_value('contraseña') ?>">
                             <!-- <div class="invalid-feedback">Password must be 8 character!</div> -->
                         </div>
-                        <div class="mb-3">
+                        <div class="inicio mb-3">
                             <?= form_submit("Ingresar", "Iniciar sesión", 'class="btn btn-login w-100"'); ?>
                             <!-- <button class="btn btn-login w-100">
                                 <span class="font-bold">Iniciar sesión</span>
@@ -73,6 +68,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             <span class="text-center fs-1">You have been logged in <br> Successfully</span>
                         </div>
                     </div> -->
+                    <div class="inicio"></div>
                     <div class="separator mx-2 text-secondary">o iniciar sesión con</div>
                     <!-- <a href="<?php //echo base_url('home'); ?> " class="btn btn-insti w-100">Gmail institucional</a> -->
                     <!-- <button class="btn btn-insti w-100">Gmail institucional</button> -->
@@ -88,3 +84,36 @@ defined('BASEPATH') or exit('No direct script access allowed');
 </body>
 
 </html>
+<style>
+    body {
+    background: linear-gradient(to bottom, #FDD188 0%, #FDDEAA 25%, #FBF1D0 75%, #060EAE 100%);
+    height: 100vh;  /* Asegura que el fondo cubra toda la altura de la pantalla */
+    margin: 0;  /* Elimina los márgenes predeterminados */
+    color: #333;  /* Color de texto oscuro para contraste */
+    }
+    h3 {
+    font-size: 1.2rem;  /* Aumenta el espacio debajo del título */
+    }
+
+    .form-data .forms-inputs:first-child {
+        margin-top: 20px; /* Aumenta el espacio entre el título y el primer campo de entrada */
+    }
+    .card {
+        background-color: white; /* Fondo del recuadro (card) */
+        border-radius: 15px; /* Bordes redondeados */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra ligera para la card */
+    }
+    .btn-login {
+        background-color: #060EAE;  /* Azul de la paleta */
+        border-color: #060EAE;  /* Asegura que los bordes también sean del mismo color */
+        color: white;
+    }
+
+    .btn-login:hover {
+        background-color: #003D8E;  /* Un tono más oscuro del azul para el hover */
+        border-color: #003D8E;
+        color: white;
+    }
+
+
+</style> 

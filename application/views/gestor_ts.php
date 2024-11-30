@@ -116,40 +116,42 @@
         </div>
 
         <!-- Modal para añadir/editar -->
-        <div class="modal fade" id="trabajadorModal" tabindex="-1">
-            <div class="modal-dialog">
+        <div class="modal fade" id="trabajadorModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                <form id="trabajadorForm" method="post">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="trabajadorModalLabel">Añadir Trabajador Social</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- Campos del formulario -->
-                        <div class="mb-3">
-                            <label for="Nombre" class="form-label">Nombre</label>
-                            <input type="text" class="form-control" name="Nombre" id="Nombre" required>
+                    <form id="trabajadorForm" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="trabajadorModalLabel">Añadir Trabajador Social</h5>
                         </div>
-                        <div class="mb-3">
-                            <label for="Apellido" class="form-label">Apellido</label>
-                            <input type="text" class="form-control" name="Apellido" id="Apellido" required>
+                        <div class="modal-body">
+                            <!-- Campos del formulario -->
+                            <div class="mb-3">
+                                <label for="Nombre" class="form-label">Nombre</label>
+                                <input type="text" class="form-control" name="Nombre" id="Nombre" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="Apellido" class="form-label">Apellido</label>
+                                <input type="text" class="form-control" name="Apellido" id="Apellido" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="Correo" class="form-label">Correo</label>
+                                <input type="email" class="form-control" name="Correo" id="Correo" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="Telefono" class="form-label">Teléfono</label>
+                                <input type="text" class="form-control" name="Telefono" id="Telefono" required>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="Correo" class="form-label">Correo</label>
-                            <input type="email" class="form-control" name="Correo" id="Correo" required>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         </div>
-                        <div class="mb-3">
-                            <label for="Telefono" class="form-label">Teléfono</label>
-                            <input type="text" class="form-control" name="Telefono" id="Telefono" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                    </div>
-                </form>
+                    </form>
                 </div>
             </div>
         </div>
+
+
     </div>
 
     <script>

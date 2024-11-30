@@ -66,4 +66,3 @@ class TrabajadorSocialController extends CI_Controller {
         }
     }
 }
-?>

@@ -90,6 +90,32 @@ class BloqueModel extends CI_Model
             "bloqueados" => $bloquesbloqueados,
         ];
     }
+        // Agregar en el controlador para calcular las fechas de las 3 semanas
+    function get_week_dates($start_date) {
+        $weeks = [];
+        $date = new DateTime($start_date);
+
+        // Obtenemos las fechas de las 3 semanas
+        for ($i = 0; $i < 3; $i++) {
+            $start_of_week = clone $date;
+            $start_of_week->modify('monday this week');  // Ajusta para el lunes de la semana
+            $weeks[] = $start_of_week->format('Y-m-d');
+            $date->modify('+1 week');
+        }
+        return $weeks;
+    }
+
+    public function horarios() {
+        $current_date = date('Y-m-d'); // Fecha actual
+        $weeks = $this->get_week_dates($current_date); // Obtener las fechas de las 3 semanas
+        
+        // Pasar las fechas al frontend
+        $data['weeks'] = $weeks;
+
+        // Cargar la vista
+        $this->load->view('horarios_view', $data['weeks']);
+    }
+
     public function get_bloques_colisionando($carrera, $dia, $horario)
     {
         $bloques_atencion = $this->db
@@ -360,13 +386,5 @@ class BloqueModel extends CI_Model
                     $this->db->error()->message
             );
         }
-        // print_r($bloques_overlap);
-        // $res = $this->db
-        // ->query(
-        //     "
-        //     INSERT INTO bloque
-        //     "
-        // );
-        // print_r($res);
     }
 }
