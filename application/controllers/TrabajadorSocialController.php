@@ -46,7 +46,7 @@ class TrabajadorSocialController extends CI_Controller {
         ];
     
         $this->TrabajadorSocialModel->actualizarTrabajadorSocial($RUN, $datosPersona);
-        redirect('gestor_ts');
+        $this->index();
     }
     
     public function check_logged_in()
