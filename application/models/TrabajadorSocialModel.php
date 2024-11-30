@@ -89,5 +89,16 @@ class TrabajadorSocialModel extends CI_Model {
         $this->db->where('ID_TS', $id);
         $this->db->delete('trabajadorsocial');
     }
+    public function obtenerCita(){
+        $query =$this->db->query('
+        SELECT b.Estado, b.Motivo,bl.FechaInicio,bl.FechaTermino, p.RUN, p.Nombre, p.Apellido, p.Telefono, p.Correo 
+        FROM bloqueatencion b 
+        join persona p
+        on (b.RUNCliente = p.RUN)
+        join bloque bl
+        on (b.ID = bl.ID)
+        ');
+        return $query->result_array();
+    }
 }
 ?>

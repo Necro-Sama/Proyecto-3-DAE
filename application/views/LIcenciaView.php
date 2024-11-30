@@ -70,53 +70,53 @@
 </head>
 
 <body>
-<?php $this->load->view('navbar'); ?> <!-- Incluir el navbar -->
+    <?php  $this->load->view('navbar',$tipo); ?>
 
-<div class="form-container">
-    <h1>Registrar Licencia</h1>
-    <form action="<?= site_url('usuarios/guardar') ?>" method="post">
-        <!-- Lista desplegable para seleccionar Trabajador Social -->
-        <div class="form-group">
-            <label for="trabajador_id">Seleccione Trabajador Social:</label>
-            <select name="trabajador_id" id="trabajador_id" class="form-control" required>
-                <option value="">Seleccione...</option>
-                <?php if (!empty($trabajadores)): ?>
-                    <?php foreach ($trabajadores as $trabajador): ?>
-                        <option value="<?= $trabajador['RUN'] ?>">
-                            <?= $trabajador['Nombre'] . ' ' . $trabajador['Apellido'] ?>
-                        </option>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <option value="">No hay Trabajadores Sociales disponibles</option>
-                <?php endif; ?>
-            </select>
-        </div>
+    <div class="form-container">
+        <h1>Registrar Licencia</h1>
+        <form action="<?= site_url('usuarios/guardar') ?>" method="post">
+            <!-- Lista desplegable para seleccionar Trabajador Social -->
+            <div class="form-group">
+                <label for="trabajador_id">Seleccione Trabajador Social:</label>
+                <select name="trabajador_id" id="trabajador_id" class="form-control" required>
+                    <option value="">Seleccione...</option>
+                    <?php if (!empty($trabajadores)): ?>
+                        <?php foreach ($trabajadores as $trabajador): ?>
+                            <option value="<?= $trabajador['RUN'] ?>">
+                                <?= $trabajador['Nombre'] . ' ' . $trabajador['Apellido'] ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <option value="">No hay Trabajadores Sociales disponibles</option>
+                    <?php endif; ?>
+                </select>
+            </div>
 
-        <!-- Campos para las fechas -->
-        <div class="form-group">
-            <label for="fecha_inicio">Fecha de Inicio:</label>
-            <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" required>
-        </div>
+            <!-- Campos para las fechas -->
+            <div class="form-group">
+                <label for="fecha_inicio">Fecha de Inicio:</label>
+                <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" required>
+            </div>
 
-        <div class="form-group">
-            <label for="fecha_termino">Fecha de Término:</label>
-            <input type="date" id="fecha_termino" name="fecha_termino" class="form-control" required>
-        </div>
+            <div class="form-group">
+                <label for="fecha_termino">Fecha de Término:</label>
+                <input type="date" id="fecha_termino" name="fecha_termino" class="form-control" required>
+            </div>
 
-        <!-- Botón para enviar el formulario -->
-        <button type="submit" class="btn btn-block">Guardar Licencia</button>
-    </form>
-</div>
+            <!-- Botón para enviar el formulario -->
+            <button type="submit" class="btn btn-block">Guardar Licencia</button>
+        </form>
+    </div>
 
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-    crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-    crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-    crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
 </body>
 
 </html>

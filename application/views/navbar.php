@@ -21,30 +21,46 @@
             Home
           </a>
         </li>
-        <li class="nav-item text-center mx-2 mx-lg-1">
-          <a class="nav-link" href="<?php echo site_url('usuarios/agendar'); ?>" >
-            <div>
-              <i class="far fa-calendar fa-lg mb-1" style="color: #fddeaa;"></i>
-            </div>
-            Agendar
-          </a>
-        </li>
-        <li class="nav-item text-center mx-2 mx-lg-1">
-          <a class="nav-link" href="<?php echo site_url('usuarios/gestor_ts'); ?>" >
-            <div>
-              <i class="far fa-user fa-lg mb-1" style="color: #fddeaa;"></i>
-            </div>
-            Gestor TS
-          </a>
-        </li>
-        <li class="nav-item text-center mx-2 mx-lg-1">
-          <a class="nav-link" href="<?php echo site_url('usuarios/Licencia'); ?>" >
-            <div>
-              <i class="fas fa-file-alt fa-lg mb-1" style="color: #fddeaa;"></i>
-            </div>
-            Ingresar Licencia
-          </a>
-        </li>
+        <?php if ($tipo === 'estudiante'): ?>
+          <li class="nav-item text-center mx-2 mx-lg-1">
+            <a class="nav-link" href="<?php echo site_url('usuarios/agendar'); ?>" >
+              <div>
+                <i class="far fa-calendar fa-lg mb-1" style="color: #fddeaa;"></i>
+              </div>
+              Agendar
+            </a>
+          </li>
+        <?php endif; ?>
+        <?php if ($tipo === 'administrador'): ?>
+          <li class="nav-item text-center mx-2 mx-lg-1">
+            <a class="nav-link" href="<?php echo site_url('usuarios/gestor_ts'); ?>" >
+              <div>
+                <i class="far fa-user fa-lg mb-1" style="color: #fddeaa;"></i>
+              </div>
+              Gestor TS
+            </a>
+          </li>
+        <?php endif; ?>
+        <?php if ($tipo === 'administrador'): ?>
+          <li class="nav-item text-center mx-2 mx-lg-1">
+            <a class="nav-link" href="<?php echo site_url('usuarios/Licencia'); ?>" >
+              <div>
+                <i class="fas fa-file-alt fa-lg mb-1" style="color: #fddeaa;"></i>
+              </div>
+              Ingresar Licencia
+            </a>
+          </li>
+        <?php endif; ?>
+        <?php ?>
+          <li class="nav-item text-center mx-2 mx-lg-1">
+            <a class="nav-link" href="<?php echo site_url('usuarios/visualizar-citas') ?>" >
+              <div>
+                <i class="far fa-user fa-lg mb-1" style="color: #fddeaa;"></i>
+              </div>
+              Mostrar Citas
+            </a>
+          </li>
+        <?php  ?>
       </ul>
       <!-- Opciones de la derecha -->
       <ul class="navbar-nav ms-auto d-flex flex-row mt-3 mt-lg-0">

@@ -14,8 +14,10 @@ class TrabajadorSocialController extends CI_Controller {
         if (!$this->check_logged_in()) {
             redirect("/usuarios/login");
         }
-        $trabajadores = $this->TrabajadorSocialModel->obtenerTrabajadoresSociales();
-        $this->load->view('gestor_ts', array("trabajadores" => $trabajadores));
+        $trabajadores['trabajadores'] = $this->TrabajadorSocialModel->obtenerTrabajadoresSociales();
+        $trabajadores['tipo']="administrador";
+        // print_r($trabajadores);
+        $this->load->view('gestor_ts',$trabajadores);
     }
 
     public function agregar() {
@@ -64,5 +66,10 @@ class TrabajadorSocialController extends CI_Controller {
             $this->session->google_token = $g_id_token;
             return $g_client;
         }
+    }
+    public function obtenercita() {
+        $data['citas'] = $this->TrabajadorSocialModel->obtenerCita();
+        $data['tipo'] = "administrador";
+        $this->load->view('VisualizarCitas', $data); // Carga la vista y pasa los datos
     }
 }

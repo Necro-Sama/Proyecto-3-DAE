@@ -73,7 +73,8 @@
     </style>
 </head>
 <body>
-    <?php $this->load->view('navbar'); ?>
+    <?php  
+    $this->load->view('navbar',$tipo); ?>
     <div class="container mt-5">
         <!-- Botón para añadir trabajador social -->
         <div class="text-center mb-4">

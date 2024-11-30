@@ -62,3 +62,5 @@ $route['usuarios/accion_agendar'] = 'UserController/accion_agendar';
 $route['usuarios/gestor_ts'] = 'TrabajadorSocialController/index';
 $route['usuarios/Licencia'] = 'UserController/Licencia';
 $route['usuarios/guardar']= 'UserController/guardar';
+$route['usuarios/visualizar-citas'] = 'TrabajadorSocialController/obtenercita';
+

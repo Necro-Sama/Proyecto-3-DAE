@@ -14,7 +14,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 </head>
 <body>
     <!-- Cargar la Navbar -->
-    <?php $this->load->view('navbar'); ?>
+    
 
     <div class="container mt-4">
         <h1 class="text-center mb-4">Home general</h1>

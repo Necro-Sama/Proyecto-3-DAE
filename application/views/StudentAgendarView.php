@@ -28,7 +28,8 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     <script src="<?= base_url("js/agendar.js") ?>"></script>
 </head>
 <body>
-    <?php $this->load->view("navbar"); ?> <!-- Incluir el navbar -->
+
+    <?php $this->load->view('navbar',$tipo); ?>
     <h1> </h1>
     <div class="container">
         <!-- <h6>Bloques disponibles</h6> -->

@@ -35,12 +35,12 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     <div class="text-center d-flex flex-column">
                         <h4>Sistema de Agenda de Hora</h4>
                         <h3>Direccion De Asuntos Estudiantiles</h3>
-                        <?= $this->session->form_error ?>
-                        <?= $this->session->error ?>
+                        
                         <span class="text-center fs-1">
                             <img class="logo" src="https://portal.uta.cl/assets/images/logo/logo-uta.svg">
                         </span>
-                        
+                        <?= $this->session->form_error ?>
+                        <?= $this->session->error ?>
                     </div>
                     <?= form_open("usuarios/auth"); ?>
                     <div class="form-data">

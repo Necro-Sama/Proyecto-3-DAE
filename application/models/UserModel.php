@@ -184,7 +184,7 @@ class UserModel extends CI_Model {
         $this->db->from('trabajadorsocial');
         $this->db->where('RUN', $run);
         $query = $this->db->get();
-        return "Trabajador Social";
+        return $query->row_array();
     }
 
     public function getAdministrador($run) {
