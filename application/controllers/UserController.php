@@ -96,21 +96,26 @@ class UserController extends CI_Controller
     }
     public function comprobardatos($RUN_usuario) {
         $data['persona'] = $this->UserModel->getPersona($RUN_usuario);
-
+        
         if ($this->UserModel->getEstudiante($RUN_usuario)) {
             $data['tipo'] = 'estudiante';
             $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
-        } if ($this->UserModel->getFuncionario($RUN_usuario)) {
+        } 
+        else if ($this->UserModel->getFuncionario($RUN_usuario)) {
             $data['tipo'] = 'trabajadorsocial';
             $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
-        } if ($this->UserModel->getAdministrador($RUN_usuario)) {
+        } 
+        else if ($this->UserModel->getAdministrador($RUN_usuario)) {
             $data['tipo'] = 'administrador';
             $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
-        } else {
+        } 
+        else {
             $data['tipo'] = 'desconocido'; // Manejo de caso por defecto
             $data['detalle'] = null;
         }
+        // print_r($data);
         return $data;
+
     }
     public function agendar()
     {

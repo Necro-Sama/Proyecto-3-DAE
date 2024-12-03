@@ -100,5 +100,27 @@ class TrabajadorSocialModel extends CI_Model {
         ');
         return $query->result_array();
     }
+    public function obtenerCitaEstudiante($RUNTS,$RUNU){
+        $query =$this->db->query('
+        SELECT p.Nombre, p.Apellido, p.Telefono, p.Correo 
+        FROM bloqueatencion b 
+        join persona p
+        on (b.RUNCliente = p.RUN)
+        join bloque bl
+        on (b.ID = bl.ID)
+        WHERE RUNCliente = ? AND RUNTS = ?
+        ',array($RUNU, $RUNTS));
+        return $query->result_array();
+    }
+    public function obtenerRUNTS($RUN){
+        $query =$this->db->query('
+        SELECT b.RUNTS FROM bloque b
+        join bloqueatencion bl
+        on b.ID=bl.ID
+        where bl.RUNCliente = ?
+        ',array($RUN));
+        $result = $query->row_array(); // Obtiene la primera fila como un arreglo asociativo
+        return isset($result['RUNTS']) ? $result['RUNTS'] : null; // Retorna el valor de RUNTS o null si no existe
+    }
 }
 ?>

@@ -5,7 +5,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 <head>
     <meta charset="UTF-8">
     <title>Visualizar Citas</title>
-    <?php   $this->load->view("navbar",$tipo);?>
+    <?php  print_r($tipo); $this->load->view("navbar",$tipo);?>
     <link rel="stylesheet" type="text/css" href="<?= base_url(
         "css/agendar.css"
     ) ?>"/>
@@ -26,7 +26,6 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
-    <script src="<?= base_url("js/agendar.js") ?>"></script>
 </head>
 
 <body>

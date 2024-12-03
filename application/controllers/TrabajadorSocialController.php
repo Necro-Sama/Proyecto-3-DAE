@@ -68,8 +68,35 @@ class TrabajadorSocialController extends CI_Controller {
         }
     }
     public function obtenercita() {
-        $data['citas'] = $this->TrabajadorSocialModel->obtenerCita();
-        $data['tipo'] = "administrador";
+        $RUN_usuario = $this->check_logged_in();
+        $data['tipo'] = $this->comprobardatos( $RUN_usuario);
+        if ($data['tipo']= 'estudiante') {
+            $RUNTS = $this->TrabajadorSocialModel->obtenerRUNTS( $RUN_usuario );
+            $data['citas'] = $this->TrabajadorSocialModel->obtenerCitaEstudiante($RUNTS,$RUN_usuario);
+        }
+        else{
+            $data['citas'] = $this->TrabajadorSocialModel->obtenerCita();
+        }
+
+        
+        print_r($data);
         $this->load->view('VisualizarCitas', $data); // Carga la vista y pasa los datos
+    }
+    public function comprobardatos($RUN_usuario) {
+
+        if ($this->UserModel->getEstudiante($RUN_usuario)) {
+            $data['tipo'] = 'estudiante';
+            $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
+        } if ($this->UserModel->getFuncionario($RUN_usuario)) {
+            $data['tipo'] = 'trabajadorsocial';
+            $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
+        } if ($this->UserModel->getAdministrador($RUN_usuario)) {
+            $data['tipo'] = 'administrador';
+            $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
+        } else {
+            $data['tipo'] = 'desconocido'; // Manejo de caso por defecto
+            $data['detalle'] = null;
+        }
+        return $data;
     }
 }

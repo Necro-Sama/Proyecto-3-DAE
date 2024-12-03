@@ -9,7 +9,7 @@
                 <p><strong>Teléfono:</strong> <?php echo $persona['Telefono']; ?></p>
                 <p><strong>Correo:</strong> <?php echo $persona['Correo']; ?></p>
 
-                <?php if ($tipo === 'Estudiante') { ?>
+                <?php if ($tipo === 'estudiante') { ?>
                     <p><strong>Carrera:</strong> <?php echo $detalle['COD_CARRERA'];
                     echo " -    ".$detalle['Nombre']; ?></p>
                 <?php }/* elseif ($tipo === 'trabajadorsocial') { ?> -->

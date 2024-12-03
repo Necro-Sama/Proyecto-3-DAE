@@ -4,7 +4,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Home de Estudiante</title>
+    <title>Home</title>
 
     <!-- Bootstrap y estilos -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -17,9 +17,9 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     
 
     <div class="container mt-4">
-        <h1 class="text-center mb-4">Home general</h1>
         
         <!-- Incluir la tarjeta del usuario -->
+
         <?php $this->load->view('user_card', ['persona' => $persona]); ?>
     </div>
 
