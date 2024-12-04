@@ -42,27 +42,33 @@ defined('BASEPATH') or exit('No direct script access allowed');
                         <?= $this->session->form_error ?>
                         <?= $this->session->error ?>
                     </div>
-                    <?= form_open("usuarios/auth"); ?>
-                    <div class="form-data">
-                        <div class="forms-inputs mb-4">
-                            <span>Correo</span>
-                            <input class="form-control" type="email" name="correo" value="<?= set_value('correo') ?>">
-                            <!-- <div class="invalid-feedback">A valid email is required!</div> -->
-                        </div>
-                        <div class="forms-inputs mb-4">
-                            <span>Contraseña</span>
-                            <input class="form-control" type="password" name="contraseña"
-                                value="<?= set_value('contraseña') ?>">
-                            <!-- <div class="invalid-feedback">Password must be 8 character!</div> -->
-                        </div>
-                        <div class="inicio mb-3">
-                            <?= form_submit("Ingresar", "Iniciar sesión", 'class="btn btn-login w-100"'); ?>
-                            <!-- <button class="btn btn-login w-100">
-                                <span class="font-bold">Iniciar sesión</span>
-                            </button> -->
-                        </div>
+                    <div id="loginForm" class="form-container active">
+                        <?= form_open("usuarios/auth"); ?>
+                            <div class="form-data">
+                                <div class="forms-inputs mb-4">
+                                    <span>Correo</span>
+                                    <input class="form-control" type="email" name="correo" value="<?= set_value('correo') ?>">
+                                    <!-- <div class="invalid-feedback">A valid email is required!</div> -->
+                                </div>
+                                <div class="forms-inputs mb-4">
+                                    <span>Contraseña</span>
+                                    <input class="form-control" type="password" name="contraseña"
+                                        value="<?= set_value('contraseña') ?>">
+                                    <!-- <div class="invalid-feedback">Password must be 8 character!</div> -->
+                                </div>
+                                <div class="inicio mb-3">
+                                    <?= form_submit("Ingresar", "Iniciar sesión", 'class="btn btn-login w-100"'); ?>
+                                    <!-- <button class="btn btn-login w-100">
+                                        <span class="font-bold">Iniciar sesión</span>
+                                    </button> -->
+                                </div>
+                            
+
+                        <!-- Botón para cambiar entre formularios -->
+                        <button type = "button"class="btn btn-switch btn-link w-100" onclick="toggleForms()">¿Nuevo usuario? Regístrate aquí</button>
+                
+                        <?= form_close(); ?>
                     </div>
-                    <?= form_close(); ?>
                     <!-- <div class="success-data" v-else>
                         <div class="text-center d-flex flex-column">
                             <span class="text-center fs-1">You have been logged in <br> Successfully</span>
@@ -77,6 +83,40 @@ defined('BASEPATH') or exit('No direct script access allowed');
                         <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
                             data-text="signin_with" data-size="large" data-locale="es-419" data-logo_alignment="left">
                         </div>
+                    </div>
+                </div>
+                     <!-- Formulario de Registro -->
+                     <div id="registerForm" class="form-container">
+                        <?= form_open("usuarios/register"); ?>
+                        <div class="form-group">
+                            <label for="nombre">Nombre</label>
+                            <input type="text" class="form-control" name="nombre" placeholder="Ingrese su nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="apellidos">Apellidos</label>
+                            <input type="text" class="form-control" name="apellidos" placeholder="Ingrese sus apellidos" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Teléfono</label>
+                            <input type="tel" class="form-control" name="telefono" placeholder="Ingrese su teléfono" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="run">RUN</label>
+                            <input type="text" class="form-control" name="run" placeholder="Ingrese su RUN" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="correo">Correo</label>
+                            <input type="email" class="form-control" name="correo" placeholder="Ingrese su correo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contraseña">Contraseña</label>
+                            <input type="password" class="form-control" name="contraseña" placeholder="Cree una contraseña" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Registrar</button>
+                        <!-- Botón para volver al inicio de sesión -->
+                        <button type="button" class="btn btn-switch btn-link w-100" onclick="toggleForms()">¿Ya tienes una cuenta? Inicia sesión</button>
+
+                        <?= form_close(); ?>
                     </div>
                 </div>
             </div>
@@ -114,6 +154,28 @@ defined('BASEPATH') or exit('No direct script access allowed');
         border-color: #003D8E;
         color: white;
     }
+    .form-container {
+    display: none; /* Oculta todos los formularios por defecto */
+}
 
+.form-container.active {
+    display: block; /* Muestra solo el formulario activo */
+}
 
 </style> 
+<script>    
+    function toggleForms() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const switchButton = document.querySelector('.btn-switch');
+            
+            loginForm.classList.toggle('active');
+            registerForm.classList.toggle('active');
+            
+            if (loginForm.classList.contains('active')) {
+                switchButton.textContent = '¿Nuevo usuario? Regístrate aquí';
+            } else {
+                switchButton.textContent = '¿Ya tienes una cuenta? Inicia sesión';
+            }
+        }
+</script>
