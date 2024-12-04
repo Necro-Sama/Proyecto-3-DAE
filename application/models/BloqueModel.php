@@ -387,4 +387,18 @@ class BloqueModel extends CI_Model
             );
         }
     }
+    function get_semanas($num_semanas)
+    {
+        $query = "SELECT ";
+        for ($i = 0; $i < $num_semanas; $i++) {
+            $query .= "TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL $i WEEK AS s$i";
+            if ($i < ($num_semanas - 1)) {
+                $query .= ", ";
+            }
+        }
+        return array_values($this->db->query($query)->result_array()[0]);
+    }
+    function get_tiempo_bd() {
+        return $this->db->query("SELECT NOW() AS t")->row(0)->t;
+    }
 }

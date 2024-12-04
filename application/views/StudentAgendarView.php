@@ -33,13 +33,23 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     <h1> </h1>
     <div class="container">
         <!-- <h6>Bloques disponibles</h6> -->
-        <?php if (isset($this->session->agendar_error) && !empty($this->session->agendar_error)): ?>
+        <?php if ($this->session->agendar_error): ?>
             <p class="error font-weight-bold alert alert-danger alert-dismissible fade show" role="alert">
                 <?= $this->session->agendar_error ?>
-                <button type="button" class="btn-close" aria-label="Close"></button>
             </p>
         <?php endif; ?>
 
+        <div id="tiempo-servidor" hidden><?= $this->BloqueModel->get_tiempo_bd() ?></div>
+        
+        <label for="semana">Semana: </label>
+        <?php $semanas = $this->BloqueModel->get_semanas(3); ?>
+        <select class="form-select" name="semana" id="semana-select" onchange="seleccion_semana(event)">
+            <?php foreach ($semanas as $semana) { ?>
+                <option value="<?= $semana ?>">
+                    <?= trim($semana, "00:00:00") ?>
+                </option>
+            <?php } ?>
+        </select>
 
         <table class="text-center">
             <thead>
@@ -69,6 +79,10 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             </div>
                 <form method="post" accept-charset="utf-8" action="<?= site_url() ?>/usuarios/accion_agendar">
                     <div class="modal-body">
+                        <div class="form-group">
+                            <label for="semana">Semana: </label>
+                            <input type="text" name="semana" id="semana" class="form-control-plaintext" readonly>
+                        </div>
                         <div class="form-group">
                             <label for="dia">Día: </label>
                             <input type="text" name="dia" id="dia" class="form-control-plaintext" readonly>

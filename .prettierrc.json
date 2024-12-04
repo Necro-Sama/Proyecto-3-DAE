@@ -1,3 +1,4 @@
 {
-    "plugins": ["@prettier/plugin-php"]
+    "plugins": ["@prettier/plugin-php"],
+    "tabWidth": 4
 }
