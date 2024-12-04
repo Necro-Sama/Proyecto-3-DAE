@@ -60,8 +60,9 @@ $route['usuarios/home'] = 'UserController/home';
 $route['usuarios/agendar'] = 'UserController/agendar';
 $route['usuarios/accion_agendar'] = 'UserController/accion_agendar';
 $route['usuarios/gestor_ts'] = 'TrabajadorSocialController/index';
+$route['usuarios/asignar-carrera'] = 'TrabajadorSocialController/asignarTSACarrera';
+$route['usuarios/asignar-carrera-procesar'] = 'TrabajadorSocialController/asignarTSACarreraProcesar';
 $route['usuarios/Licencia'] = 'UserController/Licencia';
 $route['usuarios/guardar']= 'UserController/guardar';
 $route['usuarios/visualizar-citas'] = 'TrabajadorSocialController/obtenercita';
-
 $route['usuarios/registrar']= 'UserController/registrar';

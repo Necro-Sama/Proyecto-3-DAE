@@ -43,6 +43,17 @@
         <?php endif; ?>
         <?php if ($tipo === 'administrador'): ?>
           <li class="nav-item text-center mx-2 mx-lg-1">
+            <a class="nav-link" href="<?php echo site_url('usuarios/asignar-carrera'); ?>" >
+              <div>
+                <i class="fas fa-clipboard-list fa-lg mb-1" style="color: #fddeaa;"></i>
+              </div>
+              Asignar Carrera
+            </a>
+          </li>
+        <?php endif; ?>
+
+        <?php if ($tipo === 'administrador'): ?>
+          <li class="nav-item text-center mx-2 mx-lg-1">
             <a class="nav-link" href="<?php echo site_url('usuarios/Licencia'); ?>" >
               <div>
                 <i class="fas fa-file-alt fa-lg mb-1" style="color: #fddeaa;"></i>
