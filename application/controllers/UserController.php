@@ -110,7 +110,7 @@ class UserController extends CI_Controller
             $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
         } 
         else {
-            $data['tipo'] = 'desconocido'; // Manejo de caso por defecto
+            $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
             $data['detalle'] = null;
         }
         // print_r($data);
@@ -223,6 +223,70 @@ class UserController extends CI_Controller
             return $g_client;
         }
     }
+
+    public function registrar()
+{
+    $run = $this->input->post('run', true);
+
+    // Validación de los campos del formulario
+    $this->form_validation->set_rules('nombre', 'Nombre', 'required|trim');
+    $this->form_validation->set_rules('apellidos', 'Apellido', 'required|trim');
+    $this->form_validation->set_rules('telefono', 'Teléfono', 'required|numeric|trim');
+    $this->form_validation->set_rules('run', 'RUN', 'required|trim|is_unique[persona.run]', [
+        'is_unique' => 'El RUN ya está registrado.'
+    ]);
+    $this->form_validation->set_rules('correo', 'Correo', 'required|valid_email|is_unique[persona.correo]', [
+        'is_unique' => 'El correo ya está registrado.'
+    ]);
+    $this->form_validation->set_rules('contraseña', 'Contraseña', 'required|min_length[6]|trim');
+
+    if ($this->form_validation->run() == false) {
+        // Si la validación falla, redirige al formulario de registro con errores
+        $this->session->set_flashdata('error', validation_errors());
+        redirect(site_url('usuarios/login'));
+    } else {
+        // Datos a insertar en la tabla `persona`
+        $data = [
+            'Nombre'     => $this->input->post('nombre', true),
+            'Apellido'   => $this->input->post('apellidos', true),
+            'Telefono'   => $this->input->post('telefono', true),
+            'RUN'        => $run, // Guardamos el RUN
+            'Correo'     => $this->input->post('correo', true),
+            'Contraseña' => password_hash($this->input->post('contraseña', true), PASSWORD_DEFAULT), // Encriptar la contraseña
+        ];
+        $data['Activo'] = 1;
+
+        // Insertar en la tabla `persona`
+        if ($this->UserModel->insertUser($data)) {
+            // Inserción exitosa en `persona`, continuar con las demás tablas
+            $success = true;
+
+            // Insertar en la tabla `cliente`
+            $clienteData = ['RUN' => $run];
+            if (!$this->UserModel->insertCliente($clienteData)) {
+                $success = false;
+            }
+
+            // Insertar en la tabla `noestudiante`
+            $noEstudianteData = ['RUN' => $run];
+            if (!$this->UserModel->insertNoEstudiante($noEstudianteData)) {
+                $success = false;
+            }
+
+            if ($success) {
+                $this->session->set_flashdata('success', 'Usuario registrado con éxito.');
+                redirect(site_url('usuarios/login'));
+            } else {
+                $this->session->set_flashdata('error', 'Error al registrar en las tablas relacionadas. Inténtalo de nuevo.');
+                redirect(site_url('usuarios/login'));
+            }
+        } else {
+            $this->session->set_flashdata('error', 'Error al registrar el usuario. Inténtalo de nuevo.');
+            redirect(site_url('usuarios/login'));
+        }
+    }
+}
+
 
     // Seccion licencias
 

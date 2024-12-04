@@ -81,9 +81,21 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             </div>
                         </div>
                     </div>
+                            <!-- Mensajes de error o éxito -->
+                        <?php if ($this->session->flashdata('error')): ?>
+                            <div class="alert alert-danger">
+                                <?= $this->session->flashdata('error'); ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if ($this->session->flashdata('success')): ?>
+                            <div class="alert alert-success">
+                                <?= $this->session->flashdata('success'); ?>
+                            </div>
+                        <?php endif; ?>
                         <!-- Formulario de Registro -->
                         <div id="registerForm" class="form-container">
-                            <?= form_open("usuarios/register"); ?>
+                            <?= form_open("usuarios/registrar"); ?>
                             <div class="form-group">
                                 <label for="nombre">Nombre</label>
                                 <input type="text" class="form-control" name="nombre" placeholder="Ingrese su nombre" required>
@@ -108,7 +120,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                 <label for="contraseña">Contraseña</label>
                                 <input type="password" class="form-control" name="contraseña" placeholder="Cree una contraseña" required>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Registrar</button>
+                            <button type="submit" class="btn btn-primary w-100" site_url>Registrar</button>
                             <!-- Botón para volver al inicio de sesión -->
                             <button type="button" class="btn btn-switch btn-link w-100" onclick="toggleForms()">¿Ya tienes una cuenta? Inicia sesión</button>
                             <?= form_close(); ?>

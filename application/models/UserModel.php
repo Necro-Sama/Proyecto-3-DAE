@@ -195,7 +195,24 @@ class UserModel extends CI_Model {
         $query = $this->db->get();
         return $query->row_array();
     }
+    public function insertUser($data)
+    {
+        return $this->db->insert('persona', $data);
+    }
+
+    // Insertar datos en la tabla `cliente`
+    public function insertCliente($data)
+    {
+        return $this->db->insert('cliente', $data);
+    }
+
+    // Insertar datos en la tabla `noestudiante`
+    public function insertNoEstudiante($data)
+    {
+        return $this->db->insert('noestudiante', $data);
+    }
 }
+    
 class Trabajadores_model extends CI_Model {
     // Seccion licencias
     public function obtenerTrabajadoresSociales() {
@@ -228,4 +245,5 @@ class Trabajadores_model extends CI_Model {
         where RUN =?
         ',array($run));
     }
+
 }

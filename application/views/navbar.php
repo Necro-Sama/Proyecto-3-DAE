@@ -21,7 +21,7 @@
             Home
           </a>
         </li>
-        <?php if ($tipo === 'estudiante'): ?>
+        <?php if ($tipo === 'estudiante' or $tipo ==='noestudiante'): ?>
           <li class="nav-item text-center mx-2 mx-lg-1">
             <a class="nav-link" href="<?php echo site_url('usuarios/agendar'); ?>" >
               <div>

@@ -64,3 +64,4 @@ $route['usuarios/Licencia'] = 'UserController/Licencia';
 $route['usuarios/guardar']= 'UserController/guardar';
 $route['usuarios/visualizar-citas'] = 'TrabajadorSocialController/obtenercita';
 
+$route['usuarios/registrar']= 'UserController/registrar';
