@@ -5,11 +5,38 @@ class TrabajadorSocialController extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->model('TrabajadorSocialModel');
         $this->load->model('UserModel');
+        $this->load->model('TrabajadorSocialModel');
+        $this->load->model('CarreraModel');
         $this->load->helper('url');
     }
 
+    // Método para mostrar el formulario de asignación
+    public function asignarTSACarrera() {
+        // Obtener todas las carreras
+        $data['carreras'] = $this->CarreraModel->obtenerCarreras();
+        
+        // Obtener todos los trabajadores sociales
+        $data['trabajadores_sociales'] = $this->TrabajadorSocialModel->obtenerTrabajadoresSociales();
+
+        // Cargar la vista
+        $this->load->view('AsignarCarrerasView', $data);
+    }
+
+    // Método para procesar la asignación de trabajadores sociales
+    public function asignarTSACarreraProcesar() {
+        // Obtener los datos del formulario
+        $cod_carrera = $this->input->post('COD_CARRERA');
+        $run_ts_principal = $this->input->post('RUN_TS_PRINCIPAL');
+        $run_ts_reemplazo = $this->input->post('RUN_TS_REEMPLAZO');
+        echo "<script>console.log('Entrando al método asignarTSACarreraProcesar con los datos: " . json_encode($this->input->post()) . "');</script>";
+
+        // Aquí puedes procesar la asignación (ej., guardar la relación en la base de datos)
+        $this->CarreraModel->asignarTrabajadorSocialACarrera($cod_carrera, $run_ts_principal, $run_ts_reemplazo);
+
+        // Redirigir a otra página o mostrar mensaje de éxito
+        redirect('usuarios/asignar-carrera');
+    }
     public function index() {
         if (!$this->check_logged_in()) {
             redirect("/usuarios/login");
@@ -99,4 +126,32 @@ class TrabajadorSocialController extends CI_Controller {
         }
         return $data;
     }
+    public function agregarAdmin() {
+        $data = json_decode($this->input->raw_input_stream, true);
+        $run = $data['RUN'];
+    
+        // Verificar si el TS ya está en la tabla 'administrador'
+        $this->db->where('RUN', $run);
+        $query = $this->db->get('administrador');
+    
+        if ($query->num_rows() == 0) {
+            // Insertar el RUN del trabajador social en la tabla 'administrador'
+            $this->db->insert('administrador', ['RUN' => $run]);
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false]);
+        }
+    }
+    public function eliminarAdmin() {
+        $data = json_decode($this->input->raw_input_stream, true);
+        $run = $data['RUN'];
+    
+        // Eliminar el TS de la tabla 'administrador'
+        $this->db->where('RUN', $run);
+        $this->db->delete('administrador');
+    
+        echo json_encode(['success' => true]);
+    }
+    
+    
 }

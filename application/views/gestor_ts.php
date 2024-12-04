@@ -76,21 +76,29 @@
     <?php  
     $this->load->view('navbar',$tipo); ?>
     <div class="container mt-5">
+
         <!-- Botón para añadir trabajador social -->
         <div class="text-center mb-4">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#trabajadorModal" onclick="nuevoTrabajador()">Añadir Trabajador Social</button>
+            
         </div>
-
+        
         <!-- Tabla de trabajadores sociales -->
         <div class="card">
             <div class="card-body">
                 <h3 class="card-title text-center">Lista de Trabajadores Sociales</h3>
+                <!-- Botón para asignar trabajadores sociales a carreras -->
+                <div class="text-center mb-4">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#trabajadorModal" onclick="nuevoTrabajador()">
+                        Añadir Trabajador Social
+                    </button>
+                </div>
                 <table class="table table-striped table-hover" >
                     <thead class="table-dark">
                         <tr>
                             <th>RUN</th>
                             <th>Nombre</th>
                             <th>Apellido</th>
+                            <th>Admin</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -100,6 +108,12 @@
                             <td><?php echo $trabajador['RUN']; ?></td>
                             <td><?php echo $trabajador['Nombre']; ?></td>
                             <td><?php echo $trabajador['Apellido']; ?></td>
+                            <td>
+                                 <!-- Switch para administrar TS como administrador -->
+                                <input type="checkbox" class="form-check-input" id="adminSwitch_<?php echo $trabajador['RUN']; ?>"
+                                    <?php echo ($trabajador['is_admin'] ? 'checked' : ''); ?>
+                                    onchange="toggleAdminStatus('<?php echo $trabajador['RUN']; ?>', this)">
+                            </td>
                             <td>
                                 <!-- Botón para editar -->
                                 <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#trabajadorModal"
@@ -122,7 +136,7 @@
                 <div class="modal-content">
                     <form id="trabajadorForm" method="post">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="trabajadorModalLabel">Añadir Trabajador Social</h5>
+                            <h5 class="modal-title" id="trabajadorModalLabel" style="color:white">Añadir Trabajador Social</h5>
                         </div>
                         <div class="modal-body">
                             <!-- Campos del formulario -->
@@ -152,6 +166,10 @@
             </div>
         </div>
 
+        <!-- Modal para asignar TS a carreras -->
+        <div class="modal fade" id="asignarModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <?php $this->load->view('AsignarCarrerasView'); ?>
+        </div>                                  
 
     </div>
 
@@ -168,7 +186,38 @@
             document.getElementById('trabajadorForm').action = '<?php echo site_url('TrabajadorSocialController/editar'); ?>/' + run;
         }
     </script>
+    
+    <script>
+        function toggleAdminStatus(run, checkbox) {
+            // Enviar la solicitud AJAX al controlador para agregar o eliminar del administrador
+            const url = checkbox.checked ?
+                '<?php echo site_url("TrabajadorSocialController/agregarAdmin"); ?>' :
+                '<?php echo site_url("TrabajadorSocialController/eliminarAdmin"); ?>';
 
+            // Enviar la solicitud
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ RUN: run })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Operación exitosa');
+                } else {
+                    console.error('Error al actualizar el estado de administrador');
+                    checkbox.checked = !checkbox.checked; // Revertir el estado en caso de error
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud:', error);
+                checkbox.checked = !checkbox.checked; // Revertir el estado en caso de error
+            });
+        }
+    </script>
+    
     <script src="<?php echo base_url('public/bootstrap/js/bootstrap.bundle.min.js'); ?>"></script>
 </body>
 </html>
