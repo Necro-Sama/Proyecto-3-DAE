@@ -5,7 +5,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 <head>
     <meta charset="UTF-8">
     <title>Visualizar Citas</title>
-    <?php  print_r($tipo); $this->load->view("navbar",$tipo);?>
+    <?php print_r($tipo); $this->load->view("navbar",$tipo);?>
     <link rel="stylesheet" type="text/css" href="<?= base_url(
         "css/agendar.css"
     ) ?>"/>
@@ -29,32 +29,29 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 </head>
 
 <body>
-    <div class="container mt-5">
-        <h2 class="text-center">Visualizar Citas</h2>
-        
+        <div class="container mt-5">
+    <h2 class="text-center">Visualizar Citas</h2>
         <div class="row mt-4">
             <?php if (!empty($citas)): ?>
-                <?php foreach ($citas as $index => $cita): ?>
-                    <!-- Card para cada cita -->
+                <?php foreach ($citas as $cita): ?>
                     <div class="col-md-4 mb-4">
                         <div class="card h-100">
                             <div class="card-body">
-                                <h5 class="card-title"><?= $cita['Nombre'] . ' ' . $cita['Apellido']; ?></h5>
-                                <p class="card-text"><strong>Estado:</strong> <?= $cita['Estado']; ?></p>
-                                <p class="card-text"><strong>Motivo:</strong> <?= $cita['Motivo']; ?></p>
-                                <p class="card-text"><strong>Fecha Inicio:</strong> <?= $cita['FechaInicio']; ?></p>
-                                <p class="card-text"><strong>Fecha Término:</strong> <?= $cita['FechaTermino']; ?></p>
-                                <p class="card-text"><strong>RUN:</strong> <?= $cita['RUN']; ?></p>
+                                <h5 class="card-title">Estudiante: <?= $cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante']; ?></h5>
                                 <p class="card-text"><strong>Teléfono:</strong> <?= $cita['Telefono']; ?></p>
                                 <p class="card-text"><strong>Correo:</strong> <?= $cita['Correo']; ?></p>
+                                <p class="card-text"><strong>Fecha Inicio:</strong> <?= $cita['FechaInicio']; ?></p>
+                                <p class="card-text"><strong>Fecha Término:</strong> <?= $cita['FechaTermino']; ?></p>
+                                
+                                <?php if (isset($cita['NombreTS'])): ?>
+                                    <h5 class="card-title mt-3">Trabajador Social:</h5>
+                                    <p class="card-text"><strong>Nombre:</strong> <?= $cita['NombreTS'] . ' ' . $cita['ApellidoTS']; ?></p>
+                                    <p class="card-text"><strong>Teléfono:</strong> <?= $cita['TelefonoTS']; ?></p>
+                                    <p class="card-text"><strong>Correo:</strong> <?= $cita['CorreoTS']; ?></p>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Crear nueva fila después de 3 cards -->
-                    <?php if (($index + 1) % 2 == 0): ?>
-                        </div><div class="row mt-4">
-                    <?php endif; ?>
                 <?php endforeach; ?>
             <?php else: ?>
                 <div class="col-12 text-center">
@@ -63,6 +60,5 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             <?php endif; ?>
         </div>
     </div>
-
     <script src="<?= base_url('assets/js/bootstrap.bundle.min.js'); ?>"></script>
 </body>
