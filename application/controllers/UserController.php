@@ -90,7 +90,6 @@ class UserController extends CI_Controller
             $RUN_usuario
         );
         $data = $this->comprobardatos($RUN_usuario);
-        print_r($data);// Asegúrate de que los datos se pasan correctamente a las vistas
         $this->load->view('navbar', $data);
         
         $this->load->view('HomeGlobal', $data);

@@ -5,7 +5,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 <head>
     <meta charset="UTF-8">
     <title>Visualizar Citas</title>
-    <?php print_r($tipo); $this->load->view("navbar",$tipo);?>
+    <?php $this->load->view("navbar",$tipo);?>
     <link rel="stylesheet" type="text/css" href="<?= base_url(
         "css/agendar.css"
     ) ?>"/>

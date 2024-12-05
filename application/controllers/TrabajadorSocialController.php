@@ -97,8 +97,8 @@ class TrabajadorSocialController extends CI_Controller {
     public function obtenercita()
 {
     $RUN_usuario = $this->check_logged_in();
-    $data['tipo'] = $this->comprobardatos($RUN_usuario);
 
+    $data = $this->comprobardatos($RUN_usuario);
     if ($data['tipo'] === 'estudiante') {
         $RUNTS = $this->TrabajadorSocialModel->obtenerRUNTS($RUN_usuario);
         $data['citas'] = $this->TrabajadorSocialModel->obtenerCitaEstudiante($RUNTS, $RUN_usuario);
