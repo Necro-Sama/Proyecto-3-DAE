@@ -39,6 +39,12 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             </p>
         <?php endif; ?>
 
+        <?php if ($this->session->agendar_exito): ?>
+            <p class="alert-success font-weight-bold alert alert-dismissible fade show" role="alert">
+                <?= $this->session->agendar_exito ?>
+            </p>
+        <?php endif; ?>
+
         <div id="tiempo-servidor" hidden><?= $this->BloqueModel->get_tiempo_bd() ?></div>
         
         <label for="semana">Semana: </label>
@@ -79,22 +85,24 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             </div>
                 <form method="post" accept-charset="utf-8" action="<?= site_url() ?>/usuarios/accion_agendar">
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label for="semana">Semana: </label>
-                            <input type="text" name="semana" id="semana" class="form-control-plaintext" readonly>
-                        </div>
+                        <input type="text" id="fecha_ini" name="fecha_ini" hidden>
+                        <input type="text" id="fecha_ter" name="fecha_ter" hidden>
+                        <!-- <input type="text" id="hora_in" name="hora" hidden>
+                        <input type="text" id="dia_in" name="dia" hidden> -->
                         <div class="form-group">
                             <label for="dia">Día: </label>
-                            <input type="text" name="dia" id="dia" class="form-control-plaintext" readonly>
+                            <!-- <input type="text" name="dia" id="dia" class="form-control-plaintext" readonly> -->
+                             <span id="dia"></span>
                         </div>
                         <div class="form-group">
                             <label for="bloque_horario">Bloque Horario: </label>
-                            <input type="text" name="bloque_horario" id="bloque_horario" class="form-control-plaintext" readonly>
+                            <!-- <input type="text" name="bloque_horario" id="bloque_horario" class="form-control-plaintext" readonly> -->
+                            <span id="bloque_horario"></span>
                         </div>
                         <div class="form-group">
                             <label for="motivo">Motivo: </label>
                             <select class="form-select" aria-label="Default select example" name="motivo">
-                                <option selected>Seleccionar Motivo...</option>
+                                <option value="" selected>Seleccionar Motivo...</option>
                                 <?php
                                 $motivos = [
                                     "Gratuidad Mineduc",
@@ -109,9 +117,10 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
                                     "Beca PSU-PDT-PAES UTA",
                                     "Otro",
                                 ];
-                                foreach ($motivos as $key => $value): ?>
-                                    <option value="<?= $key ?>"><?= $value ?></option>
-                                <?php endforeach; ?>
+                                foreach ($motivos as $m): ?>
+                                    <option value="<?= $m ?>"><?= $m ?></option>
+                                <?php endforeach;
+                                ?>
                             </select>
                         </div>
                     </div>

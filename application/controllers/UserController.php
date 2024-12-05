@@ -158,47 +158,41 @@ class UserController extends CI_Controller
     // Agendar solo en la semana actual para un Estudiante
     public function accion_agendar()
     {
+        $this->session->agendar_exito = "";
+        $this->session->agendar_error = "";
         $usuario = $this->check_logged_in();
         if (!$usuario) {
             session_destroy();
             redirect("/usuarios/login");
         }
-        $motivos = [
-            "Gratuidad Mineduc",
-            "Becas de arancel Mineduc",
-            "Fondo Solidario de Crédito Universitario",
-            "Beneficios Junaeb (BAES y Becas de mantención)",
-            "Beca Fotocopia UTA",
-            "Beca Alimentación UTA",
-            "Beca Residencia UTA",
-            "Beca Internado UTA",
-            "Beca Ayuda Estudiantil UTA",
-            "Beca PSU-PDT-PAES UTA",
-            "Otro",
-        ];
-        // $fecha = $this->input->post("fecha");
-        $num_bloque = $this->input->post("bloque_horario");
-        $dia = $this->input->post("dia");
+        $fecha_ini = $this->input->post("fecha_ini");
+        $fecha_ter = $this->input->post("fecha_ter");
         $motivo = $this->input->post("motivo");
-
-        if (!is_numeric($motivo)) {
+        echo "$fecha_ini, $fecha_ter, $motivo";
+        if (!$motivo) {
             $this->session->agendar_error = "Por favor seleccione un Motivo.";
+            $this->session->mark_as_flash("agendar_error");
+            redirect("/usuarios/agendar");
+        }
+        if (!$fecha_ini) {
+            $this->session->agendar_error = "No hubo una fecha seleccionada.";
             $this->session->mark_as_flash("agendar_error");
             redirect("/usuarios/agendar");
         }
         try {
             $this->BloqueModel->agendar_estudiante(
                 $usuario,
-                $dia,
-                $num_bloque,
-                $motivos[$motivo + 0]
+                $fecha_ini,
+                $fecha_ter,
+                $motivo
             );
         } catch (Exception $e) {
             $this->session->agendar_error = $e->getMessage();
             $this->session->mark_as_flash("agendar_error");
+            redirect("/usuarios/agendar");
         }
-
-        // echo $num_bloque . "," . $dia . "," . $motivos[$motivo - 1];
+        $this->session->agendar_exito = "Hora agendada con éxito.";
+        $this->session->mark_as_flash("agendar_exito");
         redirect("/usuarios/agendar");
     }
     public function logged_in($token)

@@ -16,11 +16,20 @@ const horarios = [
     { id: 12, rango: "18:40-19:25" },
 ];
 
-function agendar(dia, bloque) {
+function agendar(dia, bloque, fecha_ini, fecha_ter) {
+    fecha_ini = new Date(fecha_ini);
+    fecha_ter = new Date(fecha_ter);
+    
     $("#exampleModal").modal();
-    $("#dia")[0].value = dias[dia - 1];
-    $("#bloque_horario")[0].value = bloque;
-    $("#semana")[0].value = $("#semana-select")[0].value.replace("00:00:00", "");
+    $("#dia")[0].innerHTML = dias[dia - 1] + " " + fecha_ini.toLocaleString();
+    $("#bloque_horario")[0].innerHTML = bloque;
+    let f = fecha_ini;
+    let ft = fecha_ter;
+    
+    let fecha_in = (new Date(f.getTime() - (f.getTimezoneOffset() * 60000))).toISOString().slice(0, 19).replace('T', ' ');
+    let fecha_te = (new Date(ft.getTime() - (ft.getTimezoneOffset() * 60000))).toISOString().slice(0, 19).replace('T', ' ');
+    $("#fecha_ini")[0].value = fecha_in;
+    $("#fecha_ter")[0].value = fecha_te;
 }
 
 function seleccion_semana(e) {
@@ -29,7 +38,7 @@ function seleccion_semana(e) {
 
 function cargar_calendario() {
     let tiempo_servidor = new Date(document.getElementById("tiempo-servidor").innerHTML);
-    console.log(tiempo_servidor);
+    // console.log(tiempo_servidor);
     
     const tablaHorario = document.getElementById("tabla-horario");
     tablaHorario.innerHTML = "";
@@ -47,15 +56,18 @@ function cargar_calendario() {
             const celda = document.createElement("td");
             let t = horario.rango.split("-")[1].trim() + ":00";
             let tiempo_bloque = new Date(semana + t);
+
+            let t1 = horario.rango.split("-")[0].trim() + ":00";
+            let tiempo_bloque_ini = new Date(semana + t1);
+
             tiempo_bloque = new Date(tiempo_bloque.getTime() + (dia-1) * 24 * 3600 * 1000);
-            console.log(tiempo_bloque);
-            
+            tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia-1) * 24 * 3600 * 1000);
             if (horario.esAlmuerzo || tiempo_bloque < tiempo_servidor) {
                 celda.innerHTML = `<div style='color: #ff0000;'>(no disponible)</div>`;
             } else {
                 celda.innerHTML = `
                   <div>
-                      <button class="btn" onClick="agendar(${dia}, ${horario.id})">Agendar</button>
+                      <button class="btn" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">Agendar</button>
                   </div>
                 `;
             }

@@ -116,7 +116,7 @@ class BloqueModel extends CI_Model
         $this->load->view('horarios_view', $data['weeks']);
     }
 
-    public function get_bloques_colisionando($carrera, $dia, $horario)
+    public function get_bloques_colisionando($carrera, $fecha_ini, $fecha_ter)
     {
         $bloques_atencion = $this->db
             ->query(
@@ -130,26 +130,24 @@ class BloqueModel extends CI_Model
                 ON
                     bla.ID = bl.ID
                 WHERE
-                    FechaInicioSemana = TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY))
+                    FechaInicioSemana = TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY))
                 AND (
                         RUNTS = ?
                     OR
                         RUNTS = ?
                 )
                 AND
-                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE < FechaTermino
+                    ? < FechaTermino
                 AND
-                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE > FechaInicio
+                    ? > FechaInicio
                 ",
                 [
+                    $fecha_ini,
+                    $fecha_ini,
                     $carrera->RUNTS,
                     $carrera->ReemplazaRUNTS,
-                    $dia,
-                    $horario[0][0],
-                    $horario[0][1],
-                    $dia,
-                    $horario[1][0],
-                    $horario[1][1],
+                    $fecha_ini,
+                    $fecha_ter,
                 ]
             )
             ->result();
@@ -165,26 +163,24 @@ class BloqueModel extends CI_Model
                 ON
                     blb.ID = bl.ID
                 WHERE
-                    FechaInicioSemana = TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY))
+                    FechaInicioSemana = TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY))
                 AND (
                         RUNTS = ?
                     OR
                         RUNTS = ?
                 )
                 AND
-                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE < FechaTermino
+                    ? < FechaTermino
                 AND
-                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE > FechaInicio
+                    ? > FechaInicio
                 ",
                 [
+                    $fecha_ini,
+                    $fecha_ini,
                     $carrera->RUNTS,
                     $carrera->ReemplazaRUNTS,
-                    $dia,
-                    $horario[0][0],
-                    $horario[0][1],
-                    $dia,
-                    $horario[1][0],
-                    $horario[1][1],
+                    $fecha_ini,
+                    $fecha_ter,
                 ]
             )
             ->result();
@@ -193,30 +189,33 @@ class BloqueModel extends CI_Model
             "bloqueado" => $bloques_bloqueados,
         ];
     }
-    // Agenda solo para la semana actual
-    function agendar_estudiante($RUN_estudiante, $dia, $bloque_horario, $motivo)
-    {
-        $horarios = [
-            1 => [["08", "00"], ["08", "45"]],
-            2 => [["08", "45"], ["09", "30"]],
-            3 => [["09", "40"], ["10", "25"]],
-            4 => [["10", "25"], ["11", "10"]],
-            5 => [["11", "20"], ["12", "05"]],
-            6 => [["12", "05"], ["12", "50"]],
-            7 => [["14", "45"], ["15", "30"]],
-            8 => [["15", "30"], ["16", "15"]],
-            9 => [["16", "20"], ["17", "05"]],
-            10 => [["17", "05"], ["17", "50"]],
-            11 => [["17", "55"], ["18", "40"]],
-            12 => [["18", "40"], ["19", "25"]],
-        ];
-        $dia_to_num = [
-            "Lunes" => 0,
-            "Martes" => 1,
-            "Miércoles" => 2,
-            "Jueves" => 3,
-            "Viernes" => 4,
-        ];
+    function agendar_estudiante(
+        $RUN_estudiante,
+        $fecha_ini,
+        $fecha_ter,
+        $motivo
+    ) {
+        // $horarios = [
+        //     1 => [["08", "00"], ["08", "45"]],
+        //     2 => [["08", "45"], ["09", "30"]],
+        //     3 => [["09", "40"], ["10", "25"]],
+        //     4 => [["10", "25"], ["11", "10"]],
+        //     5 => [["11", "20"], ["12", "05"]],
+        //     6 => [["12", "05"], ["12", "50"]],
+        //     7 => [["14", "45"], ["15", "30"]],
+        //     8 => [["15", "30"], ["16", "15"]],
+        //     9 => [["16", "20"], ["17", "05"]],
+        //     10 => [["17", "05"], ["17", "50"]],
+        //     11 => [["17", "55"], ["18", "40"]],
+        //     12 => [["18", "40"], ["19", "25"]],
+        // ];
+        // $dia_to_num = [
+        //     "Lunes" => 0,
+        //     "Martes" => 1,
+        //     "Miércoles" => 2,
+        //     "Jueves" => 3,
+        //     "Viernes" => 4,
+        // ];
         $estudiante = $this->db
             ->query(
                 "
@@ -242,12 +241,13 @@ class BloqueModel extends CI_Model
                 $estudiante->COD_CARRERA
             )
             ->row(0);
-        // }
+
         $bloques_overlap = $this->get_bloques_colisionando(
             $carrera,
-            $dia_to_num[$dia],
-            $horarios[$bloque_horario]
+            $fecha_ini,
+            $fecha_ter
         );
+        print_r($bloques_overlap);
         foreach ($bloques_overlap["atencion"] as $bloque) {
             if ($bloque->RUNCliente == $RUN_estudiante) {
                 throw new Exception(
@@ -292,7 +292,7 @@ class BloqueModel extends CI_Model
                 }
             }
         }
-        $h = $horarios[$bloque_horario];
+        // $h = $horarios[$bloque_horario];
         $licencias = $this->db
             ->query(
                 "
@@ -307,55 +307,52 @@ class BloqueModel extends CI_Model
                 WHERE
                     l.RUN = ?
                 AND
-                    (TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE) < TIMESTAMP(l.FECHA_TER)
+                    ? < TIMESTAMP(l.FECHA_TER)
                 AND
-                    (TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE) > TIMESTAMP(l.FECHA_INI)
+                    ? > TIMESTAMP(l.FECHA_INI)
                 ",
-                [
-                    $run_ts,
-                    $dia_to_num[$dia],
-                    $h[0][0],
-                    $h[0][1],
-                    $dia_to_num[$dia],
-                    $h[1][0],
-                    $h[1][1],
-                ]
+                [$run_ts, $fecha_ini, $fecha_ter]
             )
             ->result();
         if (count($licencias)) {
             throw new Exception("Horario no disponible.");
         }
         if (
-            $this->db
-                ->query(
-                    "SELECT
-                    (TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE) < NOW() AS xd",
-                    [$dia_to_num[$dia], $h[0][0], $h[0][1]]
-                )
-                ->row(0)->xd
+            $this->db->query("SELECT ? < NOW() AS xd", [$fecha_ter])->row(0)->xd
         ) {
             throw new Exception("Fecha inválida.");
+        }
+        // Si no existe calendario para esta semana, creelo automaticamente
+        if (
+            $this->db
+                ->query(
+                    "SELECT *
+                 FROM calendariosemanal
+                 WHERE FechaInicioSemana = TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY))
+                 AND RUNTS = ?",
+                    [$fecha_ini, $fecha_ini, $run_ts]
+                )
+                ->num_rows() == 0
+        ) {
+            echo "XD";
+            $this->db->query(
+                "INSERT INTO calendariosemanal VALUES
+                 (TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY)), ?)",
+                [$fecha_ini, $fecha_ini, $run_ts]
+            );
         }
         if (
             !$this->db->query(
                 "
                 INSERT INTO bloque VALUES (
-                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE,
-                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL ? DAY + INTERVAL ? HOUR + INTERVAL ? MINUTE,
+                    ?,
+                    ?,
                     NULL,
-                    TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)),
+                    TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY)),
                     ?
                 )
                 ",
-                [
-                    $dia_to_num[$dia],
-                    $h[0][0],
-                    $h[0][1],
-                    $dia_to_num[$dia],
-                    $h[1][0],
-                    $h[1][1],
-                    $run_ts,
-                ]
+                [$fecha_ini, $fecha_ter, $fecha_ini, $fecha_ini, $run_ts]
             )
         ) {
             throw new Exception(
@@ -392,13 +389,14 @@ class BloqueModel extends CI_Model
         $query = "SELECT ";
         for ($i = 0; $i < $num_semanas; $i++) {
             $query .= "TIMESTAMP(DATE(NOW() - INTERVAL (DAYOFWEEK(NOW()) - 2) DAY)) + INTERVAL $i WEEK AS s$i";
-            if ($i < ($num_semanas - 1)) {
+            if ($i < $num_semanas - 1) {
                 $query .= ", ";
             }
         }
         return array_values($this->db->query($query)->result_array()[0]);
     }
-    function get_tiempo_bd() {
+    function get_tiempo_bd()
+    {
         return $this->db->query("SELECT NOW() AS t")->row(0)->t;
     }
 }
