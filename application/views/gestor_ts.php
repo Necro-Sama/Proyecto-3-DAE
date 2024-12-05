@@ -16,8 +16,9 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .card-title {
-            color: #060eae; /* Azul 1 */
+            color: black !important; /* Fuerza el color con !important */
         }
+
         /* Encabezado de tabla */
         .table-dark {
             background-color: #060eae !important; /* Azul 1 */
@@ -70,6 +71,7 @@
         .btn-close {
             color: white;
         }
+        
     </style>
 </head>
 <body>

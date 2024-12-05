@@ -23,7 +23,7 @@
             color: white;
         }
         .card-title {
-            color: #060eae;
+            color: #fddeaa;
         }
         .btn-primary {
             background-color: #060eae;
