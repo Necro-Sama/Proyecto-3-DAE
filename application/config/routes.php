@@ -66,3 +66,6 @@ $route['usuarios/Licencia'] = 'UserController/Licencia';
 $route['usuarios/guardar']= 'UserController/guardar';
 $route['usuarios/visualizar-citas'] = 'TrabajadorSocialController/obtenercita';
 $route['usuarios/registrar']= 'UserController/registrar';
+$route['usuarios/TrabajadorSocialController/editar/:id']= 'TrabajadorSocialController/editar';
+$route['usuarios/TrabajadorSocialController/eliminar/:id']= 'TrabajadorSocialController/eliminar';
+$route['usuarios/TrabajadorSocialController/agregar']= 'TrabajadorSocialController/agregar';

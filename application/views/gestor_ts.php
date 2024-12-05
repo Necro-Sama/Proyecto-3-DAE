@@ -158,6 +158,10 @@
                                 <label for="Telefono" class="form-label">Teléfono</label>
                                 <input type="text" class="form-control" name="Telefono" id="Telefono" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="RUN" class="form-label">RUN</label>
+                                <input type="text" class="form-control" name="RUN" id="RUN" required>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="submit" class="btn btn-primary">Guardar</button>
@@ -185,6 +189,7 @@
             document.getElementById('Apellido').value = apellido;
             document.getElementById('Correo').value = correo;
             document.getElementById('Telefono').value = telefono;
+            document.getElementById('RUN').value = run;
             document.getElementById('trabajadorForm').action = '<?php echo site_url('TrabajadorSocialController/editar'); ?>/' + run;
         }
     </script>

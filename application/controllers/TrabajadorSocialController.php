@@ -58,12 +58,12 @@ class TrabajadorSocialController extends CI_Controller {
         ];
 
         $this->TrabajadorSocialModel->agregarTrabajadorSocial($datosPersona, []);
-        redirect('gestor_ts');
+        redirect('/usuarios/gestor_ts');
     }
 
     public function eliminar($RUN) {
         $this->TrabajadorSocialModel->eliminarTrabajadorSocial($RUN);
-        redirect('gestor_ts');
+        redirect('/usuarios/gestor_ts');
     }
 
     public function editar($RUN) {
