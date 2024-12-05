@@ -195,6 +195,14 @@ class UserModel extends CI_Model {
         $query = $this->db->get();
         return $query->row_array();
     }
+    public function getNoEstudiante($run) {
+        // Obtener datos adicionales de administrador
+        $this->db->select('*');
+        $this->db->from('noestudiante');
+        $this->db->where('RUN', $run);
+        $query = $this->db->get();
+        return $query->row_array();
+    }
     public function insertUser($data)
     {
         return $this->db->insert('persona', $data);

@@ -93,29 +93,98 @@ class TrabajadorSocialModel extends CI_Model {
         $this->db->where('ID_TS', $id);
         $this->db->delete('trabajadorsocial');
     }
-    public function obtenerCita(){
-        $query =$this->db->query('
-        SELECT b.Estado, b.Motivo,bl.FechaInicio,bl.FechaTermino, p.RUN, p.Nombre, p.Apellido, p.Telefono, p.Correo 
-        FROM bloqueatencion b 
-        join persona p
-        on (b.RUNCliente = p.RUN)
-        join bloque bl
-        on (b.ID = bl.ID)
+    // public function obtenerCita(){
+    //     $query =$this->db->query('
+    //     SELECT b.Estado, b.Motivo,bl.FechaInicio,bl.FechaTermino, p.RUN, p.Nombre, p.Apellido, p.Telefono, p.Correo 
+    //     FROM bloqueatencion b 
+    //     join persona p
+    //     on (b.RUNCliente = p.RUN)
+    //     join bloque bl
+    //     on (b.ID = bl.ID)
+    //     ');
+    //     return $query->result_array();
+    // }
+    // public function obtenerCitaEstudiante($RUNTS,$RUNU){
+    //     $query =$this->db->query('
+    //     SELECT p.Nombre, p.Apellido, p.Telefono, p.Correo 
+    //     FROM bloqueatencion b 
+    //     join persona p
+    //     on (b.RUNCliente = p.RUN)
+    //     join bloque bl
+    //     on (b.ID = bl.ID)
+    //     WHERE RUNCliente = ? AND RUNTS = ?
+    //     ',array($RUNU, $RUNTS));
+    //     return $query->result_array();
+    // }
+
+    public function obtenerCitasAdministrador()
+    {
+        $query = $this->db->query('
+            SELECT 
+                bl.FechaInicio, bl.FechaTermino, 
+                p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo, 
+                ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS
+            FROM bloqueatencion b
+            JOIN persona p ON b.RUNCliente = p.RUN
+            JOIN bloque bl ON b.ID = bl.ID
+            JOIN persona ts ON bl.RUNTS = ts.RUN
         ');
+
         return $query->result_array();
     }
-    public function obtenerCitaEstudiante($RUNTS,$RUNU){
-        $query =$this->db->query('
-        SELECT p.Nombre, p.Apellido, p.Telefono, p.Correo 
-        FROM bloqueatencion b 
-        join persona p
-        on (b.RUNCliente = p.RUN)
-        join bloque bl
-        on (b.ID = bl.ID)
-        WHERE RUNCliente = ? AND RUNTS = ?
-        ',array($RUNU, $RUNTS));
+
+    public function obtenerCitasPorTS($RUNTS)
+    {
+        $query = $this->db->query('
+            SELECT 
+                bl.FechaInicio, bl.FechaTermino, 
+                p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo, 
+                ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS
+            FROM bloqueatencion b
+            JOIN persona p ON b.RUNCliente = p.RUN
+            JOIN bloque bl ON b.ID = bl.ID
+            JOIN persona ts ON bl.RUNTS = ts.RUN
+            WHERE bl.RUNTS = ?
+        ', [$RUNTS]);
+
         return $query->result_array();
     }
+
+    public function obtenerCitaEstudiante($RUNTS, $RUNU)
+    {
+        $query = $this->db->query('
+            SELECT 
+                bl.FechaInicio, bl.FechaTermino, 
+                p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo,
+                ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS
+            FROM bloqueatencion b
+            JOIN persona p ON b.RUNCliente = p.RUN
+            JOIN bloque bl ON b.ID = bl.ID
+            JOIN persona ts ON bl.RUNTS = ts.RUN
+            WHERE b.RUNCliente = ? AND bl.RUNTS = ?
+        ', [$RUNU, $RUNTS]);
+
+        return $query->result_array();
+    }
+
+    public function obtenerCitasNoEstudiante($RUNNoEstudiante)
+    {
+        $query = $this->db->query('
+            SELECT 
+                bl.FechaInicio, bl.FechaTermino, 
+                p.Nombre AS NombreNoEstudiante, p.Apellido AS ApellidoNoEstudiante, p.Telefono, p.Correo,
+                ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS
+            FROM bloqueatencion b
+            JOIN persona p ON b.RUNCliente = p.RUN
+            JOIN bloque bl ON b.ID = bl.ID
+            JOIN persona ts ON bl.RUNTS = ts.RUN
+            WHERE b.RUNCliente = ?
+        ', [$RUNNoEstudiante]);
+
+        return $query->result_array();
+    }
+
+
     public function obtenerRUNTS($RUN){
         $query =$this->db->query('
         SELECT b.RUNTS FROM bloque b

@@ -94,35 +94,46 @@ class TrabajadorSocialController extends CI_Controller {
             return $g_client;
         }
     }
-    public function obtenercita() {
-        $RUN_usuario = $this->check_logged_in();
-        $data['tipo'] = $this->comprobardatos( $RUN_usuario);
-        if ($data['tipo']= 'estudiante') {
-            $RUNTS = $this->TrabajadorSocialModel->obtenerRUNTS( $RUN_usuario );
-            $data['citas'] = $this->TrabajadorSocialModel->obtenerCitaEstudiante($RUNTS,$RUN_usuario);
-        }
-        else{
-            $data['citas'] = $this->TrabajadorSocialModel->obtenerCita();
-        }
+    public function obtenercita()
+{
+    $RUN_usuario = $this->check_logged_in();
+    $data['tipo'] = $this->comprobardatos($RUN_usuario);
 
-        
-        print_r($data);
-        $this->load->view('VisualizarCitas', $data); // Carga la vista y pasa los datos
+    if ($data['tipo'] === 'estudiante') {
+        $RUNTS = $this->TrabajadorSocialModel->obtenerRUNTS($RUN_usuario);
+        $data['citas'] = $this->TrabajadorSocialModel->obtenerCitaEstudiante($RUNTS, $RUN_usuario);
+    } elseif ($data['tipo'] === 'noestudiante') {
+        $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasNoEstudiante($RUN_usuario);
+    } elseif ($data['tipo'] === 'trabajadorsocial') {
+        $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasPorTS($RUN_usuario);
+    } elseif ($data['tipo'] === 'administrador') {
+        $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasAdministrador();
+    } else {
+        $data['citas'] = [];
     }
-    public function comprobardatos($RUN_usuario) {
 
+    $this->load->view('VisualizarCitas', $data);
+}
+
+
+    public function comprobardatos($RUN_usuario) {
+        $data['persona'] = $this->UserModel->getPersona($RUN_usuario);
+        
         if ($this->UserModel->getEstudiante($RUN_usuario)) {
             $data['tipo'] = 'estudiante';
             $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
-        } if ($this->UserModel->getFuncionario($RUN_usuario)) {
+        } 
+        else if ($this->UserModel->getFuncionario($RUN_usuario)) {
             $data['tipo'] = 'trabajadorsocial';
             $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
-        } if ($this->UserModel->getAdministrador($RUN_usuario)) {
+        } 
+        else if ($this->UserModel->getAdministrador($RUN_usuario)) {
             $data['tipo'] = 'administrador';
             $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
-        } else {
-            $data['tipo'] = 'desconocido'; // Manejo de caso por defecto
-            $data['detalle'] = null;
+        } 
+        else {
+            $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
+            $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
         }
         return $data;
     }

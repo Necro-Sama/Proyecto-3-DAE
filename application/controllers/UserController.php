@@ -90,8 +90,9 @@ class UserController extends CI_Controller
             $RUN_usuario
         );
         $data = $this->comprobardatos($RUN_usuario);
-        // Asegúrate de que los datos se pasan correctamente a las vistas
+        print_r($data);// Asegúrate de que los datos se pasan correctamente a las vistas
         $this->load->view('navbar', $data);
+        
         $this->load->view('HomeGlobal', $data);
     }
     public function comprobardatos($RUN_usuario) {
@@ -111,11 +112,9 @@ class UserController extends CI_Controller
         } 
         else {
             $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
-            $data['detalle'] = null;
+            $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
         }
-        // print_r($data);
         return $data;
-
     }
     public function agendar()
     {
@@ -155,7 +154,6 @@ class UserController extends CI_Controller
     //     }
     // }
 
-    // Agendar solo en la semana actual para un Estudiante
     public function accion_agendar()
     {
         $this->session->agendar_exito = "";
@@ -280,10 +278,7 @@ class UserController extends CI_Controller
         }
     }
 }
-
-
     // Seccion licencias
-
     public function mostrarTS()
     {
         $this->load->model("Trabajadores_model");
