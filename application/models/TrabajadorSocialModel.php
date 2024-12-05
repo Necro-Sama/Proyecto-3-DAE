@@ -172,7 +172,7 @@ class TrabajadorSocialModel extends CI_Model {
         $query = $this->db->query('
             SELECT 
                 bl.FechaInicio, bl.FechaTermino, 
-                p.Nombre AS NombreNoEstudiante, p.Apellido AS ApellidoNoEstudiante, p.Telefono, p.Correo,
+                p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo,
                 ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS
             FROM bloqueatencion b
             JOIN persona p ON b.RUNCliente = p.RUN
