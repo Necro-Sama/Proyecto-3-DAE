@@ -73,7 +73,7 @@
     <?php  $this->load->view('navbar',$tipo); ?>
 
     <div class="form-container">
-        <h1>Registrar Licencia</h1>
+        
         <form action="<?= site_url('usuarios/guardar') ?>" method="post">
             <!-- Lista desplegable para seleccionar Trabajador Social -->
             <div class="form-group">

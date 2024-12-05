@@ -15,10 +15,10 @@ class TrabajadorSocialController extends CI_Controller {
     public function asignarTSACarrera() {
         // Obtener todas las carreras
         $data['carreras'] = $this->CarreraModel->obtenerCarreras();
-        
+        $RUN_usuario = $this->check_logged_in();
         // Obtener todos los trabajadores sociales
         $data['trabajadores_sociales'] = $this->TrabajadorSocialModel->obtenerTrabajadoresSociales();
-
+        $data['tipo']= $this->comprobardatos($RUN_usuario);
         // Cargar la vista
         $this->load->view('AsignarCarrerasView', $data);
     }

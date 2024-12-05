@@ -1,36 +1,46 @@
-<?php
-defined("BASEPATH") or exit("No direct script access allowed"); ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Visualizar Citas</title>
-    <?php $this->load->view("navbar",$tipo);?>
-    <link rel="stylesheet" type="text/css" href="<?= base_url(
-        "css/agendar.css"
-    ) ?>"/>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
-    <link rel="stylesheet" type="text/css" href="<?= base_url() ?>css/style.css"/>
-    <link rel="stylesheet" href="<?php echo base_url(
-        "public/bootstrap/css/bootstrap.min.css"
-    ); ?>">
-    
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
+    <?php $this->load->view("navbar", $tipo); ?>
+    <link rel="stylesheet" href="<?= base_url('public/bootstrap/css/bootstrap.min.css'); ?>">
+    <style>
+        body {
+            background-color: #FBF1D0;
+        }
+        .card {
+            background-color: #FDDEAA;
+            border: 2px solid #FDD188;
+            border-radius: 15px; /* Bordes redondeados */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            color: #060EAE;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #060EAE;
+            border-color: #060EAE;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #FDD188;
+            border-color: #FDD188;
+            color: #060EAE;
+        }
+        .card-text strong {
+            color: #060EAE;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 </head>
 
 <body>
-        <div class="container mt-5">
-    <h2 class="text-center">Visualizar Citas</h2>
+    <div class="container mt-5">
+        <h2 class="text-center">Citas Programadas</h2>
         <div class="row mt-4">
             <?php if (!empty($citas)): ?>
                 <?php foreach ($citas as $cita): ?>
@@ -62,3 +72,4 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     </div>
     <script src="<?= base_url('assets/js/bootstrap.bundle.min.js'); ?>"></script>
 </body>
+</html>
