@@ -47,17 +47,28 @@
                     <div class="col-md-4 mb-4">
                         <div class="card h-100">
                             <div class="card-body">
-                                <h5 class="card-title">Estudiante: <?= $cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante']; ?></h5>
-                                <p class="card-text"><strong>Teléfono:</strong> <?= $cita['Telefono']; ?></p>
-                                <p class="card-text"><strong>Correo:</strong> <?= $cita['Correo']; ?></p>
-                                <p class="card-text"><strong>Fecha Inicio:</strong> <?= $cita['FechaInicio']; ?></p>
-                                <p class="card-text"><strong>Fecha Término:</strong> <?= $cita['FechaTermino']; ?></p>
-                                
-                                <?php if (isset($cita['NombreTS'])): ?>
-                                    <h5 class="card-title mt-3">Trabajador Social:</h5>
-                                    <p class="card-text"><strong>Nombre:</strong> <?= $cita['NombreTS'] . ' ' . $cita['ApellidoTS']; ?></p>
-                                    <p class="card-text"><strong>Teléfono:</strong> <?= $cita['TelefonoTS']; ?></p>
-                                    <p class="card-text"><strong>Correo:</strong> <?= $cita['CorreoTS']; ?></p>
+                                <?php if ($tipo === 'estudiante'): ?>
+                                    <!-- Información completa para estudiantes -->
+                                    <h5 class="card-title">Estudiante: <?= $cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante']; ?></h5>
+                                    <p class="card-text"><strong>Teléfono:</strong> <?= $cita['Telefono']; ?></p>
+                                    <p class="card-text"><strong>Correo:</strong> <?= $cita['Correo']; ?></p>
+                                    <p class="card-text"><strong>Fecha Inicio:</strong> <?= $cita['FechaInicio']; ?></p>
+                                    <p class="card-text"><strong>Fecha Término:</strong> <?= $cita['FechaTermino']; ?></p>
+                                    
+                                    <?php if (isset($cita['NombreTS'])): ?>
+                                        <h5 class="card-title mt-3">Trabajador Social:</h5>
+                                        <p class="card-text"><strong>Nombre:</strong> <?= $cita['NombreTS'] . ' ' . $cita['ApellidoTS']; ?></p>
+                                        <p class="card-text"><strong>Teléfono:</strong> <?= $cita['TelefonoTS']; ?></p>
+                                        <p class="card-text"><strong>Correo:</strong> <?= $cita['CorreoTS']; ?></p>
+                                    <?php endif; ?>
+                                <?php elseif ($tipo === 'trabajadorsocial'): ?>
+                                    <!-- Información limitada para trabajadores sociales -->
+                                    <h5 class="card-title">Estudiante: <?= $cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante']; ?></h5>
+                                    <p class="card-text"><strong>Teléfono:</strong> <?= $cita['Telefono']; ?></p>
+                                    <p class="card-text"><strong>Correo:</strong> <?= $cita['Correo']; ?></p>
+                                    <p class="card-text"><strong>Motivo de la Cita:</strong> <?= $cita['Motivo']; ?></p>
+                                    <p class="card-text"><strong>Fecha Inicio:</strong> <?= $cita['FechaInicio']; ?></p>
+                                    <p class="card-text"><strong>Fecha Término:</strong> <?= $cita['FechaTermino']; ?></p>
                                 <?php endif; ?>
                             </div>
                         </div>

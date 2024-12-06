@@ -134,21 +134,22 @@ class TrabajadorSocialModel extends CI_Model {
     }
 
     public function obtenerCitasPorTS($RUNTS)
-    {
-        $query = $this->db->query('
-            SELECT 
-                bl.FechaInicio, bl.FechaTermino, 
-                p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo, 
-                ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS
-            FROM bloqueatencion b
-            JOIN persona p ON b.RUNCliente = p.RUN
-            JOIN bloque bl ON b.ID = bl.ID
-            JOIN persona ts ON bl.RUNTS = ts.RUN
-            WHERE bl.RUNTS = ?
-        ', [$RUNTS]);
+{
+    $query = $this->db->query('
+        SELECT 
+            bl.FechaInicio, bl.FechaTermino, 
+            p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo, 
+            ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS,
+            b.Motivo
+        FROM bloqueatencion b
+        JOIN persona p ON b.RUNCliente = p.RUN
+        JOIN bloque bl ON b.ID = bl.ID
+        JOIN persona ts ON bl.RUNTS = ts.RUN
+        WHERE bl.RUNTS = ?
+    ', [$RUNTS]);
 
-        return $query->result_array();
-    }
+    return $query->result_array();
+}
 
     public function obtenerCitaEstudiante($RUNTS, $RUNU)
     {
