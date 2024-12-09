@@ -291,18 +291,20 @@ class UserController extends CI_Controller
         $fecha_inicio = $this->input->post("fecha_inicio");
         $fecha_termino = $this->input->post("fecha_termino");
 
-        $data["licencia_id"] = $this->Trabajadores_model->guardarLicencia(
-            $trabajador_id,
-            $fecha_inicio,
-            $fecha_termino
-        );
+        $resultado = $this->Trabajadores_model->guardarLicencia($trabajador_id, $fecha_inicio, $fecha_termino);
 
-        if ($data) {
-            echo "Licencia registrada con éxito.";
+        if ($resultado) {
+            // Mensaje de éxito
+            $this->session->set_flashdata('mensaje', 'Licencia registrada con éxito.');
+            $this->session->set_flashdata('mensaje_tipo', 'success');
         } else {
-            echo "Error al registrar la licencia.";
+            // Mensaje de error
+            $this->session->set_flashdata('mensaje', 'Error al registrar la licencia.');
+            $this->session->set_flashdata('mensaje_tipo', 'danger');
         }
-        $this->Licencia();
+
+        // Redirige al formulario
+        redirect('usuarios/Licencia');
     }
     public function Licencia()
     {

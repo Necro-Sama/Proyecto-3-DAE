@@ -123,7 +123,8 @@ class TrabajadorSocialModel extends CI_Model {
             SELECT 
                 bl.FechaInicio, bl.FechaTermino, 
                 p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo, 
-                ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS
+                ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS,
+                b.Motivo
             FROM bloqueatencion b
             JOIN persona p ON b.RUNCliente = p.RUN
             JOIN bloque bl ON b.ID = bl.ID

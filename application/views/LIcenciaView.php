@@ -73,7 +73,13 @@
     <?php  $this->load->view('navbar',$tipo); ?>
 
     <div class="form-container">
-        
+        <!-- Mostrar mensaje si existe -->
+        <?php if ($this->session->flashdata('mensaje')): ?>
+            <div class="alert alert-<?= $this->session->flashdata('mensaje_tipo'); ?> text-center" role="alert">
+                <?= $this->session->flashdata('mensaje'); ?>
+            </div>
+        <?php endif; ?>
+
         <form action="<?= site_url('usuarios/guardar') ?>" method="post">
             <!-- Lista desplegable para seleccionar Trabajador Social -->
             <div class="form-group">
