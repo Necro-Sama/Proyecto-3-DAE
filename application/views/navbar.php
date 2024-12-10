@@ -1,11 +1,9 @@
 <nav class="navbar navbar-expand-lg custom-navbar">
-  <div class="container-fluid">
     <!-- Logo y título -->
     <a class="navbar-brand fw-bold logo-section" href="<?= site_url('usuarios/home') ?>">
       <img src="<?= base_url('dae-logo.png') ?>" style="height: 30px; margin-right: 10px;">
       Sistema DAE
     </a>
-
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <i class="fas fa-bars" style="color: #fdd188;"></i>
     </button>

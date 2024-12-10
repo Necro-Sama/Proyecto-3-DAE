@@ -7,7 +7,7 @@
     <style>
         /* Fondo general */
         body {
-            background-color: white; /* Naranja 3 */
+            background-color: #fbf1d0; /* Naranja 3 */
         }
         /* Diseño de la tarjeta */
         .card {
@@ -111,11 +111,12 @@
                             <td><?php echo $trabajador['Nombre']; ?></td>
                             <td><?php echo $trabajador['Apellido']; ?></td>
                             <td>
-                                 <!-- Switch para administrar TS como administrador -->
+                            <!-- Switch para administrar TS como administrador -->
+                            <div class="form-check form-switch">
                                 <input type="checkbox" class="form-check-input" id="adminSwitch_<?php echo $trabajador['RUN']; ?>"
                                     <?php echo ($trabajador['is_admin'] ? 'checked' : ''); ?>
-                                    onchange="toggleAdminStatus('<?php echo $trabajador['RUN']; ?>', this)">
-                            </td>
+                                    onchange="cambiarTipo('<?php echo $trabajador['RUN']; ?>')">
+                            </div>
                             <td>
                                 <!-- Botón para editar -->
                                 <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#trabajadorModal"
@@ -174,7 +175,6 @@
 
         <!-- Modal para asignar TS a carreras -->
         <div class="modal fade" id="asignarModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-        <?php $this->load->view('AsignarCarrerasView'); ?>
         </div>                                  
 
     </div>
@@ -192,9 +192,6 @@
             document.getElementById('RUN').value = run;
             document.getElementById('trabajadorForm').action = '<?php echo site_url('TrabajadorSocialController/editar'); ?>/' + run;
         }
-    </script>
-    
-    <script>
         function toggleAdminStatus(run, checkbox) {
             // Enviar la solicitud AJAX al controlador para agregar o eliminar del administrador
             const url = checkbox.checked ?
@@ -221,6 +218,30 @@
             .catch(error => {
                 console.error('Error en la solicitud:', error);
                 checkbox.checked = !checkbox.checked; // Revertir el estado en caso de error
+            });
+        }
+        function cambiarTipo(run) {
+            // Enviar la solicitud AJAX al controlador
+            fetch('<?php echo site_url("TrabajadorSocialController/cambiartipo"); ?>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ RUN: run })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Tipo cambiado exitosamente');
+                } else {
+                    console.error('Error al cambiar el tipo');
+                    // Manejar el error según sea necesario
+                    alert('Error al cambiar el tipo. Inténtalo de nuevo.');
+                }
+            })
+            .catch(error => {
+                console.error('Error en la solicitud:', error);
+                alert('Error al comunicarse con el servidor. Inténtalo de nuevo.');
             });
         }
     </script>

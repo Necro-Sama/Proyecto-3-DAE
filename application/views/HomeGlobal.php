@@ -12,6 +12,11 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     <link rel="stylesheet" type="text/css" href="<?= base_url() ?>css/style.css"/>
     <link rel="stylesheet" href="<?php echo base_url("public/bootstrap/css/bootstrap.min.css"); ?>">
 </head>
+<style>
+    body {
+            background-color: #fbf1d0; /* Naranja 3 */
+        }
+</style>
 <body>
     <!-- Cargar la Navbar -->
     
@@ -20,7 +25,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
         
         <!-- Incluir la tarjeta del usuario -->
 
-        <?php $this->load->view('user_card', ['persona' => $persona]); ?>
+        <?php  $this->load->view('user_card', ['persona' => $persona]); ?>
     </div>
 
     <!-- Scripts -->

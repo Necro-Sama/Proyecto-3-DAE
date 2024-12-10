@@ -114,29 +114,27 @@ class TrabajadorSocialController extends CI_Controller {
 
     $this->load->view('VisualizarCitas', $data);
 }
-
-
-    public function comprobardatos($RUN_usuario) {
-        $data['persona'] = $this->UserModel->getPersona($RUN_usuario);
-        
-        if ($this->UserModel->getEstudiante($RUN_usuario)) {
-            $data['tipo'] = 'estudiante';
-            $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
-        } 
-        else if ($this->UserModel->getFuncionario($RUN_usuario)) {
-            $data['tipo'] = 'trabajadorsocial';
-            $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
-        } 
-        else if ($this->UserModel->getAdministrador($RUN_usuario)) {
-            $data['tipo'] = 'administrador';
-            $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
-        } 
-        else {
-            $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
-            $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
-        }
-        return $data;
+public function comprobardatos($RUN_usuario) {
+    $data['persona'] = $this->UserModel->getPersona($RUN_usuario);
+    
+    if ($this->UserModel->getEstudiante($RUN_usuario)) {
+        $data['tipo'] = 'estudiante';
+        $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
+    } 
+    if ($this->UserModel->getFuncionario($RUN_usuario))  {
+        $data['tipo'] = 'trabajadorsocial';
+        $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
+    } 
+    if ($this->UserModel->getAdministrador($RUN_usuario)) {
+        $data['tipo'] = 'administrador';
+        $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
+    } 
+    else {
+        $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
+        $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
     }
+    return $data;
+}
     public function agregarAdmin() {
         $data = json_decode($this->input->raw_input_stream, true);
         $run = $data['RUN'];
@@ -163,6 +161,36 @@ class TrabajadorSocialController extends CI_Controller {
     
         echo json_encode(['success' => true]);
     }
-    
+    public function cambiartipo()
+{
+    // Leer el cuerpo de la solicitud
+    $data = json_decode(file_get_contents('php://input'), true);
+
+    if (isset($data['RUN'])) {
+        $run = $data['RUN'];
+        
+        // Consultar si el trabajador social ya es administrador
+        $this->load->model('TrabajadorSocialModel');
+        $es_admin = $this->TrabajadorSocialModel->esAdmin($run);
+
+        // Cambiar el estado
+        $resultado = false;
+        if ($es_admin) {
+            // Si es administrador, eliminarlo de la tabla
+            $resultado = $this->TrabajadorSocialModel->eliminarAdmin($run);
+        } else {
+            // Si no es administrador, agregarlo a la tabla
+            $resultado = $this->TrabajadorSocialModel->agregarAdmin($run);
+        }
+
+        if ($resultado) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'No se pudo actualizar el tipo']);
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'RUN no proporcionado']);
+    }
+}
     
 }

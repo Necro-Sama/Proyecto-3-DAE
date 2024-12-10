@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="<?php echo base_url('public/bootstrap/css/bootstrap.min.css'); ?>">
     <style>
         body {
-            background-color: white;
+            background-color: #fbf1d0; /* Naranja 3 */
         }
         .card {
             background-color: #fddeaa;

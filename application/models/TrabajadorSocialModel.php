@@ -90,8 +90,11 @@ class TrabajadorSocialModel extends CI_Model {
     }
 
     public function eliminarTS($id) {
-        $this->db->where('ID_TS', $id);
+        // borrara a la TS de la lista y de la BD desde la raiz persona (datos personales basicos)
+        $this->db->where('RUN', $id);
         $this->db->delete('trabajadorsocial');
+        $this->db->delete('funcionario');
+        $this->db->delete('persona');
     }
     // public function obtenerCita(){
     //     $query =$this->db->query('
@@ -196,6 +199,28 @@ class TrabajadorSocialModel extends CI_Model {
         ',array($RUN));
         $result = $query->row_array(); // Obtiene la primera fila como un arreglo asociativo
         return isset($result['RUNTS']) ? $result['RUNTS'] : null; // Retorna el valor de RUNTS o null si no existe
+    }
+    public function esAdmin($run)
+    {
+        $this->db->select('RUN');
+        $this->db->from('administrador');
+        $this->db->where('RUN', $run);
+        $query = $this->db->get();
+        return $query->num_rows() > 0; // Retorna true si el RUN está como administrador
+    }
+
+    // Agregar el RUN a la tabla 'administrador'
+    public function agregarAdmin($run)
+    {
+        $data = ['RUN' => $run];
+        return $this->db->insert('administrador', $data);
+    }
+
+    // Eliminar el RUN de la tabla 'administrador'
+    public function eliminarAdmin($run)
+    {
+        $this->db->where('RUN', $run);
+        return $this->db->delete('administrador');
     }
 }
 ?>

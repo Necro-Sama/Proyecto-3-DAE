@@ -91,7 +91,7 @@ class UserController extends CI_Controller
         );
         $data = $this->comprobardatos($RUN_usuario);
         $this->load->view('navbar', $data);
-        
+        print_r($data);
         $this->load->view('HomeGlobal', $data);
     }
     public function comprobardatos($RUN_usuario) {
@@ -101,11 +101,11 @@ class UserController extends CI_Controller
             $data['tipo'] = 'estudiante';
             $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
         } 
-        else if ($this->UserModel->getFuncionario($RUN_usuario)) {
+        if ($this->UserModel->getFuncionario($RUN_usuario))  {
             $data['tipo'] = 'trabajadorsocial';
             $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
         } 
-        else if ($this->UserModel->getAdministrador($RUN_usuario)) {
+        if ($this->UserModel->getAdministrador($RUN_usuario)) {
             $data['tipo'] = 'administrador';
             $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
         } 
