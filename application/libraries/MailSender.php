@@ -14,24 +14,26 @@ class MailSender {
 
         // Configuración del servidor SMTP
         $this->mail->isSMTP();
-        $this->mail->Host = 'smtp.example.com'; // Cambiar por tu servidor SMTP
+        $this->mail->Host = 'smtp.gmail.com'; // Cambia a tu servidor SMTP
         $this->mail->SMTPAuth = true;
-        $this->mail->Username = 'correo-generico@example.com'; // Correo genérico proporcionado
-        $this->mail->Password = 'contraseña-segura'; // Contraseña del correo
-        $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $this->mail->Port = 587; // Cambiar si tu proveedor usa otro puerto
+        $this->mail->Username = 'gustavo.rios.alvarez@alumnos.uta.cl'; // Tu correo genérico
+        $this->mail->Password = 'ojei tdhz jtsn kaju '; // Contraseña o contraseña de aplicación
+        $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // TLS o SSL según tu servidor
+        $this->mail->Port = 587; // Puerto 587 para TLS o 465 para SSL
     }
 
     public function sendMail($to, $subject, $body) {
         try {
-            $this->mail->setFrom('correo-generico@example.com', 'Sistema de Agenda'); // Correo y nombre del remitente
+            // Configuración del remitente
+            $this->mail->setFrom('correo-generico@dominio.com', 'Sistema de Agenda'); // Cambia a tu correo y nombre genérico
             $this->mail->addAddress($to); // Correo del destinatario
 
-            // Configuración del correo
+            // Configuración del contenido del correo
             $this->mail->isHTML(true);
             $this->mail->Subject = $subject;
             $this->mail->Body = $body;
 
+            // Enviar correo
             $this->mail->send();
             return true;
         } catch (Exception $e) {
