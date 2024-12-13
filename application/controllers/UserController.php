@@ -86,9 +86,6 @@ class UserController extends CI_Controller
         }
         // $this->load->view("navbar");
         // Checkear si es trabajador social
-        $trabajador_social = $this->UserModel->get_trabajador_social(
-            $RUN_usuario
-        );
         $data = $this->comprobardatos($RUN_usuario);
         $this->load->view('navbar', $data);
         print_r($data);
@@ -109,7 +106,7 @@ class UserController extends CI_Controller
             $data['tipo'] = 'administrador';
             $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
         } 
-        else {
+        if ($this->UserModel->getNoEstudiante($RUN_usuario)) {
             $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
             $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
         }
@@ -133,26 +130,6 @@ class UserController extends CI_Controller
     {
         return $this->UserModel->get_admin($RUN_usuario);
     }
-
-    // public function cargar_vista()
-    // {
-    //     $RUN_usuario = $this->session->userdata("RUN");
-    //     $gestion_ts = $this->UserModel->get_admin($RUN_usuario);
-    //     $data["gestion_ts"] = $gestion_ts;
-    //     $this->load->view("navbar", $data);
-    //     if (!$this->check_logged_in()) {
-    //         $usuario = $this->check_logged_in();
-    //         if (!$usuario) {
-    //             session_destroy();
-    //             redirect("/usuarios/login");
-    //         }
-    //         $this->load->view("navbar");
-    //         $this->load->view("StudentAgendarView", [
-    //             "RUN_ESTUDIANTE" => $usuario,
-    //         ]);
-    //     }
-    // }
-
     public function accion_agendar()
     {
         $this->session->agendar_exito = "";
