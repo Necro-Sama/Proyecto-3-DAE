@@ -88,7 +88,6 @@ class UserController extends CI_Controller
         // Checkear si es trabajador social
         $data = $this->comprobardatos($RUN_usuario);
         $this->load->view('navbar', $data);
-        print_r($data);
         $this->load->view('HomeGlobal', $data);
     }
     public function comprobardatos($RUN_usuario) {

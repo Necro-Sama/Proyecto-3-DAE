@@ -120,9 +120,9 @@ class TrabajadorSocialModel extends CI_Model {
     //     return $query->result_array();
     // }
 
-    public function obtenerCitasAdministrador()
+    public function obtenerCitasAdministrador($filtro = null)
     {
-        $query = $this->db->query('
+        $sql = '
             SELECT 
                 bl.FechaInicio, bl.FechaTermino, 
                 p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo, 
@@ -131,10 +131,15 @@ class TrabajadorSocialModel extends CI_Model {
             FROM bloqueatencion b
             JOIN persona p ON b.RUNCliente = p.RUN
             JOIN bloque bl ON b.ID = bl.ID
-            JOIN persona ts ON bl.RUNTS = ts.RUN
-        ');
+            JOIN persona ts ON bl.RUNTS = ts.RUN';
 
-        return $query->result_array();
+        if ($filtro) {
+            $sql .= ' WHERE p.RUN LIKE ? OR p.Nombre LIKE ? OR ts.Nombre LIKE ?';
+            return $this->db->query($sql, ["%$filtro%", "%$filtro%", "%$filtro%"])->result_array();
+        }
+
+        $sql .= ' ORDER BY bl.FechaInicio ASC';
+        return $this->db->query($sql)->result_array();
     }
 
     public function obtenerCitasPorTS($RUNTS)

@@ -95,46 +95,54 @@ class TrabajadorSocialController extends CI_Controller {
         }
     }
     public function obtenercita()
-{
-    $RUN_usuario = $this->check_logged_in();
+    {
+        $RUN_usuario = $this->check_logged_in();
+        $filtro = $this->input->get('filtro'); // Obtener filtro desde la vista (puede ser RUN o nombre)
 
-    $data = $this->comprobardatos($RUN_usuario);
-    if ($data['tipo'] === 'estudiante') {
-        $RUNTS = $this->TrabajadorSocialModel->obtenerRUNTS($RUN_usuario);
-        $data['citas'] = $this->TrabajadorSocialModel->obtenerCitaEstudiante($RUNTS, $RUN_usuario);
-    } elseif ($data['tipo'] === 'noestudiante') {
-        $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasNoEstudiante($RUN_usuario);
-    } elseif ($data['tipo'] === 'trabajadorsocial') {
-        $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasPorTS($RUN_usuario);
-    } elseif ($data['tipo'] === 'administrador') {
-        $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasAdministrador();
-    } else {
-        $data['citas'] = [];
-    }
+        $data = $this->comprobardatos($RUN_usuario);
+        if ($data['tipo'] === 'estudiante') {
+            $RUNTS = $this->TrabajadorSocialModel->obtenerRUNTS($RUN_usuario);
+            $data['citas'] = $this->TrabajadorSocialModel->obtenerCitaEstudiante($RUNTS, $RUN_usuario, $filtro);
+        } elseif ($data['tipo'] === 'noestudiante') {
+            $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasNoEstudiante($RUN_usuario, $filtro);
+        } elseif ($data['tipo'] === 'trabajadorsocial') {
+            $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasPorTS($RUN_usuario, $filtro);
+        } elseif ($data['tipo'] === 'administrador') {
+            $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasAdministrador($filtro);
+        } else {
+            $data['citas'] = [];
+        }
 
-    $this->load->view('VisualizarCitas', $data);
-}
-public function comprobardatos($RUN_usuario) {
-    $data['persona'] = $this->UserModel->getPersona($RUN_usuario);
-    
-    if ($this->UserModel->getEstudiante($RUN_usuario)) {
-        $data['tipo'] = 'estudiante';
-        $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
-    } 
-    if ($this->UserModel->getFuncionario($RUN_usuario))  {
-        $data['tipo'] = 'trabajadorsocial';
-        $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
-    } 
-    if ($this->UserModel->getAdministrador($RUN_usuario)) {
-        $data['tipo'] = 'administrador';
-        $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
-    } 
-    else {
-        $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
-        $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
+        $this->load->view('VisualizarCitas', $data);
     }
-    return $data;
-}
+    public function filtrar_citas()
+    {
+        $futuras = $this->input->post('futuras');
+        $citas = $this->Citas_model->get_citas_futuras($futuras); // Asumiendo que tienes un modelo que retorna las citas filtradas
+
+        echo json_encode($citas); // Devolver las citas como JSON
+    }
+    public function comprobardatos($RUN_usuario) {
+        $data['persona'] = $this->UserModel->getPersona($RUN_usuario);
+        
+        if ($this->UserModel->getEstudiante($RUN_usuario)) {
+            $data['tipo'] = 'estudiante';
+            $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
+        } 
+        if ($this->UserModel->getFuncionario($RUN_usuario))  {
+            $data['tipo'] = 'trabajadorsocial';
+            $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
+        } 
+        if ($this->UserModel->getAdministrador($RUN_usuario)) {
+            $data['tipo'] = 'administrador';
+            $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
+        } 
+        else {
+            $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
+            $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
+        }
+        return $data;
+    }
     public function agregarAdmin() {
         $data = json_decode($this->input->raw_input_stream, true);
         $run = $data['RUN'];

@@ -40,66 +40,69 @@
 
 <body>
     <div class="container mt-5">
-        <h2 class="text-center">Citas Programadas</h2>
-        <div class="row mt-4">
-            <?php if (!empty($citas)): ?>
+        <h1 class="mb-4">Listado de Citas</h1>
+
+        <!-- Formulario de Búsqueda -->
+        <form method="get" action="<?= site_url('usuarios/visualizar-citas'); ?>" id="buscarForm" class="mb-4">
+            <div class="input-group">
+                <input type="text" name="filtro" class="form-control" placeholder="Buscar por RUT" value="<?= $this->input->get('filtro'); ?>" required>
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="submit">Buscar</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="row">
+            <?php if (isset($citas) && !empty($citas)): ?>
                 <?php foreach ($citas as $cita): ?>
+                    <?php
+                    $esPasada = strtotime($cita['FechaInicio']) < time(); // Verificar si la cita es pasada
+                    ?>
                     <div class="col-md-4 mb-4">
                         <div class="card h-100">
                             <div class="card-body">
-                                <?php if ($tipo === 'estudiante'): ?>
-                                    <!-- Información completa para estudiantes -->
-                                    <h5 class="card-title">Estudiante: <?= $cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante']; ?></h5>
-                                    <p class="card-text"><strong>Teléfono:</strong> <?= $cita['Telefono']; ?></p>
-                                    <p class="card-text"><strong>Correo:</strong> <?= $cita['Correo']; ?></p>
-                                    <p class="card-text"><strong>Fecha Inicio:</strong> <?= $cita['FechaInicio']; ?></p>
-                                    <p class="card-text"><strong>Fecha Término:</strong> <?= $cita['FechaTermino']; ?></p>
-                                    
-                                    <?php if (isset($cita['NombreTS'])): ?>
-                                        <h5 class="card-title mt-3">Trabajador Social:</h5>
-                                        <p class="card-text"><strong>Nombre:</strong> <?= $cita['NombreTS'] . ' ' . $cita['ApellidoTS']; ?></p>
-                                        <p class="card-text"><strong>Teléfono:</strong> <?= $cita['TelefonoTS']; ?></p>
-                                        <p class="card-text"><strong>Correo:</strong> <?= $cita['CorreoTS']; ?></p>
-                                    <?php endif; ?>
-                                    
-                                <?php elseif ($tipo === 'trabajadorsocial'): ?>
-                                    <!-- Información limitada para trabajadores sociales -->
-                                    <h5 class="card-title">Estudiante: <?= $cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante']; ?></h5>
-                                    <p class="card-text"><strong>Teléfono:</strong> <?= $cita['Telefono']; ?></p>
-                                    <p class="card-text"><strong>Correo:</strong> <?= $cita['Correo']; ?></p>
-                                    <p class="card-text"><strong>Motivo de la Cita:</strong> <?= $cita['Motivo']; ?></p>
-                                    <p class="card-text"><strong>Fecha Inicio:</strong> <?= $cita['FechaInicio']; ?></p>
-                                    <p class="card-text"><strong>Fecha Término:</strong> <?= $cita['FechaTermino']; ?></p>
-
-
-                                <?php elseif ($tipo === 'administrador'): ?>
-                                    <h5 class="card-title">Estudiante</h5>
-                                    <p class="card-text"><strong>Nombre:</strong> <?= $cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante']; ?></p>
-                                    <p class="card-text"><strong>Teléfono:</strong> <?= $cita['Telefono']; ?></p>
-                                    <p class="card-text"><strong>Correo:</strong> <?= $cita['Correo']; ?></p>
-                                    <p class="card-text"><strong>Motivo de la Cita:</strong> <?= $cita['Motivo']; ?></p>
-                                    <p class="card-text mt-3"><strong>Fecha Inicio:</strong> <?= $cita['FechaInicio']; ?></p>
-                                    <p class="card-text"><strong>Fecha Término:</strong> <?= $cita['FechaTermino']; ?></p>
-
-                                    <h5 class="card-title mt-3">Trabajador Social</h5>
-                                    <p class="card-text"><strong>Nombre:</strong> <?= $cita['NombreTS'] . ' ' . $cita['ApellidoTS']; ?></p>
-                                    <p class="card-text"><strong>Teléfono:</strong> <?= $cita['TelefonoTS']; ?></p>
-                                    <p class="card-text"><strong>Correo:</strong> <?= $cita['CorreoTS']; ?></p>
-
-                                    
-                                    
+                                <?php if ($esPasada): ?>
+                                    <h5 class="card-title text-danger">Cita Pasada</h5>
                                 <?php endif; ?>
+                                <h5 class="card-title"><?= htmlspecialchars($cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante']); ?></h5>
+                                <p class="card-text"><strong>Teléfono:</strong> <?= htmlspecialchars($cita['Telefono']); ?></p>
+                                <p class="card-text"><strong>Correo:</strong> <?= htmlspecialchars($cita['Correo']); ?></p>
+                                <p class="card-text"><strong>Trabajador Social:</strong> <?= htmlspecialchars($cita['NombreTS'] . ' ' . $cita['ApellidoTS']); ?></p>
+                                <p class="card-text"><strong>Fecha Inicio:</strong> <?= htmlspecialchars($cita['FechaInicio']); ?></p>
+                                <p class="card-text"><strong>Fecha Término:</strong> <?= htmlspecialchars($cita['FechaTermino']); ?></p>
+                                <p class="card-text"><strong>Motivo:</strong> <?= htmlspecialchars($cita['Motivo']); ?></p>
                             </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div class="col-12 text-center">
-                    <p>No hay citas disponibles.</p>
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        No se encontraron citas.
+                    </div>
                 </div>
             <?php endif; ?>
         </div>
     </div>
-    <script src="<?= base_url('assets/js/bootstrap.bundle.min.js'); ?>"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Formatear RUT al perder el foco
+            $('input[name="filtro"]').on('blur', function() {
+                var rut = $(this).val().replace(/\D/g, ''); // Quitar caracteres no numéricos
+                var formattedRut = rut.replace(/^(\d{1,3})(\d{3})(\d{3})(\d{1,2})?$/g, '$1.$2.$3-$4');
+                $(this).val(formattedRut);
+            });
+
+            $('#buscarForm').on('submit', function(e) {
+                var filtro = $('input[name="filtro"]').val().trim();
+                if (filtro === '') {
+                    e.preventDefault();
+                    alert('Por favor, ingrese un texto para buscar.');
+                }
+            });
+        });
+    </script>
+
 </body>
 </html>

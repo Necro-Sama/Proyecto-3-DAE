@@ -32,6 +32,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
             <div class="row d-flex justify-content-center">
                 <div class="col-md-6">
                     <div class="card px-5 py-5">
+                        <!-- Seccion logo -->
                         <div class="text-center d-flex flex-column">
                             <h4>Sistema de Agenda de Hora</h4>
                             <h3>Direccion De Asuntos Estudiantiles</h3>
@@ -39,42 +40,32 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             <span class="text-center fs-1">
                                 <img class="logo" src="https://portal.uta.cl/assets/images/logo/logo-uta.svg">
                             </span>
+                            <h5>Oficina de Asistentes Sociales</h5>
                             <?= $this->session->form_error ?>
                             <?= $this->session->error ?>
                         </div>
+                        <!-- Sección inicio de sesion -->
                         <div id="loginForm" class="form-container active">
                             <?= form_open("usuarios/auth"); ?>
                                 <div class="form-data">
                                     <div class="forms-inputs mb-4">
                                         <span>Correo</span>
                                         <input class="form-control" type="email" name="correo" value="<?= set_value('correo') ?>">
-                                        <!-- <div class="invalid-feedback">A valid email is required!</div> -->
                                     </div>
                                     <div class="forms-inputs mb-4">
                                         <span>Contraseña</span>
                                         <input class="form-control" type="password" name="contraseña"
                                             value="<?= set_value('contraseña') ?>">
-                                        <!-- <div class="invalid-feedback">Password must be 8 character!</div> -->
                                     </div>
                                     <div class="inicio mb-3">
                                         <?= form_submit("Ingresar", "Iniciar sesión", 'class="btn btn-login w-100"'); ?>
-                                        <!-- <button class="btn btn-login w-100">
-                                            <span class="font-bold">Iniciar sesión</span>
-                                        </button> -->
                                     </div>
                             <!-- Botón para cambiar entre formularios -->
                             <button type = "button"class="btn btn-switch btn-link w-100" onclick="toggleForms()">¿Nuevo usuario? Regístrate aquí</button>               
                             <?= form_close(); ?>
                         </div>
-                        <!-- <div class="success-data" v-else>
-                            <div class="text-center d-flex flex-column">
-                                <span class="text-center fs-1">You have been logged in <br> Successfully</span>
-                            </div>
-                        </div> -->
                         <div class="inicio"></div>
                         <div class="separator mx-2 text-secondary">o iniciar sesión con</div>
-                        <!-- <a href="<?php //echo base_url('home'); ?> " class="btn btn-insti w-100">Gmail institucional</a> -->
-                        <!-- <button class="btn btn-insti w-100">Gmail institucional</button> -->
                         <div class="text-center">
                             <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
                                 data-text="signin_with" data-size="large" data-locale="es-419" data-logo_alignment="left">
@@ -93,7 +84,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                 <?= $this->session->flashdata('success'); ?>
                             </div>
                         <?php endif; ?>
-                        <!-- Formulario de Registro -->
+                        <!-- Formulario para Registro -->
                         <div id="registerForm" class="form-container">
                             <?= form_open("usuarios/registrar"); ?>
                             <div class="form-group">
