@@ -8,45 +8,70 @@ class CitasController extends CI_Controller
         $this->load->model('TrabajadorSocialModel');
     }
 
-    public function obtenercita()
-    {
-        // Verificar sesión e identificar tipo de usuario
-        $RUN_usuario = $this->check_logged_in();
-        $data = $this->comprobardatos($RUN_usuario);
-
-        if ($data['tipo'] === 'estudiante') {
-            // Obtener el RUN del trabajador social asignado al estudiante
-            $RUNTS = $this->TrabajadorSocialModel->obtenerRUNTS($RUN_usuario);
-            $data['citas'] = $this->TrabajadorSocialModel->obtenerCitaEstudiante($RUNTS, $RUN_usuario);
-        } elseif ($data['tipo'] === 'noestudiante') {
-            // Obtener citas para un usuario no estudiante
-            $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasNoEstudiante($RUN_usuario);
-        } elseif ($data['tipo'] === 'trabajadorsocial') {
-            // Obtener citas asignadas al trabajador social
-            $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasPorTS($RUN_usuario);
-        } elseif ($data['tipo'] === 'administrador') {
-            // Obtener todas las citas (administrador)
-            $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasAdministrador();
-        } else {
-            $data['citas'] = [];
+    public function comprobardatos($RUN_usuario) {
+        $data['persona'] = $this->UserModel->getPersona($RUN_usuario);
+        
+        if ($this->UserModel->getEstudiante($RUN_usuario)) {
+            $data['tipo'] = 'estudiante';
+            $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
+        } 
+        if ($this->UserModel->getFuncionario($RUN_usuario))  {
+            $data['tipo'] = 'trabajadorsocial';
+            $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
+        } 
+        if ($this->UserModel->getAdministrador($RUN_usuario)) {
+            $data['tipo'] = 'administrador';
+            $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
+        } 
+        if ($this->UserModel->getNoEstudiante($RUN_usuario)) {
+            $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
+            $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
         }
-
-        // Cargar la vista con las citas
-        $this->load->view('VisualizarCitas', $data);
+        return $data;
     }
-
-    private function check_logged_in()
+    public function accion_agendar()
     {
-        if (!$this->session->userdata('logged_in')) {
-            redirect('login'); // Redirige al login si no está autenticado
+        $this->session->agendar_exito = "";
+        $this->session->agendar_error = "";
+        $usuario = $this->check_logged_in();
+        if (!$usuario) {
+            session_destroy();
+            redirect("/usuarios/login");
         }
-        return $this->session->userdata('RUN'); // Devuelve el RUN del usuario
+        $fecha_ini = $this->input->post("fecha_ini");
+        $fecha_ter = $this->input->post("fecha_ter");
+        $motivo = $this->input->post("motivo");
+        echo "$fecha_ini, $fecha_ter, $motivo";
+        if (!$motivo) {
+            $this->session->agendar_error = "Por favor seleccione un Motivo.";
+            $this->session->mark_as_flash("agendar_error");
+            redirect("/usuarios/agendar");
+        }
+        if (!$fecha_ini) {
+            $this->session->agendar_error = "No hubo una fecha seleccionada.";
+            $this->session->mark_as_flash("agendar_error");
+            redirect("/usuarios/agendar");
+        }
+        try {
+            $this->BloqueModel->agendar_estudiante(
+                $usuario,
+                $fecha_ini,
+                $fecha_ter,
+                $motivo
+            );
+        } catch (Exception $e) {
+            $this->session->agendar_error = $e->getMessage();
+            $this->session->mark_as_flash("agendar_error");
+            redirect("/usuarios/agendar");
+        }
+        $this->session->agendar_exito = "Hora agendada con éxito.";
+        $this->session->mark_as_flash("agendar_exito");
+        redirect("/usuarios/agendar");
     }
-
-    private function comprobardatos($RUN_usuario)
+    public function get_bloques_no_disponibles_carrera($carrera)
     {
-        // Determinar tipo de usuario en base a la sesión o base de datos
-        $tipo_usuario = $this->session->userdata('tipo_usuario'); // Ejemplo: 'estudiante', 'trabajadorsocial', etc.
-        return ['tipo' => $tipo_usuario, 'RUN' => $RUN_usuario];
+        return $this->BloquesReservadosModel->get_bloques_no_disponibles_carrera(
+            $carrera
+        );
     }
 }

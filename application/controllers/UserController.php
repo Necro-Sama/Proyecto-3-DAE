@@ -190,7 +190,6 @@ class UserController extends CI_Controller
             return $g_client;
         }
     }
-
     public function registrar()
 {
     $run = $this->input->post('run', true);
@@ -252,7 +251,7 @@ class UserController extends CI_Controller
             redirect(site_url('usuarios/login'));
         }
     }
-}
+    }
     // Seccion licencias
     public function mostrarTS()
     {

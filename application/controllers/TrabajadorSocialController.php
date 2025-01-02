@@ -10,7 +10,6 @@ class TrabajadorSocialController extends CI_Controller {
         $this->load->model('CarreraModel');
         $this->load->helper('url');
     }
-
     // Método para mostrar el formulario de asignación
     public function asignarTSACarrera() {
         // Obtener todas las carreras
@@ -22,7 +21,6 @@ class TrabajadorSocialController extends CI_Controller {
         // Cargar la vista
         $this->load->view('AsignarCarrerasView', $data);
     }
-
     // Método para procesar la asignación de trabajadores sociales
     public function asignarTSACarreraProcesar() {
         // Obtener los datos del formulario
@@ -46,7 +44,6 @@ class TrabajadorSocialController extends CI_Controller {
         // print_r($trabajadores);
         $this->load->view('gestor_ts',$trabajadores);
     }
-
     public function agregar() {
         $datosPersona = [
             'RUN' => $this->input->post('RUN'),
@@ -60,12 +57,10 @@ class TrabajadorSocialController extends CI_Controller {
         $this->TrabajadorSocialModel->agregarTrabajadorSocial($datosPersona, []);
         redirect('/usuarios/gestor_ts');
     }
-
     public function eliminar($RUN) {
         $this->TrabajadorSocialModel->eliminarTrabajadorSocial($RUN);
         redirect('/usuarios/gestor_ts');
     }
-
     public function editar($RUN) {
         $datosPersona = [
             'Nombre' => $this->input->post('Nombre'),
@@ -77,7 +72,6 @@ class TrabajadorSocialController extends CI_Controller {
         $this->TrabajadorSocialModel->actualizarTrabajadorSocial($RUN, $datosPersona);
         $this->index();
     }
-    
     public function check_logged_in()
     {
         if ($this->session->token) {

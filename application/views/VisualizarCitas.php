@@ -43,14 +43,15 @@
         <h1 class="mb-4">Listado de Citas</h1>
 
         <!-- Formulario de Búsqueda -->
-        <form method="get" action="<?= site_url('usuarios/visualizar-citas'); ?>" id="buscarForm" class="mb-4">
+        <form method="get" action="<?= site_url('usuarios/visualizar-citas'); ?>" class="mb-4">
             <div class="input-group">
-                <input type="text" name="filtro" class="form-control" placeholder="Buscar por RUT" value="<?= $this->input->get('filtro'); ?>" required>
+                <input type="text" name="filtro" class="form-control" placeholder="Buscar por RUN o Nombre" value="<?= $this->input->get('filtro'); ?>">
                 <div class="input-group-append">
                     <button class="btn btn-primary" type="submit">Buscar</button>
                 </div>
             </div>
         </form>
+
 
         <div class="row">
             <?php if (isset($citas) && !empty($citas)): ?>
@@ -87,13 +88,6 @@
 
     <script>
         $(document).ready(function() {
-            // Formatear RUT al perder el foco
-            $('input[name="filtro"]').on('blur', function() {
-                var rut = $(this).val().replace(/\D/g, ''); // Quitar caracteres no numéricos
-                var formattedRut = rut.replace(/^(\d{1,3})(\d{3})(\d{3})(\d{1,2})?$/g, '$1.$2.$3-$4');
-                $(this).val(formattedRut);
-            });
-
             $('#buscarForm').on('submit', function(e) {
                 var filtro = $('input[name="filtro"]').val().trim();
                 if (filtro === '') {

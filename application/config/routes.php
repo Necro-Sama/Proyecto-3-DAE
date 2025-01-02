@@ -52,20 +52,33 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'UserController/login';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
-$route['usuarios'] = 'UserController';
-$route['usuarios/login'] = 'UserController/login';
-$route['usuarios/logout'] = 'UserController/logout';
-$route['usuarios/auth'] = 'UserController/auth';
-$route['usuarios/home'] = 'UserController/home';
-$route['usuarios/agendar'] = 'UserController/agendar';
-$route['usuarios/accion_agendar'] = 'UserController/accion_agendar';
-$route['usuarios/gestor_ts'] = 'TrabajadorSocialController/index';
-$route['usuarios/asignar-carrera'] = 'TrabajadorSocialController/asignarTSACarrera';
-$route['usuarios/asignar-carrera-procesar'] = 'TrabajadorSocialController/asignarTSACarreraProcesar';
-$route['usuarios/Licencia'] = 'UserController/Licencia';
-$route['usuarios/guardar']= 'UserController/guardar';
-$route['usuarios/visualizar-citas'] = 'TrabajadorSocialController/obtenercita';
-$route['usuarios/registrar']= 'UserController/registrar';
-$route['usuarios/TrabajadorSocialController/editar/:id']= 'TrabajadorSocialController/editar';
-$route['usuarios/TrabajadorSocialController/eliminar/:id']= 'TrabajadorSocialController/eliminar';
-$route['usuarios/TrabajadorSocialController/agregar']= 'TrabajadorSocialController/agregar';
+
+//Rutas de Usuario
+    //Inicio de sesion
+        $route['usuarios'] = 'UserController';
+        $route['usuarios/login'] = 'UserController/login';
+        $route['usuarios/logout'] = 'UserController/logout';
+        $route['usuarios/auth'] = 'UserController/auth';
+    //Registrar Usuario
+    $route['usuarios/registrar']= 'UserController/registrar';
+    //Home
+        $route['usuarios/home'] = 'UserController/home';
+//Rutas de agendar
+    $route['usuarios/agendar'] = 'UserController/agendar';
+    $route['usuarios/accion_agendar'] = 'CitasController/accion_agendar';
+//Rutas de Gestion TS
+    $route['usuarios/gestor_ts'] = 'TrabajadorSocialController/index';
+    //gestion de ts
+    $route['usuarios/TrabajadorSocialController/editar/:id']= 'TrabajadorSocialController/editar';
+    $route['usuarios/TrabajadorSocialController/eliminar/:id']= 'TrabajadorSocialController/eliminar';
+    $route['usuarios/TrabajadorSocialController/agregar']= 'TrabajadorSocialController/agregar';
+    //Rutas asignar Carrera
+        $route['usuarios/asignar-carrera'] = 'TrabajadorSocialController/asignarTSACarrera';
+        $route['usuarios/asignar-carrera-procesar'] = 'TrabajadorSocialController/asignarTSACarreraProcesar';
+    //Rutas Ingreso de Licencia
+        $route['usuarios/Licencia'] = 'UserController/Licencia';
+        $route['usuarios/guardar']= 'UserController/guardar';
+//Ruta general vizualizar cita
+    $route['usuarios/visualizar-citas'] = 'TrabajadorSocialController/obtenercita';
+
+
