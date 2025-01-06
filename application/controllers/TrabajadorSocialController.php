@@ -106,7 +106,6 @@ class TrabajadorSocialController extends CI_Controller {
         } else {
             $data['citas'] = [];
         }
-
         $this->load->view('VisualizarCitas', $data);
     }
     public function filtrar_citas()
@@ -129,7 +128,7 @@ class TrabajadorSocialController extends CI_Controller {
         } 
         if ($this->UserModel->getAdministrador($RUN_usuario)) {
             $data['tipo'] = 'administrador';
-            $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
+            $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario)
         } 
         else {
             $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
