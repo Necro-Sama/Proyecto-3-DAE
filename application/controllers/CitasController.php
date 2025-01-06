@@ -74,4 +74,45 @@ class CitasController extends CI_Controller
             $carrera
         );
     }
+    public function eliminarCita($idCita, $runCliente)
+    {
+        $this->db->trans_start();
+
+        // Verificar que el RUN corresponde al ID de la cita
+        $this->db->where('ID', $idCita);
+        $this->db->where('RUNCliente', $runCliente);
+        $existe = $this->db->get('BloqueAtencion')->row();
+
+        if (!$existe) {
+            $this->db->trans_complete();
+            return false; // No se encontró coincidencia
+        }
+
+        // Eliminar de ambas tablas
+        $this->db->where('ID', $idCita);
+        $this->db->delete('BloqueAtencion');
+
+        $this->db->where('ID', $idCita);
+        $this->db->delete('Bloque');
+
+        $this->db->trans_complete();
+        return $this->db->trans_status();
+    }
+    public function eliminarCita($idCita)
+    {
+        $this->db->trans_start(); // Iniciamos una transacción
+
+        // Eliminar de la tabla BloqueAtencion
+        $this->db->where('ID', $idCita);
+        $this->db->delete('BloqueAtencion');
+
+        // Eliminar de la tabla Bloque
+        $this->db->where('ID', $idCita);
+        $this->db->delete('Bloque');
+
+        $this->db->trans_complete(); // Finalizamos la transacción
+
+        // Retornamos el estado de la transacción
+        return $this->db->trans_status();
+    }
 }

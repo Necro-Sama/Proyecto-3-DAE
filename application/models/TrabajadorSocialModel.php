@@ -19,23 +19,20 @@ class TrabajadorSocialModel extends CI_Model {
         
         return $this->db->get()->result_array(); 
     }
-    
+
     public function agregarPersona($personaData) {
         $this->db->insert('persona', $personaData);
         return $this->db->insert_id();  // Obtener el ID de Persona recién insertado
     }
-
     public function agregarTS($tsData) {
         $this->db->insert('trabajadorsocial', $tsData);
     }
-
     public function obtenerTS() {
         $this->db->select('trabajadorsocial.*, persona.Nombre, persona.Apellido, persona.Apellido, persona.Telefono, persona.Correo')
                  ->from('trabajadorsocial')
                  ->join('persona', 'trabajadorsocial.RUN = persona.RUN');
         return $this->db->get()->result_array();
     }
-
     // Método para agregar un trabajador social
     public function agregarTrabajadorSocial($datosPersona, $datosTrabajadorSocial) {
         // Primero, insertar en la tabla `persona`
@@ -56,7 +53,6 @@ class TrabajadorSocialModel extends CI_Model {
         $this->db->where('RUN', $RUN);
         $this->db->update('persona', $datosPersona);
     }
-
     // Método para eliminar un trabajador social
     public function eliminarTrabajadorSocial($RUN) {
         // Eliminar de la tabla `trabajadorsocial`
@@ -78,17 +74,14 @@ class TrabajadorSocialModel extends CI_Model {
                  ->where('trabajadorsocial.ID_TS', $id);
         return $this->db->get()->row_array();
     }
-
     public function editarPersona($run, $personaData) {
         $this->db->where('RUN', $run);
         $this->db->update('persona', $personaData);
     }
-
     public function editarTS($id, $tsData) {
         $this->db->where('ID_TS', $id);
         $this->db->update('trabajadorsocial', $tsData);
     }
-
     public function eliminarTS($id) {
         // borrara a la TS de la lista y de la BD desde la raiz persona (datos personales basicos)
         $this->db->where('RUN', $id);
@@ -96,30 +89,6 @@ class TrabajadorSocialModel extends CI_Model {
         $this->db->delete('funcionario');
         $this->db->delete('persona');
     }
-    // public function obtenerCita(){
-    //     $query =$this->db->query('
-    //     SELECT b.Estado, b.Motivo,bl.FechaInicio,bl.FechaTermino, p.RUN, p.Nombre, p.Apellido, p.Telefono, p.Correo 
-    //     FROM bloqueatencion b 
-    //     join persona p
-    //     on (b.RUNCliente = p.RUN)
-    //     join bloque bl
-    //     on (b.ID = bl.ID)
-    //     ');
-    //     return $query->result_array();
-    // }
-    // public function obtenerCitaEstudiante($RUNTS,$RUNU){
-    //     $query =$this->db->query('
-    //     SELECT p.Nombre, p.Apellido, p.Telefono, p.Correo 
-    //     FROM bloqueatencion b 
-    //     join persona p
-    //     on (b.RUNCliente = p.RUN)
-    //     join bloque bl
-    //     on (b.ID = bl.ID)
-    //     WHERE RUNCliente = ? AND RUNTS = ?
-    //     ',array($RUNU, $RUNTS));
-    //     return $query->result_array();
-    // }
-
     public function obtenerCitasAdministrador($filtro = null)
     {
         $sql = '

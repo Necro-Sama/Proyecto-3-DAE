@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Visualizar Citas</title>
-    <?php $this->load->view("navbar", $tipo); ?>
+    <?php print_r($citas) $this->load->view("navbar", $tipo); ?>
     <link rel="stylesheet" href="<?= base_url('public/bootstrap/css/bootstrap.min.css'); ?>">
     <style>
         body {
@@ -42,7 +42,6 @@
     <?php ?>
     <div class="container mt-5">
         <h1 class="mb-4">Listado de Citas</h1>
-
         <!-- Formulario de Búsqueda -->
         <form method="get" action="<?= site_url('usuarios/visualizar-citas'); ?>" class="mb-4">
             <div class="input-group">
@@ -52,8 +51,6 @@
                 </div>
             </div>
         </form>
-
-
         <div class="row">
             <?php if (isset($citas) && !empty($citas)): ?>
                 <?php foreach ($citas as $cita): ?>
@@ -73,6 +70,13 @@
                                 <p class="card-text"><strong>Fecha Inicio:</strong> <?= htmlspecialchars($cita['FechaInicio']); ?></p>
                                 <p class="card-text"><strong>Fecha Término:</strong> <?= htmlspecialchars($cita['FechaTermino']); ?></p>
                                 <p class="card-text"><strong>Motivo:</strong> <?= htmlspecialchars($cita['Motivo']); ?></p>
+                                <!-- Botón de cancelar -->
+                                <button 
+                                    class="btn btn-danger mt-2" 
+                                    <?= $esPasada ? 'disabled' : ''; ?> 
+                                    onclick="cancelarCita('<?= $cita['id']; ?>')">
+                                    Cancelar
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -97,6 +101,23 @@
                 }
             });
         });
+    </script>
+    <script>
+        function cancelarCita(idCita) {
+            if (confirm("¿Estás seguro de que deseas cancelar esta cita?")) {
+                // Envía la solicitud de cancelación al servidor
+                $.post("<?= site_url('CitasController/cancelarcita'); ?>", { id: idCita }, function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        location.reload(); // Recarga la página para actualizar el listado
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                }, "json").fail(function() {
+                    alert("Ocurrió un error al intentar cancelar la cita.");
+                });
+            }
+        }
     </script>
 
 </body>
