@@ -17,7 +17,7 @@ class MailSender {
         $this->mail->Host = 'smtp.gmail.com'; // Cambia a tu servidor SMTP
         $this->mail->SMTPAuth = true;
         $this->mail->Username = 'gustavo.rios.alvarez@alumnos.uta.cl'; // Tu correo genérico
-        $this->mail->Password = ' '; // Contraseña o contraseña de aplicación
+        $this->mail->Password = 'ojei tdhz jtsn kaju '; // Contraseña o contraseña de aplicación
         $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // TLS o SSL según tu servidor
         $this->mail->Port = 587; // Puerto 587 para TLS o 465 para SSL
     }
