@@ -93,10 +93,10 @@ class TrabajadorSocialModel extends CI_Model {
     {
         $sql = '
             SELECT 
-                bl.FechaInicio, bl.FechaTermino,bl.ID, 
+                bl.FechaInicio, bl.FechaTermino, bl.ID, 
                 p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo, 
                 ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS,
-                b.Motivo AS Motivo
+                b.Motivo AS Motivo, b.RUNCliente AS RUNCliente
             FROM bloqueatencion b
             JOIN persona p ON b.RUNCliente = p.RUN
             JOIN bloque bl ON b.ID = bl.ID
@@ -107,9 +107,11 @@ class TrabajadorSocialModel extends CI_Model {
             return $this->db->query($sql, ["%$filtro%", "%$filtro%", "%$filtro%"])->result_array();
         }
 
-        $sql .= ' ORDER BY bl.FechaInicio ASC';
+        // Cambiado el orden de ASC a DESC para ordenar de la fecha más reciente a la más antigua
+        $sql .= ' ORDER BY bl.FechaInicio DESC';
         return $this->db->query($sql)->result_array();
     }
+
 
     public function obtenerCitasPorTS($RUNTS)
 {
@@ -118,12 +120,13 @@ class TrabajadorSocialModel extends CI_Model {
             bl.FechaInicio, bl.FechaTermino, bl.ID,
             p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo, 
             ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS,
-            b.Motivo AS Motivo
+            b.Motivo AS Motivo, b.RUNCliente AS RUNCliente
         FROM bloqueatencion b
         JOIN persona p ON b.RUNCliente = p.RUN
         JOIN bloque bl ON b.ID = bl.ID
         JOIN persona ts ON bl.RUNTS = ts.RUN
         WHERE bl.RUNTS = ?
+        ORDER BY bl.FechaInicio DESC
     ', [$RUNTS]);
 
     return $query->result_array();
@@ -136,12 +139,13 @@ class TrabajadorSocialModel extends CI_Model {
                 bl.FechaInicio, bl.FechaTermino, bl.ID,
                 p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo,
                 ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS,
-                b.Motivo AS Motivo
+                b.Motivo AS Motivo, b.RUNCliente AS RUNCliente
             FROM bloqueatencion b
             JOIN persona p ON b.RUNCliente = p.RUN
             JOIN bloque bl ON b.ID = bl.ID
             JOIN persona ts ON bl.RUNTS = ts.RUN
             WHERE b.RUNCliente = ? AND bl.RUNTS = ?
+            ORDER BY bl.FechaInicio DESC
         ', [$RUNU, $RUNTS]);
 
         return $query->result_array();
@@ -154,12 +158,13 @@ class TrabajadorSocialModel extends CI_Model {
                 bl.FechaInicio, bl.FechaTermino, bl.ID,
                 p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo,
                 ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS,
-                b.Motivo AS Motivo
+                b.Motivo AS Motivo, b.RUNCliente AS RUNCliente
             FROM bloqueatencion b
             JOIN persona p ON b.RUNCliente = p.RUN
             JOIN bloque bl ON b.ID = bl.ID
             JOIN persona ts ON bl.RUNTS = ts.RUN
             WHERE b.RUNCliente = ?
+            ORDER BY bl.FechaInicio DESC
         ', [$RUNNoEstudiante]);
 
         return $query->result_array();
