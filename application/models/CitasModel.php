@@ -44,5 +44,30 @@ class CitasModel extends CI_Model
 
         return $this->db->trans_status(); // Retorna el estado de la transacción
     }
+    public function verificar_bloque($id_bloque)
+    {
+        // Verificar si el bloque está reservado en la tabla bloqueatencion
+        
+        $query_atencion =$this->db->query('
+            SELECT ID FROM bloqueantecion
+            where ID = ??
+        ',$id_bloque);
+
+        if ($query_atencion->num_rows() > 0) {
+            return ['estado' => 'Reservado']; // Bloque reservado
+        }
+
+        // Verificar si el bloque está bloqueado en la tabla bloquebloqueado
+        $query_bloqueado =$this->db->query('
+            SELECT ID FROM bloquebloqueado
+            where ID = ??
+        ',$id_bloque);
+        if ($query_bloqueado->num_rows() > 0) {
+            return ['estado' => 'Bloqueado']; // Bloque bloqueado
+        }
+
+        // Si no está ni reservado ni bloqueado
+        return ['estado' => 'Disponible']; // Bloque disponible
+    }
 }
 ?>

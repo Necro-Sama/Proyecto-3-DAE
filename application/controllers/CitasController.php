@@ -27,7 +27,11 @@ class CitasController extends CI_Controller
         // Redirigir a la misma página
         redirect('usuarios/visualizar-citas');
     }
-
+    public function obtener_estado_bloque($id_bloque)
+    {
+        $estado = $this->CitaModel->verificar_bloque($id_bloque);
+        echo json_encode($estado); // Retornar el estado como JSON
+    }
 
 
 

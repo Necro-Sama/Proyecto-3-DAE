@@ -38,8 +38,7 @@ function seleccion_semana(e) {
 
 function cargar_calendario() {
     let tiempo_servidor = new Date(document.getElementById("tiempo-servidor").innerHTML);
-    // console.log(tiempo_servidor);
-    
+
     const tablaHorario = document.getElementById("tabla-horario");
     tablaHorario.innerHTML = "";
     const semana = document.getElementById("semana-select").value.replace("00:00:00", "");
@@ -60,22 +59,68 @@ function cargar_calendario() {
             let t1 = horario.rango.split("-")[0].trim() + ":00";
             let tiempo_bloque_ini = new Date(semana + t1);
 
-            tiempo_bloque = new Date(tiempo_bloque.getTime() + (dia-1) * 24 * 3600 * 1000);
-            tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia-1) * 24 * 3600 * 1000);
+            tiempo_bloque = new Date(tiempo_bloque.getTime() + (dia - 1) * 24 * 3600 * 1000);
+            tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia - 1) * 24 * 3600 * 1000);
+
             if (horario.esAlmuerzo || tiempo_bloque < tiempo_servidor) {
                 celda.innerHTML = `<div style='color: #ff0000;'>(no disponible)</div>`;
             } else {
-                celda.innerHTML = `
-                  <div>
-                      <button class="btn" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">Agendar</button>
-                  </div>
-                `;
+                // Verificar si el bloque está reservado o bloqueado
+                verificar_estado_bloque(horario.id, (estado) => {
+                    console.log("Estado del bloque: ", estado); // Verificar el estado recibido
+                print_f(estado);
+                    if (estado === 'Reservado') {
+                        celda.innerHTML = `<div style='color: #ff0000;'>Reservado</div>`;
+                    } else if (estado === 'Bloqueado') {
+                        celda.innerHTML = `<div style='color: #ff0000;'>Bloqueado</div>`;
+                    } else {
+                        celda.innerHTML = `
+                          <div>
+                              <button class="btn" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">Agendar</button>
+                          </div>
+                        `;
+                    }
+                });
             }
             fila.appendChild(celda);
         }
         tablaHorario.appendChild(fila);
     });
 }
+
+// Función para realizar la consulta al servidor sobre si el bloque está reservado o bloqueado
+    function verificar_estado_bloque(id_bloque, callback) {
+        $.ajax({
+            url: 'CitaController/obtener_estado_bloque/' + id_bloque, // URL del controlador
+            method: 'GET',
+            dataType: 'json',
+            success: function(respuesta) {
+                console.log("Respuesta del servidor:", respuesta); // Verificar que se recibe la respuesta
+                callback(respuesta.estado); // Llamar el callback con el estado (Reservado, Bloqueado, Disponible)
+            },
+            error: function() {
+                console.error('Error en la solicitud AJAX'); // Verificar que no haya errores
+                callback('Disponible'); // En caso de error, suponer que el bloque está disponible
+            }
+        });
+    }
+
+
+// Función para realizar la consulta al servidor sobre si el bloque está reservado o bloqueado
+function verificar_estado_bloque(id_bloque, callback) {
+    $.ajax({
+        url: 'CitaController/obtener_estado_bloque/' + id_bloque, // URL del controlador
+        method: 'GET',
+        dataType: 'json',
+        success: function(respuesta) {
+            callback(respuesta.estado); // Llamar el callback con el estado (Reservado, Bloqueado, Disponible)
+        },
+        error: function() {
+            callback('Disponible'); // En caso de error, suponer que el bloque está disponible
+        }
+    });
+}
+
 
 window.onload = (e) => {
     cargar_calendario();
