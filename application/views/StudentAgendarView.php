@@ -201,7 +201,6 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
         justify-content: space-between;
         align-items: center;
     }
-
     /* Botón de cierre */
     .error .btn-close {
         background: none;
@@ -210,17 +209,14 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
         color: #721c24;
         cursor: pointer;
     }
-
     /* Efecto de hover en el botón */
     .error .btn-close:hover {
         color: #f5c6cb;
     }
-
     /* Estilo para el texto */
     .error strong {
         font-weight: bold;
     }
-
     /* Estilo en caso de que el error tenga un mensaje largo o más de una línea */
     .error {
         white-space: normal;
@@ -231,11 +227,9 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
         font-size: 16px;
         padding: 20px;
     }
-
     .form-group label {
         font-weight: bold;
     }
-
     .form-control-plaintext {
     border: none;  /* Eliminar el borde */
     background-color: transparent;  /* Asegurarse de que el fondo sea transparente */
@@ -245,6 +239,4 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     .form-select {
         font-size: 14px;
     }
-
-
 </style>

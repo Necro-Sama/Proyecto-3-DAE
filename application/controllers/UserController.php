@@ -116,7 +116,6 @@ class UserController extends CI_Controller
     }
     public function agendar()
     {
-
         $RUN_usuario = $this->check_logged_in();
         $data = $this->comprobardatos($RUN_usuario);
         if (!$RUN_usuario) {
@@ -124,34 +123,11 @@ class UserController extends CI_Controller
             redirect("/usuarios/login");
         }
         $this->load->view("StudentAgendarView", $data);
-        // ,[
-        //     "RUN_ESTUDIANTE" => $RUN_usuario,
-        // ]);
     }
     public function gestion_ts($RUN_usuario)
     {
         return $this->UserModel->get_admin($RUN_usuario);
     }
-
-    // public function cargar_vista()
-    // {
-    //     $RUN_usuario = $this->session->userdata("RUN");
-    //     $gestion_ts = $this->UserModel->get_admin($RUN_usuario);
-    //     $data["gestion_ts"] = $gestion_ts;
-    //     $this->load->view("navbar", $data);
-    //     if (!$this->check_logged_in()) {
-    //         $usuario = $this->check_logged_in();
-    //         if (!$usuario) {
-    //             session_destroy();
-    //             redirect("/usuarios/login");
-    //         }
-    //         $this->load->view("navbar");
-    //         $this->load->view("StudentAgendarView", [
-    //             "RUN_ESTUDIANTE" => $usuario,
-    //         ]);
-    //     }
-    // }
-
     public function accion_agendar()
     {
         $this->session->agendar_exito = "";
@@ -213,6 +189,7 @@ class UserController extends CI_Controller
             return $g_client;
         }
     }
+    
     public function registrar()
 {
     $run = $this->input->post('run', true);
