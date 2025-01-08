@@ -68,15 +68,14 @@ function cargar_calendario() {
                 // Verificar si el bloque está reservado o bloqueado
                 verificar_estado_bloque(horario.id, (estado) => {
                     console.log("Estado del bloque: ", estado); // Verificar el estado recibido
-                print_f(estado);
-                    if (estado === 'Reservado') {
+                    if ($estado === 'Reservado') {
                         celda.innerHTML = `<div style='color: #ff0000;'>Reservado</div>`;
-                    } else if (estado === 'Bloqueado') {
+                    } else if ($estadoestado === 'Bloqueado') {
                         celda.innerHTML = `<div style='color: #ff0000;'>Bloqueado</div>`;
                     } else {
                         celda.innerHTML = `
                           <div>
-                              <button class="btn" onClick="Reservado(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">Agendar</button>
+                              <button class="btn" onClick="Disponible(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">Agendar</button>
                           </div>
                         `;
                     }
