@@ -49,7 +49,9 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
         
         <label for="semana">Semana: </label>
         <?php $semanas = $this->BloqueModel->get_semanas(3); ?>
+        
         <select class="form-select" name="semana" id="semana-select" onchange="seleccion_semana(event)">
+            <?php print_r($semanas);?>
             <?php foreach ($semanas as $semana) { ?>
                 <option value="<?= $semana ?>">
                     <?= trim($semana, "00:00:00") ?>

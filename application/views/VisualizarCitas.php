@@ -20,20 +20,20 @@
         .card {
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Asegura que los elementos estén espaciados */
+            justify-content: space-between;
             background-color: #FDDEAA;
             border: 2px solid #FDD188;
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 300px; /* Ancho fijo para uniformidad */
-            height: 450px; /* Altura fija para todas las tarjetas */
+            width: 300px;
+            height: 450px;
         }
 
         .card-body {
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Espacia los elementos dentro del cuerpo */
-            flex-grow: 1; /* Hace que el contenido ocupe el espacio disponible */
+            justify-content: space-between;
+            flex-grow: 1;
         }
 
         .card-title {
@@ -62,13 +62,13 @@
         }
 
         .btn-danger {
-            margin-top: auto; /* Asegura que el botón quede al final */
+            margin-top: auto;
         }
 
         @media (max-width: 768px) {
             .card {
-                flex: 1 1 100%; /* Una tarjeta por fila en pantallas pequeñas */
-                height: auto; /* Permite que las tarjetas sean más dinámicas en pantallas pequeñas */
+                flex: 1 1 100%;
+                height: auto;
             }
         }
     </style>
@@ -101,7 +101,12 @@
             <?php if (isset($citas) && !empty($citas)): ?>
                 <?php foreach ($citas as $cita): ?>
                     <?php
-                    $esPasada = strtotime($cita['FechaInicio']) < time(); // Verificar si la cita es pasada
+                    // Crear objetos DateTime para la cita y la fecha actual
+                    $fechaCita = new DateTime($cita['FechaInicio']);
+                    $fechaActual = new DateTime();
+
+                    // Comparar la fecha y hora de la cita con la fecha y hora actuales
+                    $esPasada = $fechaCita < $fechaActual;
                     ?>
                     <div class="card">
                         <div class="card-body">
@@ -138,7 +143,6 @@
             <?php endif; ?>
         </div>
     </div>
-
 
     <script>
         function cancelarCita(idCita, runCliente) {

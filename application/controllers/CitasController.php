@@ -27,12 +27,30 @@ class CitasController extends CI_Controller
         // Redirigir a la misma página
         redirect('usuarios/visualizar-citas');
     }
-    public function obtener_estado_bloque($id_bloque)
-    {
-        $estado = $this->CitaModel->verificar_bloque($id_bloque);
-        echo json_encode($estado); // Retornar el estado como JSON
+    function estadobloque($id_bloque){
+        return $this->CitasModel->verificar_bloque($id_bloque);
     }
-
+    public function comprobardatos($RUN_usuario) {
+        $data['persona'] = $this->UserModel->getPersona($RUN_usuario);
+        
+        if ($this->UserModel->getEstudiante($RUN_usuario)) {
+            $data['tipo'] = 'estudiante';
+            $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
+        } 
+        if ($this->UserModel->getFuncionario($RUN_usuario))  {
+            $data['tipo'] = 'trabajadorsocial';
+            $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
+        } 
+        if ($this->UserModel->getAdministrador($RUN_usuario)) {
+            $data['tipo'] = 'administrador';
+            $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
+        } 
+        else {
+            $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
+            $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
+        }
+        return $data;
+    }
 
 
 }

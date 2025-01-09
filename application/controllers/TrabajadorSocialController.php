@@ -91,21 +91,26 @@ class TrabajadorSocialController extends CI_Controller {
     public function obtenercita()
     {
         $RUN_usuario = $this->check_logged_in();
+        if (!$RUN_usuario) {
+            session_destroy();
+            redirect("/usuarios/login");
+        }
         $filtro = $this->input->get('filtro'); // Obtener filtro desde la vista (puede ser RUN o nombre)
 
         $data = $this->comprobardatos($RUN_usuario);
         if ($data['tipo'] === 'estudiante') {
             $RUNTS = $this->TrabajadorSocialModel->obtenerRUNTS($RUN_usuario);
             $data['citas'] = $this->TrabajadorSocialModel->obtenerCitaEstudiante($RUNTS, $RUN_usuario, $filtro);
-        } elseif ($data['tipo'] === 'noestudiante') {
+        } else if ($data['tipo'] === 'noestudiante') {
             $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasNoEstudiante($RUN_usuario, $filtro);
-        } elseif ($data['tipo'] === 'trabajadorsocial') {
+        } else if ($data['tipo'] === 'trabajadorsocial') {
             $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasPorTS($RUN_usuario, $filtro);
-        } elseif ($data['tipo'] === 'administrador') {
+        } else if ($data['tipo'] === 'administrador') {
             $data['citas'] = $this->TrabajadorSocialModel->obtenerCitasAdministrador($filtro);
         } else {
             $data['citas'] = [];
         }
+        //print_r($data);
         $this->load->view('VisualizarCitas', $data);
     }
     public function filtrar_citas()
@@ -130,7 +135,7 @@ class TrabajadorSocialController extends CI_Controller {
             $data['tipo'] = 'administrador';
             $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
         } 
-        else {
+        if($this->UserModel->getNoEstudiante($RUN_usuario)) {
             $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
             $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
         }
