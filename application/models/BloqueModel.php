@@ -243,5 +243,23 @@ class BloqueModel extends CI_Model
     {
         return $this->db->query("SELECT NOW() AS t")->row(0)->t;
     }
+    public function bloquearBloques($bloques) {
+        foreach ($bloques as $bloque) {
+            $data = [
+                'dia' => $bloque['dia'],
+                'bloque' => $bloque['bloque'],
+                'inicio' => $bloque['inicio'],
+                'fin' => $bloque['fin'],
+                'asunto' => 'bloqueado',
+                'rut' => $this->session->userdata('rut') // Usuario actual
+            ];
+            $this->db->insert('bloquebloqueado', $data);
+        }
+    }
+    public function bloquear() {
+        $bloques = $this->input->post('bloques');
+        $this->BloqueModel->bloquearBloques($bloques);
+        echo json_encode(['status' => 'success']);
+    }
 }
 

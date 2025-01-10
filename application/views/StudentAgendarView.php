@@ -5,6 +5,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
+    <?php $this->load->view("navbar", $tipo); ?>
     <link rel="stylesheet" type="text/css" href="<?= base_url(
         "css/agendar.css"
     ) ?>"/>
@@ -28,112 +29,73 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     <script src="<?= base_url("js/agendar.js") ?>"></script>
 </head>
 <body>
-
-    <?php $this->load->view('navbar',$tipo); ?>
-    <h1> </h1>
     <div class="container">
-        <!-- <h6>Bloques disponibles</h6> -->
-        <?php if ($this->session->agendar_error): ?>
-            <p class="error font-weight-bold alert alert-danger alert-dismissible fade show" role="alert">
-                <?= $this->session->agendar_error ?>
-            </p>
-        <?php endif; ?>
+        <h1>Calendario</h1>
 
-        <?php if ($this->session->agendar_exito): ?>
-            <p class="alert-success font-weight-bold alert alert-dismissible fade show" role="alert">
-                <?= $this->session->agendar_exito ?>
-            </p>
-        <?php endif; ?>
-
-        <div id="tiempo-servidor" hidden><?= $this->BloqueModel->get_tiempo_bd() ?></div>
-        
-        <label for="semana">Semana: </label>
-        <?php $semanas = $this->BloqueModel->get_semanas(3); ?>
-        
-        <select class="form-select" name="semana" id="semana-select" onchange="seleccion_semana(event)">
-            <?php print_r($semanas);?>
-            <?php foreach ($semanas as $semana) { ?>
-                <option value="<?= $semana ?>">
-                    <?= trim($semana, "00:00:00") ?>
-                </option>
-            <?php } ?>
+        <!-- Dropdown para seleccionar semana -->
+        <select id="semana-select" onchange="seleccion_semana()">
+            <!-- Las opciones de semanas serán generadas por JS -->
         </select>
 
-        <table class="text-center">
+        <table id="tabla-horario" class="table">
             <thead>
                 <tr>
-                    <th><div class="p-2 display-7 dia">Hora</div></th>
-                    <th><div class="p-2 display-7 dia">Lunes</div></th>
-                    <th><div class="p-2 display-7 dia">Martes</div></th>
-                    <th><div class="p-2 display-7 dia">Miércoles</div></th>
-                    <th><div class="p-2 display-7 dia">Jueves</div></th>
-                    <th><div class="p-2 display-7 dia">Viernes</div></th>
+                    <th>Horario</th>
+                    <th>Lunes</th>
+                    <th>Martes</th>
+                    <th>Miércoles</th>
+                    <th>Jueves</th>
+                    <th>Viernes</th>
                 </tr>
             </thead>
-            <tbody id="tabla-horario">
-                <!-- Contenido generado dinámicamente -->
-            </tbody>
+            <tbody></tbody>
         </table>
-    </div>
 
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Agendar</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-                <form method="post" accept-charset="utf-8" action="<?= site_url() ?>/usuarios/accion_agendar">
+        <!-- Modal Agendar -->
+        <div id="exampleModal" class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Agendar</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
                     <div class="modal-body">
-                        <input type="text" id="fecha_ini" name="fecha_ini" hidden>
-                        <input type="text" id="fecha_ter" name="fecha_ter" hidden>
-                        <!-- <input type="text" id="hora_in" name="hora" hidden>
-                        <input type="text" id="dia_in" name="dia" hidden> -->
-                        <div class="form-group">
-                            <label for="dia">Día: </label>
-                            <!-- <input type="text" name="dia" id="dia" class="form-control-plaintext" readonly> -->
-                             <span id="dia"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="bloque_horario">Bloque Horario: </label>
-                            <!-- <input type="text" name="bloque_horario" id="bloque_horario" class="form-control-plaintext" readonly> -->
-                            <span id="bloque_horario"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="motivo">Motivo: </label>
-                            <select class="form-select" aria-label="Default select example" name="motivo">
-                                <option value="" selected>Seleccionar Motivo...</option>
-                                <?php
-                                $motivos = [
-                                    "Gratuidad Mineduc",
-                                    "Becas de arancel Mineduc",
-                                    "Fondo Solidario de Crédito Universitario",
-                                    "Beneficios Junaeb (BAES y Becas de mantención)",
-                                    "Beca Fotocopia UTA",
-                                    "Beca Alimentación UTA",
-                                    "Beca Residencia UTA",
-                                    "Beca Internado UTA",
-                                    "Beca Ayuda Estudiantil UTA",
-                                    "Beca PSU-PDT-PAES UTA",
-                                    "Otro",
-                                ];
-                                foreach ($motivos as $m): ?>
-                                    <option value="<?= $m ?>"><?= $m ?></option>
-                                <?php endforeach;
-                                ?>
-                            </select>
-                        </div>
+                        <p id="dia"></p>
+                        <p id="bloque_horario"></p>
+                        <input type="datetime-local" id="fecha_ini" />
+                        <input type="datetime-local" id="fecha_ter" />
                     </div>
                     <div class="modal-footer">
-                        <input type="submit" class="btn btn-primary" name="agendar" value="Agendar" />
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary" onclick="enviarAgendar()">Agendar</button>
                     </div>
-                </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Bloquear -->
+        <div id="bloquearModal" class="modal fade" tabindex="-1" aria-labelledby="bloquearModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bloquearModalLabel">Bloquear Día</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="diaBloqueo"></p>
+                        <p>Bloques seleccionados: <span id="bloquesSeleccionados"></span></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-danger" onclick="enviarBloqueos()">Bloquear</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= base_url('assets/js/agendar.js') ?>"></script> <!-- Enlace al archivo JavaScript -->
 </body>
 </html>
 <style>
