@@ -4,7 +4,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Calendario</title>
     <?php $this->load->view("navbar", $tipo); ?>
     <link rel="stylesheet" type="text/css" href="<?= base_url(
         "css/agendar.css"
@@ -30,8 +30,6 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 </head>
 <body>
     <div class="container">
-        <h1>Calendario</h1>
-
         <!-- Dropdown para seleccionar semana -->
         <select id="semana-select" onchange="seleccion_semana()">
             <!-- Las opciones de semanas serán generadas por JS -->
@@ -74,7 +72,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
         </div>
 
         <!-- Modal Bloquear -->
-        <div id="bloquearModal" class="modal fade" tabindex="-1" aria-labelledby="bloquearModalLabel" aria-hidden="true">
+        <div  id="bloquearModal" class="modal fade" tabindex="-1" aria-labelledby="bloquearModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -99,108 +97,58 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 </body>
 </html>
 <style>
-    /* Reducir el tamaño vertical del calendario */
-    table {
-        width: 80%; /* Ancho reducido */
-        margin: 20px auto; /* Centrado horizontal */
-        table-layout: fixed;
-        border-collapse: separate;
-        border-spacing: 0;
-        border: 2px solid #000; /* Borde del calendario */
-        border-radius: 15px; /* Bordes redondeados */
-        overflow: hidden;
-        font-size: 12px; /* Tamaño de texto más pequeño */
-    }
+   /* Reducir el tamaño del calendario */
+table {
+    width: 90%; /* Reducir al 90% del contenedor */
+    margin: 20px auto; /* Centrado horizontal */
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 2px solid #000; /* Borde del calendario */
+    border-radius: 15px; /* Bordes redondeados */
+    overflow: hidden;
+    font-size: 12px; /* Tamaño de texto más pequeño */
+}
 
-    th, td {
-        padding: 4px; /* Menor espaciado interno */
-        text-align: center;
-        font-size: 11px; /* Texto más pequeño */
-        border: 1px solid #000; /* Bordes internos */
-        height: 30px; /* Altura fija para las celdas */
-    }
+/* Ajustar las celdas de la tabla */
+th, td {
+    padding: 8px; /* Aumentar el espaciado */
+    text-align: center;
+    font-size: 10px; /* Reducir tamaño de texto */
+    border: 1px solid #000;
+    height: 40px; /* Altura más pequeña para las celdas */
+}
 
-    /* Estilo del encabezado */
-    thead {
-        background-color: #FBF1D0;
-        color: #000;
-        border-radius: 15px 15px 0 0;
-    }
+/* Mantener el estilo del encabezado */
+thead {
+    background-color: #FBF1D0;
+    color: #000;
+    border-radius: 15px 15px 0 0;
+}
 
-    /* Alternar colores en las filas del cuerpo */
-    tbody tr:nth-child(even) {
-        background-color: #FFF7CC;
-    }
+/* Alternar colores en las filas del cuerpo */
+tbody tr:nth-child(even) {
+    background-color: #FFF7CC;
+}
 
-    tbody tr:nth-child(odd) {
-        background-color: #FFF2B3;
-    }
+tbody tr:nth-child(odd) {
+    background-color: #FFF2B3;
+}
 
-    /* Estilo para los botones "Agendar" */
-    button {
-        font-size: 10px;
-        padding: 2px 5px; /* Más compacto */
-        cursor: pointer;
-        border: 1px solid #000;
-        border-radius: 5px; /* Bordes redondeados */
-        background-color: #FBF1D0; /* Color inicial */
-        transition: background-color 0.3s ease; /* Animación al cambiar de color */
-    }
+/* Ajuste de los botones "Agendar" */
+button {
+    font-size: 10px;
+    padding: 2px 5px;
+    cursor: pointer;
+    border: 1px solid #000;
+    border-radius: 5px;
+    background-color: #FBF1D0;
+    transition: background-color 0.3s ease;
+}
 
-    button:active, button.selected {
-        background-color: #FDD188; /* Color cuando está seleccionado */
-    }
-    /* Estilo para el mensaje de error */
-    .error {
-        position: relative;
-        padding: 15px;
-        margin: 10px 0;
-        border-radius: 5px;
-        font-size: 16px;
-        background-color: #f8d7da; /* Fondo de error */
-        color: #721c24; /* Color del texto */
-        border: 1px solid #f5c6cb; /* Borde sutil */
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    /* Botón de cierre */
-    .error .btn-close {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        color: #721c24;
-        cursor: pointer;
-    }
-    /* Efecto de hover en el botón */
-    .error .btn-close:hover {
-        color: #f5c6cb;
-    }
-    /* Estilo para el texto */
-    .error strong {
-        font-weight: bold;
-    }
-    /* Estilo en caso de que el error tenga un mensaje largo o más de una línea */
-    .error {
-        white-space: normal;
-        word-wrap: break-word;
-    }
-    /* Personalización del modal */
-    .modal-body {
-        font-size: 16px;
-        padding: 20px;
-    }
-    .form-group label {
-        font-weight: bold;
-    }
-    .form-control-plaintext {
-    border: none;  /* Eliminar el borde */
-    background-color: transparent;  /* Asegurarse de que el fondo sea transparente */
-    padding: 0;  /* Eliminar el padding extra */
-    font-size: 16px;  /* Tamaño de texto adecuado */
-    }
-    .form-select {
-        font-size: 14px;
-    }
+button:active, button.selected {
+    background-color: #FDD188;
+}
+
+
 </style>

@@ -24,7 +24,9 @@ const horarios = [
     { id: 20, rango: "17:30-18:00", duracion: 30 },
 ];
 
+
 // Función para generar semanas
+// Función para generar semanas (lunes a viernes)
 function generarSemanas() {
     const semanaSelect = document.getElementById('semana-select');
     const fechaActual = new Date();
@@ -36,9 +38,9 @@ function generarSemanas() {
         let fechaInicio = new Date(inicioSemana);
         fechaInicio.setDate(fechaInicio.getDate() + (i * 7));
 
-        // Calculamos el final de la semana
+        // Calculamos el final de la semana (viernes)
         let fechaFin = new Date(fechaInicio);
-        fechaFin.setDate(fechaFin.getDate() + 6);
+        fechaFin.setDate(fechaFin.getDate() + 4); // Solo sumamos 4 días desde el lunes
 
         semanaOptions.push({
             inicio: fechaInicio.toISOString().split('T')[0],
@@ -55,14 +57,6 @@ function generarSemanas() {
         semanaSelect.appendChild(opt);
     });
 }
-
-// Función para obtener el inicio de la semana (lunes)
-function getInicioSemana(date) {
-    const day = date.getDay(),
-          diff = date.getDate() - day + (day == 0 ? -6 : 1); // Lunes es el primer día
-    return new Date(date.setDate(diff));
-}
-
 
 // Función para cargar el calendario
 function cargar_calendario() {
@@ -81,20 +75,14 @@ function cargar_calendario() {
         celdaHora.innerHTML = `<div class="p-2 display-8">${horario.id}<br>${horario.rango}</div>`;
         fila.appendChild(celdaHora);
 
-        // Columna para cada día de la semana
-        for (let dia = 0; dia < 5; dia++) {
+        // Columna para cada día de la semana (lunes a viernes)
+        for (let dia = 1; dia < 6; dia++) { // Solo recorremos de lunes (0) a viernes (4)
             const celda = document.createElement("td");
             const fechaBloque = new Date(fechaSemana);
             fechaBloque.setDate(fechaSemana.getDate() + dia);
 
-            // Excluimos sábados y domingos
-            if (fechaBloque.getDay() === 0 || fechaBloque.getDay() === 6) {
-                continue; // Saltamos los sábados y domingos
-            }
-
             // Verificamos si la fecha ya pasó
             if (fechaBloque < new Date()) {
-                // Si la fecha es pasada, la marcamos como no disponible
                 celda.innerHTML = `
                     <div class="no-disponible">
                         <span>${fechaBloque.getDate()}-${fechaBloque.getMonth() + 1}</span>
@@ -119,6 +107,57 @@ function cargar_calendario() {
 
         tablaHorario.appendChild(fila);
     });
+}
+
+function getInicioSemana(fecha) {
+    const diaSemana = fecha.getDay(); // Obtiene el día de la semana (0 = Domingo, 1 = Lunes, etc.)
+    let inicioSemana = new Date(fecha); // Crea una copia de la fecha original
+
+    if (diaSemana === 1) {
+        // Ya es lunes, no se cambia
+        inicioSemana.setDate(fecha.getDate());
+    } else if (diaSemana === 2) {
+        // Martes: Retrocede un día
+        inicioSemana.setDate(fecha.getDate() - 1);
+    } else if (diaSemana === 3) {
+        // Miércoles: Retrocede dos días
+        inicioSemana.setDate(fecha.getDate() - 2);
+    } else if (diaSemana === 4) {
+        // Jueves: Retrocede tres días
+        inicioSemana.setDate(fecha.getDate() - 3);
+    } else if (diaSemana === 5) {
+        // Viernes: Retrocede cuatro días
+        inicioSemana.setDate(fecha.getDate() - 4);
+    } else if (diaSemana === 6) {
+        // Sábado: Retrocede cinco días
+        inicioSemana.setDate(fecha.getDate() - 5);
+    } else if (diaSemana === 0) {
+        // Domingo: Retrocede seis días
+        inicioSemana.setDate(fecha.getDate() - 6);
+    }
+    console.log("Día de la semana:", fecha.getDay()); 
+    console.log("Fecha inicial calculada:", inicioSemana);
+    return inicioSemana;
+}
+
+
+// Función para verificar si la semana está disponible (todos los bloques de la semana no deben haber pasado)
+function estaSemanaDisponible(inicioSemana) {
+    const semanaFinal = new Date(inicioSemana);
+    semanaFinal.setDate(semanaFinal.getDate() + 6);
+
+    // Comprobamos si todos los bloques de la semana han pasado
+    let todosBloqueados = true;
+    for (let i = 0; i < 5; i++) {
+        const fechaBloque = new Date(inicioSemana);
+        fechaBloque.setDate(inicioSemana.getDate() + i);
+        if (fechaBloque >= new Date()) {
+            todosBloqueados = false;
+            break;
+        }
+    }
+
+    return !todosBloqueados;
 }
 
 // Función para seleccionar semana
