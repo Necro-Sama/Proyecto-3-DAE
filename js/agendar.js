@@ -44,6 +44,17 @@ function cargar_calendario() {
     tablaHorario.innerHTML = "";
     const semana = document.getElementById("semana-select").value.replace("00:00:00", "");
 
+    function marcarTodos(dia) {
+        // Selecciona todos los checkboxes de los bloques para el día específico
+        const checkboxes = document.querySelectorAll(`.checkbox-bloquear-${dia}`);
+        const checked = document.getElementById(`checkbox-${dia}`).checked;
+
+        // Marca o desmarca todos los checkboxes del día según el estado del checkbox de la cabecera
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = checked;
+        });
+    }
+
     horarios.forEach((horario, index) => {
         const fila = document.createElement("tr");
         fila.className = index % 2 === 0 ? "fila1" : "fila2";
@@ -60,17 +71,21 @@ function cargar_calendario() {
             let t1 = horario.rango.split("-")[0].trim() + ":00";
             let tiempo_bloque_ini = new Date(semana + t1);
 
-            tiempo_bloque = new Date(tiempo_bloque.getTime() + (dia-1) * 24 * 3600 * 1000);
-            tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia-1) * 24 * 3600 * 1000);
+            tiempo_bloque = new Date(tiempo_bloque.getTime() + (dia - 1) * 24 * 3600 * 1000);
+            tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia - 1) * 24 * 3600 * 1000);
+
+            // Si el bloque está disponible, muestra el checkbox y el botón de agendar
             if (horario.esAlmuerzo || tiempo_bloque < tiempo_servidor) {
                 celda.innerHTML = `<div style='color: #ff0000;'>(no disponible)</div>`;
             } else {
                 celda.innerHTML = `
-                  <div>
-                      <button class="btn" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">Agendar</button>
-                  </div>
+                    <div>
+                        <input type="checkbox" id="bloquear-${horario.id}-${dia}" class="checkbox-bloquear checkbox-bloquear-${['lunes', 'martes', 'miercoles', 'jueves', 'viernes'][dia - 1]}" />
+                        <button class="btn" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">Agendar</button>
+                    </div>
                 `;
             }
+
             fila.appendChild(celda);
         }
         tablaHorario.appendChild(fila);

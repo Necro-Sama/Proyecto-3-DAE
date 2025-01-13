@@ -57,17 +57,40 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             <?php } ?>
         </select>
 
+        <!-- Agregar el botón "Bloquear" debajo del select -->
+        <button type="button" class="btn btn-danger" id="btn-bloquear">Bloquear</button>
+
         <table class="text-center">
-            <thead>
-                <tr>
-                    <th><div class="p-2 display-7 dia">Hora</div></th>
-                    <th><div class="p-2 display-7 dia">Lunes</div></th>
-                    <th><div class="p-2 display-7 dia">Martes</div></th>
-                    <th><div class="p-2 display-7 dia">Miércoles</div></th>
-                    <th><div class="p-2 display-7 dia">Jueves</div></th>
-                    <th><div class="p-2 display-7 dia">Viernes</div></th>
-                </tr>
-            </thead>
+        <thead>
+            <tr>
+                <th><div class="p-2 display-7 dia">Hora</div></th>
+                <th><div class="p-2 display-7 dia">
+                Lunes
+                <input type="checkbox" class="checkbox-dia" id="checkbox-lunes" onchange="marcarTodos('lunes')" />
+                    </div>
+                </th>
+                <th><div class="p-2 display-7 dia">
+                Martes
+                <input type="checkbox" class="checkbox-dia" id="checkbox-martes" onchange="marcarTodos('martes')" />
+                    </div>
+                </th>
+                <th><div class="p-2 display-7 dia">
+                Miércoles
+                <input type="checkbox" class="checkbox-dia" id="checkbox-miercoles" onchange="marcarTodos('miercoles')" />
+                    </div>
+                </th>
+                <th><div class="p-2 display-7 dia">
+                Jueves
+                <input type="checkbox" class="checkbox-dia" id="checkbox-jueves" onchange="marcarTodos('jueves')" />
+                    </div>
+                </th>
+                <th><div class="p-2 display-7 dia">
+                Viernes
+                <input type="checkbox" class="checkbox-dia" id="checkbox-viernes" onchange="marcarTodos('viernes')" />
+                    </div>
+                </th>
+            </tr>
+        </thead>
             <tbody id="tabla-horario">
                 <!-- Contenido generado dinámicamente -->
             </tbody>
