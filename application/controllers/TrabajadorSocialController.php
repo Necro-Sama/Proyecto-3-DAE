@@ -127,17 +127,20 @@ class TrabajadorSocialController extends CI_Controller {
             $data['tipo'] = 'estudiante';
             $data['detalle'] = $this->UserModel->getEstudiante($RUN_usuario);
         } 
-        if ($this->UserModel->getFuncionario($RUN_usuario))  {
+        else if ($this->UserModel->getFuncionario($RUN_usuario))  {
             $data['tipo'] = 'trabajadorsocial';
             $data['detalle'] = $this->UserModel->getFuncionario($RUN_usuario);
         } 
-        if ($this->UserModel->getAdministrador($RUN_usuario)) {
+        else if ($this->UserModel->getAdministrador($RUN_usuario)) {
             $data['tipo'] = 'administrador';
             $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
         } 
-        if($this->UserModel->getNoEstudiante($RUN_usuario)) {
-            $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
+        else if ($this->UserModel->getNoEstudiante($RUN_usuario)) {
+            $data['tipo'] = 'noestudiante';
             $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
+        }
+        else{
+            $data['tipo']='';
         }
         return $data;
     }

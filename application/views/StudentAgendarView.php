@@ -4,7 +4,8 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Agenda</title>
+    <?php print_r($tipo); $this->load->view('navbar',$tipo); ?>
     <link rel="stylesheet" type="text/css" href="<?= base_url(
         "css/agendar.css"
     ) ?>"/>
@@ -29,7 +30,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 </head>
 <body>
 
-    <?php $this->load->view('navbar',$tipo); ?>
+   
     <h1> </h1>
     <div class="container">
         <!-- <h6>Bloques disponibles</h6> -->
@@ -57,7 +58,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             <?php } ?>
         </select>
 
-        <!-- Agregar el botón "Bloquear" debajo del select -->
+        <!-- boton "Bloquear" -->
         <button type="button" class="btn btn-danger" id="btn-bloquear">Bloquear</button>
 
         <table class="text-center">
@@ -66,33 +67,43 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
                 <th><div class="p-2 display-7 dia">Hora</div></th>
                 <th><div class="p-2 display-7 dia">
                 Lunes
+                <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
                 <input type="checkbox" class="checkbox-dia" id="checkbox-lunes" onchange="marcarTodos('lunes')" />
+                <?php endif; ?>
                     </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                 Martes
+                <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
                 <input type="checkbox" class="checkbox-dia" id="checkbox-martes" onchange="marcarTodos('martes')" />
+                <?php endif; ?>
                     </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                 Miércoles
+                <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
                 <input type="checkbox" class="checkbox-dia" id="checkbox-miercoles" onchange="marcarTodos('miercoles')" />
+                <?php endif; ?>
                     </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                 Jueves
+                <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
                 <input type="checkbox" class="checkbox-dia" id="checkbox-jueves" onchange="marcarTodos('jueves')" />
+                <?php endif; ?>
                     </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                 Viernes
+                <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
                 <input type="checkbox" class="checkbox-dia" id="checkbox-viernes" onchange="marcarTodos('viernes')" />
+                <?php endif; ?>
                     </div>
                 </th>
             </tr>
         </thead>
             <tbody id="tabla-horario">
-                <!-- Contenido generado dinámicamente -->
+                <!-- Contenido generado dinamicamente -->
             </tbody>
         </table>
     </div>

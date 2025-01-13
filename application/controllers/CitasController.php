@@ -45,9 +45,12 @@ class CitasController extends CI_Controller
             $data['tipo'] = 'administrador';
             $data['detalle'] = $this->UserModel->getAdministrador($RUN_usuario);
         } 
-        else {
-            $data['tipo'] = 'noestudiante'; // Manejo de caso por defecto
+        else if ($this->UserModel->getNoEstudiante($RUN_usuario)) {
+            $data['tipo'] = 'noestudiante'; 
             $data['detalle'] = $this->UserModel->getNoEstudiante( $RUN_usuario );
+        }
+        else{
+            $data['tipo']='';
         }
         return $data;
     }

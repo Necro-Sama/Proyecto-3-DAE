@@ -314,4 +314,8 @@ class BloqueModel extends CI_Model
     {
         return $this->db->query("SELECT NOW() AS t")->row(0)->t;
     }
+    function bloquear($fecha_inicio,$fecha_termino){
+        $this->db->insert('bloquebloqueado', $fecha_inicio,$fecha_termino);
+
+    }
 }
