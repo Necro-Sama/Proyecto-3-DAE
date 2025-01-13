@@ -1,19 +1,19 @@
 let dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 const horarios = [
-    { id: 1, rango: "08:00-08:45" },
-    { id: 2, rango: "08:45-09:30" },
-    { id: 3, rango: "09:40-10:25" },
-    { id: 4, rango: "10:25-11:10" },
-    { id: 5, rango: "11:20-12:05" },
-    { id: 6, rango: "12:05-12:50" },
-    { id: "almuerzo1", rango: "13:00-13:45", esAlmuerzo: true },
-    { id: "almuerzo2", rango: "13:45-14:30", esAlmuerzo: true },
-    { id: 7, rango: "14:45-15:30" },
-    { id: 8, rango: "15:30-16:15" },
-    { id: 9, rango: "16:20-17:05" },
-    { id: 10, rango: "17:05-17:50" },
-    { id: 11, rango: "17:55-18:40" },
-    { id: 12, rango: "18:40-19:25" },
+    { id: 1, rango: "08:00-08:30" },
+    { id: 2, rango: "08:30-10:00" },
+    { id: 3, rango: "10:00-10:30" },
+    { id: 4, rango: "11:00-11:30" },
+    { id: 5, rango: "11:30-12:00" },
+    { id: 6, rango: "12:00-12:30" },
+    { id: "almuerzo", rango: "12:55-13:45", esAlmuerzo: true },
+    { id: "almuerzo", rango: "13:45-14:30", esAlmuerzo: true },
+    { id: 7, rango: "14:30-15:00" },
+    { id: 8, rango: "15:00-15:30" },
+    { id: 9, rango: "16:00-16:30" },
+    { id: 10, rango: "16:30-17:00" },
+    { id: 11, rango: "17:30-18:00" },
+    { id: 12, rango: "18:30-19:00" },
 ];
 
 function agendar(dia, bloque, fecha_ini, fecha_ter) {
