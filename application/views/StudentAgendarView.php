@@ -48,7 +48,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
         <div id="tiempo-servidor" hidden><?= $this->BloqueModel->get_tiempo_bd() ?></div>
         
         <label for="semana">Semana: </label>
-        <?php $semanas = $this->BloqueModel->get_semanas(3); ?>
+        <?php  $semanas = $this->BloqueModel->get_semanas(3); ?>
         <select class="form-select" name="semana" id="semana-select" onchange="seleccion_semana(event)">
             <?php foreach ($semanas as $semana) { ?>
                 <option value="<?= $semana ?>">
@@ -87,7 +87,6 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
                     <div class="modal-body">
                         <input type="text" id="fecha_ini" name="fecha_ini" hidden>
                         <input type="text" id="fecha_ter" name="fecha_ter" hidden>
-
                         <div class="form-group">
                             <label for="dia">Día: </label>
                             <span id="dia"></span>
