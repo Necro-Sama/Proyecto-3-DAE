@@ -6,13 +6,11 @@ class BloqueModel extends CI_Model
         parent::__construct();
         $this->load->database();
     }
-
-    // Obtener las fechas de inicio de las semanas
     function get_week_dates($start_date) {
         $weeks = [];
         $date = new DateTime($start_date);
 
-        // Obtener las fechas de las 3 semanas
+        // Obtenemos las fechas de las 3 semanas
         for ($i = 0; $i < 3; $i++) {
             $start_of_week = clone $date;
             $start_of_week->modify('monday this week');  // Ajusta para el lunes de la semana
@@ -22,7 +20,6 @@ class BloqueModel extends CI_Model
         return $weeks;
     }
 
-    // Función que carga los horarios
     public function horarios() {
         $current_date = date('Y-m-d'); // Fecha actual
         $weeks = $this->get_week_dates($current_date); // Obtener las fechas de las 3 semanas
@@ -31,10 +28,9 @@ class BloqueModel extends CI_Model
         $data['weeks'] = $weeks;
 
         // Cargar la vista
-        $this->load->view('horarios_view', ['weeks' => $weeks]);  // Corregir la forma en que se pasa el array
+        $this->load->view('horarios_view', $data['weeks']);
     }
 
-    // Obtener bloques de atención y bloqueados que se solapan con la fecha de agendamiento
     public function get_bloques_colisionando($carrera, $fecha_ini, $fecha_ter)
     {
         $bloques_atencion = $this->db
@@ -70,7 +66,6 @@ class BloqueModel extends CI_Model
                 ]
             )
             ->result();
-
         $bloques_bloqueados = $this->db
             ->query(
                 "
@@ -104,16 +99,38 @@ class BloqueModel extends CI_Model
                 ]
             )
             ->result();
-
         return [
             "atencion" => $bloques_atencion,
             "bloqueado" => $bloques_bloqueados,
         ];
     }
-
-    // Agendar cita para el estudiante
-    function agendar_estudiante($RUN_estudiante, $fecha_ini, $fecha_ter, $motivo)
-    {
+    function agendar_estudiante(
+        $RUN_estudiante,
+        $fecha_ini,
+        $fecha_ter,
+        $motivo
+    ) {
+        // $horarios = [
+        //     1 => [["08", "00"], ["08", "45"]],
+        //     2 => [["08", "45"], ["09", "30"]],
+        //     3 => [["09", "40"], ["10", "25"]],
+        //     4 => [["10", "25"], ["11", "10"]],
+        //     5 => [["11", "20"], ["12", "05"]],
+        //     6 => [["12", "05"], ["12", "50"]],
+        //     7 => [["14", "45"], ["15", "30"]],
+        //     8 => [["15", "30"], ["16", "15"]],
+        //     9 => [["16", "20"], ["17", "05"]],
+        //     10 => [["17", "05"], ["17", "50"]],
+        //     11 => [["17", "55"], ["18", "40"]],
+        //     12 => [["18", "40"], ["19", "25"]],
+        // ];
+        // $dia_to_num = [
+        //     "Lunes" => 0,
+        //     "Martes" => 1,
+        //     "Miércoles" => 2,
+        //     "Jueves" => 3,
+        //     "Viernes" => 4,
+        // ];
         $estudiante = $this->db
             ->query(
                 "
@@ -125,9 +142,8 @@ class BloqueModel extends CI_Model
                     estudiante e
                 ON
                     p.RUN = e.RUN
-                WHERE
-                    p.RUN = ?",
-                [$RUN_estudiante]  // Corregir la consulta agregando el parámetro RUN
+                ",
+                $RUN_estudiante
             )
             ->row(0);
 
@@ -135,36 +151,63 @@ class BloqueModel extends CI_Model
             ->query(
                 "
                 SELECT * FROM carrera
-                WHERE COD_CARRERA = ?",
-                [$estudiante->COD_CARRERA]  // Corregir la consulta para pasar el parámetro correctamente
+                WHERE COD_CARRERA = ?
+                ",
+                $estudiante->COD_CARRERA
             )
             ->row(0);
 
-        $bloques_overlap = $this->get_bloques_colisionando($carrera, $fecha_ini, $fecha_ter);
-
+        $bloques_overlap = $this->get_bloques_colisionando(
+            $carrera,
+            $fecha_ini,
+            $fecha_ter
+        );
+        print_r($bloques_overlap);
         foreach ($bloques_overlap["atencion"] as $bloque) {
             if ($bloque->RUNCliente == $RUN_estudiante) {
-                throw new Exception("No puedes agendar dos veces en la misma hora.");
+                throw new Exception(
+                    "No puedes agendar dos veces en la misma hora."
+                );
             }
         }
-
-        // Si existen bloqueos o colisiones con citas previas
-        if (count($bloques_overlap["atencion"]) + count($bloques_overlap["bloqueado"]) >= 2) {
+        // echo count($bloques_overlap["atencion"]);
+        if (
+            count($bloques_overlap["atencion"]) +
+                count($bloques_overlap["bloqueado"]) >=
+            2
+        ) {
             throw new Exception("Horario no disponible.");
         }
-
-        // Determinar con qué TS agendar la cita
-        if (count($bloques_overlap["atencion"]) + count($bloques_overlap["bloqueado"]) == 0) {
-            $run_ts = $carrera->RUNTS;  // Usar TS asignado si no hay conflictos
+        if (
+            count($bloques_overlap["atencion"]) +
+                count($bloques_overlap["bloqueado"]) ==
+            0
+        ) {
+            // Agendar con TS asignada
+            $run_ts = $carrera->RUNTS;
         } else {
+            // Agendar con la TS reemplazante si el bloque NO asociado a este, sino, agendarlo a TS asignada
             if (count($bloques_overlap["bloqueado"])) {
-                $run_ts = $bloques_overlap["bloqueado"][0]->RUNTS == $carrera->ReemplazaRUNTS ? $carrera->RUNTS : $carrera->ReemplazaRUNTS;
+                if (
+                    $bloques_overlap["bloqueado"][0]->RUNTS ==
+                    $carrera->ReemplazaRUNTS
+                ) {
+                    $run_ts = $carrera->RUNTS;
+                } else {
+                    $run_ts = $carrera->ReemplazaRUNTS;
+                }
             } elseif (count($bloques_overlap["atencion"])) {
-                $run_ts = $bloques_overlap["atencion"][0]->RUNTS == $carrera->ReemplazaRUNTS ? $carrera->RUNTS : $carrera->ReemplazaRUNTS;
+                if (
+                    $bloques_overlap["atencion"][0]->RUNTS ==
+                    $carrera->ReemplazaRUNTS
+                ) {
+                    $run_ts = $carrera->RUNTS;
+                } else {
+                    $run_ts = $carrera->ReemplazaRUNTS;
+                }
             }
         }
-
-        // Verificar si el TS asignado tiene alguna licencia en ese rango de fechas
+        // $h = $horarios[$bloque_horario];
         $licencias = $this->db
             ->query(
                 "
@@ -181,51 +224,81 @@ class BloqueModel extends CI_Model
                 AND
                     ? < TIMESTAMP(l.FECHA_TER)
                 AND
-                    ? > TIMESTAMP(l.FECHA_INI)",
+                    ? > TIMESTAMP(l.FECHA_INI)
+                ",
                 [$run_ts, $fecha_ini, $fecha_ter]
             )
             ->result();
-
         if (count($licencias)) {
             throw new Exception("Horario no disponible.");
         }
-
-        // Verificar si la fecha es válida (mayor a la actual)
-        if ($this->db->query("SELECT ? < NOW() AS xd", [$fecha_ter])->row(0)->xd) {
+        if (
+            $this->db->query("SELECT ? < NOW() AS xd", [$fecha_ter])->row(0)->xd
+        ) {
             throw new Exception("Fecha inválida.");
         }
-
-        // Crear calendario semanal automáticamente si no existe
-        if ($this->db->query(
-            "SELECT * FROM calendariosemanal WHERE FechaInicioSemana = TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY)) AND RUNTS = ?",
-            [$fecha_ini, $fecha_ini, $run_ts]
-        )->num_rows() == 0) {
+        // Si no existe calendario para esta semana, creelo automaticamente
+        if (
+            $this->db
+                ->query(
+                    "SELECT *
+                 FROM calendariosemanal
+                 WHERE FechaInicioSemana = TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY))
+                 AND RUNTS = ?",
+                    [$fecha_ini, $fecha_ini, $run_ts]
+                )
+                ->num_rows() == 0
+        ) {
+            echo "XD";
             $this->db->query(
-                "INSERT INTO calendariosemanal VALUES (TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY)), ?)",
+                "INSERT INTO calendariosemanal VALUES
+                 (TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY)), ?)",
                 [$fecha_ini, $fecha_ini, $run_ts]
             );
         }
-
-        // Insertar el bloque de atención en la base de datos
-        if (!$this->db->query(
-            "INSERT INTO bloque VALUES (?, ?, NULL, TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY)), ?)",
-            [$fecha_ini, $fecha_ter, $fecha_ini, $fecha_ini, $run_ts]
-        )) {
-            throw new Exception("ERROR " . $this->db->error()->code . ": " . $this->db->error()->message);
+        if (
+            !$this->db->query(
+                "
+                INSERT INTO bloque VALUES (
+                    ?,
+                    ?,
+                    NULL,
+                    TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY)),
+                    ?
+                )
+                ",
+                [$fecha_ini, $fecha_ter, $fecha_ini, $fecha_ini, $run_ts]
+            )
+        ) {
+            throw new Exception(
+                "ERROR " .
+                    $this->db->error()->code .
+                    ": " .
+                    $this->db->error()->message
+            );
         }
-
         $insert_id = $this->db->insert_id();
-
-        // Insertar el motivo de la cita
-        if (!$this->db->query(
-            "INSERT INTO bloqueatencion VALUES ('Reservado', ?, ?, ?)",
-            [$motivo, $insert_id, $RUN_estudiante]
-        )) {
-            throw new Exception("DB ERROR " . $this->db->error()->code . ": " . $this->db->error()->message);
+        if (
+            !$this->db->query(
+                "
+                INSERT INTO bloqueatencion VALUES (
+                    'Reservado',
+                    ?,
+                    ?,
+                    ?
+                )
+                ",
+                [$motivo, $insert_id, $RUN_estudiante]
+            )
+        ) {
+            throw new Exception(
+                "DB ERROR " .
+                    $this->db->error()->code .
+                    ": " .
+                    $this->db->error()->message
+            );
         }
     }
-
-    // Función para obtener las fechas de las semanas
     function get_semanas($num_semanas)
     {
         $query = "SELECT ";
@@ -237,8 +310,6 @@ class BloqueModel extends CI_Model
         }
         return array_values($this->db->query($query)->result_array()[0]);
     }
-
-    // Obtener la fecha y hora actual de la base de datos
     function get_tiempo_bd()
     {
         return $this->db->query("SELECT NOW() AS t")->row(0)->t;
