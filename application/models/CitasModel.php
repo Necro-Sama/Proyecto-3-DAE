@@ -70,5 +70,42 @@ class CitasModel extends CI_Model
         // Si no está ni reservado ni bloqueado
         return ['estado' => 'Disponible']; // Bloque disponible
     }
+    public function bloquearBloque($id, $fechainicio, $fechafinal, $RUN) {
+        // Verificar si ya existe un bloqueo con la misma fecha inicial
+        $query = $this->db->get_where('bloquebloqueado', ['fechainicio' => $fechainicio]);
+        
+        if ($query->num_rows() > 0) {
+            echo 'Fecha ya Bloqueada';
+        } else {
+            // Datos a insertar en la tabla
+            $data = [
+                'ID' => $id,
+                'fechainicio' => $fechainicio,
+                'fechafinal' => $fechafinal,
+                'RUN' => $RUN
+            ];
+    
+            // Insertar el nuevo registro
+            $this->db->insert('bloquebloqueado', $data);
+    
+            if ($this->db->affected_rows() > 0) {
+                echo 'Bloqueo creado exitosamente';
+            } else {
+                echo 'Error al bloquear el bloque';
+            }
+        }
+    }
+    public function seleccionarfecha(){
+        //la idea principal es enviarlo a la agenda para que seleccione otro dia de las 3 semanas 
+        //de esta manera cambiamos el boton de agendar por uno que diga reagendar de la misma manera que bloquear con un if
+        //traspasamos una variable para que pueda reconocer el proceso
+        //una vez se seleccione llamara a la funcion reagendar para agedar y eliminar la otra pasando los datos de la eliminacion
+        //para la funcion eliminar cita y reusar funciones
+    }
+    public function reagendar(){
+        //llamara a eliminar cita para borrar la anterior y pasara a tomar la nueva una vez terminado enviara un mensaje de reagendado con exito.
+
+    }
+    
 }
 ?>

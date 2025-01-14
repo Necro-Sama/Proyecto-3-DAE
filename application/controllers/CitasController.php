@@ -54,6 +54,10 @@ class CitasController extends CI_Controller
         }
         return $data;
     }
+    function bloquear ($RUN_usuario,$fechainicio,$fechafinal) {
+        
+    }
+    function reagendar($RUN_usuario,$fechainicio,$fechafinal){
 
-
+    }
 }

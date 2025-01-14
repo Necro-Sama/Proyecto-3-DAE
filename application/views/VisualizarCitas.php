@@ -126,12 +126,14 @@
                             <form method="POST" action="<?= site_url('usuarios/eliminarcita'); ?>" style="display:inline;">
                                 <input type="hidden" name="idCita" value="<?= $cita['ID']; ?>">
                                 <input type="hidden" name="runCliente" value="<?= $cita['RUNCliente']; ?>">
-                                <button 
-                                    class="btn btn-danger mt-2" 
-                                    <?= $esPasada ? 'disabled' : ''; ?> 
-                                    type="submit">
+                                
+                                <button class="btn btn mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="submit">
+                                    Reagendar
+                                </button>
+                                <button class="btn btn-danger mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="submit">
                                     Cancelar
                                 </button>
+                                
                             </form>
                         </div>
                     </div>

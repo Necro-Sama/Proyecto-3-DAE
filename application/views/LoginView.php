@@ -7,6 +7,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <head>
         <meta charset="UTF-8">
         <title>Login</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://accounts.google.com/gsi/client" async></script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
             integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -41,6 +42,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                                 <img class="logo" src="https://portal.uta.cl/assets/images/logo/logo-uta.svg">
                             </span>
                             <h5>Oficina de Asistentes Sociales</h5>
+                            <h1> </h1>
                             <?= $this->session->form_error ?>
                             <?= $this->session->error ?>
                         </div>
@@ -123,45 +125,100 @@ defined('BASEPATH') or exit('No direct script access allowed');
     </body>
 </html>
 <style>
-    body {
+   body {
     background: linear-gradient(to bottom, #FDD188 0%, #FDDEAA 25%, #FBF1D0 75%, #060EAE 100%);
-    height: 100vh;  /* Asegura que el fondo cubra toda la altura de la pantalla */
-    margin: 0;  /* Elimina los márgenes predeterminados */
-    color: #333;  /* Color de texto oscuro para contraste */
-    }
-    h3 {
-    font-size: 1.2rem;  /* Aumenta el espacio debajo del título */
+    min-height: 100vh;  /* Asegura que cubra toda la altura de la ventana */
+    margin: 0;
+    color: #333;
+    font-family: Arial, sans-serif;
     }
 
-    .form-data .forms-inputs:first-child {
-        margin-top: 20px; /* Aumenta el espacio entre el título y el primer campo de entrada */
+    h3 {
+        font-size: 1.2rem;
     }
+    .forms-inputs span {
+    display: block; /* Asegura que el texto esté en una línea independiente */
+    margin-bottom: 5px; /* Ajusta el espacio entre el texto y el campo de entrada */
+    font-size: 0.9rem; /* Opcional: ajusta el tamaño del texto */
+    color: #333; /* Opcional: color del texto */
+    }
+
+    .container {
+        max-width: 100%; /* Permite que la tarjeta ocupe el ancho máximo disponible */
+        padding: 15px; /* Asegura que haya espacio en los bordes */
+    }
+
     .card {
-        background-color: white; /* Fondo del recuadro (card) */
-        border-radius: 15px; /* Bordes redondeados */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra ligera para la card */
+        max-width: 400px; /* Ancho máximo de la tarjeta */
+        margin: auto; /* Centra la tarjeta horizontalmente */
+        padding: 20px;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+
     .btn-login {
-        background-color: #060EAE;  /* Azul de la paleta */
-        border-color: #060EAE;  /* Asegura que los bordes también sean del mismo color */
+        background-color: #060EAE;
+        border-color: #060EAE;
         color: white;
+        width: 100%; /* Asegura que los botones se adapten al ancho de la tarjeta */
     }
 
     .btn-login:hover {
-        background-color: #003D8E;  /* Un tono más oscuro del azul para el hover */
+        background-color: #003D8E;
         border-color: #003D8E;
-        color: white;
     }
+
     .form-container {
-    display: none; /* Oculta todos los formularios por defecto */
+        display: none;
     }
 
     .form-container.active {
-        display: block; /* Muestra solo el formulario activo */
+        display: block;
     }
+
+    .logo {
+        max-width: 100%; /* Asegura que el logo no exceda los límites de la tarjeta */
+        height: auto; /* Mantiene la proporción del logo */
+    }
+
+    .separator {
+        text-align: center;
+        margin: 10px 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    /* Medias Queries */
+    @media (max-width: 768px) {
+        .card {
+            width: 90%; /* Hace que la tarjeta ocupe casi todo el ancho en pantallas pequeñas */
+        }
+
+        h3 {
+            font-size: 1rem; /* Reduce el tamaño de los textos en pantallas pequeñas */
+        }
+    }
+
+    @media (max-width: 480px) {
+        h3 {
+            font-size: 0.9rem;
+        }
+
+        .btn-login {
+            font-size: 0.9rem; /* Ajusta el tamaño del texto del botón */
+        }
+    }
+
 
 </style> 
 <script>    
+    window.addEventListener('resize', function() {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        console.log(`Ancho: ${viewportWidth}, Alto: ${viewportHeight}`);
+    });
     function toggleForms() {
             const loginForm = document.getElementById('loginForm');
             const registerForm = document.getElementById('registerForm');
