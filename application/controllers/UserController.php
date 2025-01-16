@@ -84,11 +84,6 @@ class UserController extends CI_Controller
             session_destroy();
             redirect("/usuarios/login");
         }
-        // $this->load->view("navbar");
-        // Checkear si es trabajador social
-        $trabajador_social = $this->UserModel->get_trabajador_social(
-            $RUN_usuario
-        );
         $data = $this->comprobardatos($RUN_usuario);
         $this->load->view('navbar', $data);
         $this->load->view('HomeGlobal', $data);
@@ -121,15 +116,17 @@ class UserController extends CI_Controller
     {
 
         $RUN_usuario = $this->check_logged_in();
-        $data = $this->comprobardatos($RUN_usuario);
+        
+
         if (!$RUN_usuario) {
             session_destroy();
             redirect("/usuarios/login");
         }
+        $data = $this->comprobardatos($RUN_usuario);
+        
+        $data['reagenda'] = false;
+       
         $this->load->view("StudentAgendarView", $data);
-        // ,[
-        //     "RUN_ESTUDIANTE" => $RUN_usuario,
-        // ]);
     }
     public function gestion_ts($RUN_usuario)
     {
@@ -144,10 +141,12 @@ class UserController extends CI_Controller
             session_destroy();
             redirect("/usuarios/login");
         }
+
         $fecha_ini = $this->input->post("fecha_ini");
         $fecha_ter = $this->input->post("fecha_ter");
         $motivo = $this->input->post("motivo");
-        echo "$fecha_ini, $fecha_ter, $motivo";
+        $id_anterior = $this->input->post("id_anterior"); // ID de la cita anterior
+
         if (!$motivo) {
             $this->session->agendar_error = "Por favor seleccione un Motivo.";
             $this->session->mark_as_flash("agendar_error");
@@ -158,22 +157,34 @@ class UserController extends CI_Controller
             $this->session->mark_as_flash("agendar_error");
             redirect("/usuarios/agendar");
         }
+
         try {
+            // Registrar nueva cita
             $this->BloqueModel->agendar_estudiante(
                 $usuario,
                 $fecha_ini,
                 $fecha_ter,
                 $motivo
             );
+
+            // Llamar a la función de eliminación en CitasController
+            if ($id_anterior) {
+                $this->load->controller('CitasController'); // Cargar el controlador
+                $this->CitasController->eliminar($id_anterior); // Llamar a la función
+            }
+
         } catch (Exception $e) {
             $this->session->agendar_error = $e->getMessage();
             $this->session->mark_as_flash("agendar_error");
             redirect("/usuarios/agendar");
         }
+
         $this->session->agendar_exito = "Hora agendada con éxito.";
         $this->session->mark_as_flash("agendar_exito");
         redirect("/usuarios/agendar");
     }
+
+
     public function logged_in($token)
     {
         if ($token) {

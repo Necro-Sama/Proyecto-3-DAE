@@ -7,6 +7,7 @@ class CitasController extends CI_Controller
         parent::__construct();
         $this->load->model('TrabajadorSocialModel');
         $this->load->model('CitasModel');
+        $this->load->model('UserController');
     }
     // Método para eliminar una cita
     public function eliminarCita()
@@ -57,7 +58,21 @@ class CitasController extends CI_Controller
     function bloquear ($RUN_usuario,$fechainicio,$fechafinal) {
         
     }
-    function reagendar($RUN_usuario,$fechainicio,$fechafinal){
+    public function seleccionarfecha($id) 
+        //la idea principal es enviarlo a la agenda para que seleccione otro dia de las 3 semanas 
+        //de esta manera cambiamos el boton de agendar por uno que diga reagendar de la misma manera que bloquear con un if
+        //traspasamos una variable para que pueda reconocer el proceso
+        //una vez se seleccione llamara a la funcion reagendar para agedar y eliminar la otra pasando los datos de la eliminacion
+        //para la funcion eliminar cita y reusar funciones
+        $RUN_usuario = $this->UserController->check_logged_in();
+        $data = $this->comprobardatos($RUN_usuario);
+        $data['reagenda'] = true;
+        $data['eliminar'] = $id;
+        $this->load->view('StudentAgendarView',$data);
+        
+    }
+    public function reagendar(){
+        //llamara a eliminar cita para borrar la anterior y pasara a tomar la nueva una vez terminado enviara un mensaje de reagendado con exito.
 
     }
 }

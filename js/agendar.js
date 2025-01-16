@@ -78,20 +78,25 @@ function cargar_calendario() {
             if (horario.esAlmuerzo || tiempo_bloque < tiempo_servidor) {
                 celda.innerHTML = `<div style='color: #ff0000;'>(no disponible)</div>`;
             } else {
-    // Condición para determinar si se muestra el checkbox
-    const mostrarCheckbox = tipoUsuario === 'administrador' || tipoUsuario === 'trabajadorsocial';
-
-    celda.innerHTML = `
-        <div>
-            ${
-                mostrarCheckbox
-                    ? `<input type="checkbox" id="bloquear-${horario.id}-${dia}" class="checkbox-bloquear checkbox-bloquear-${['lunes', 'martes', 'miercoles', 'jueves', 'viernes'][dia - 1]}" />`
-                    : ``
+                // Condición para determinar si se muestra el checkbox
+                const mostrarCheckbox = tipoUsuario === 'administrador' || tipoUsuario === 'trabajadorsocial';
+                const reagendar = reagenda;
+            
+                celda.innerHTML = `
+                    <div>
+                        ${reagendar 
+                            ? `<button class="btn" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">ReAgendar</button>`
+                            : `
+                                ${mostrarCheckbox 
+                                    ? `<input type="checkbox" id="bloquear-${horario.id}-${dia}" class="checkbox-bloquear checkbox-bloquear-${['lunes', 'martes', 'miercoles', 'jueves', 'viernes'][dia - 1]}" />`
+                                    : ''}
+                                <button class="btn" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">Agendar</button>
+                              `
+                        }
+                    </div>
+                `;
             }
-            <button class="btn" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">Agendar</button>
-        </div>
-    `;
-}
+            
 fila.appendChild(celda);
 
         }

@@ -127,9 +127,10 @@
                                 <input type="hidden" name="idCita" value="<?= $cita['ID']; ?>">
                                 <input type="hidden" name="runCliente" value="<?= $cita['RUNCliente']; ?>">
                                 
-                                <button class="btn btn mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="submit">
+                                <button class="btn btn-primary mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="button" onClick="seleccionarFecha('<?= $cita['ID']; ?>', '<?= $cita['RUNCliente']; ?>')">
                                     Reagendar
                                 </button>
+
                                 <button class="btn btn-danger mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="submit">
                                     Cancelar
                                 </button>
@@ -164,6 +165,11 @@
                     alert("Ocurrió un error al intentar cancelar la cita.");
                 });
             }
+        }
+        function seleccionarFecha(idCita, runCliente) {
+            // Redirige a una página para seleccionar una nueva fecha
+            const url = `<?= site_url('usuarios/seleccionarfecha'); ?>?idCita=${idCita}`;
+            window.location.href = url;
         }
     </script>
 </body>

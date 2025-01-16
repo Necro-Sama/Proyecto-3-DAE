@@ -66,6 +66,7 @@ $route['translate_uri_dashes'] = FALSE;
 //Rutas de agendar
     $route['usuarios/agendar'] = 'UserController/agendar';
     $route['usuarios/accion_agendar'] = 'UserController/accion_agendar';
+    $route['usuarios/reagendar'] = 'CitasController/seleccionarfecha';
 //Rutas de Gestion TS
     $route['usuarios/gestor_ts'] = 'TrabajadorSocialController/index';
     //gestion de ts

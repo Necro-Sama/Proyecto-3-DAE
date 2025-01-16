@@ -62,7 +62,6 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
                 <button type="button" class="btn btn-danger" id="btn-bloquear">Bloquear</button>
         <?php endif; ?>
         <!-- boton "Bloquear" -->
-        
 
         <table class="text-center">
         <thead>
@@ -120,7 +119,15 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-                <form method="post" accept-charset="utf-8" action="<?= site_url() ?>/usuarios/accion_agendar">
+                <form method="post" accept-charset="utf-8" 
+                        <?php if($reagenda == false ):?>
+                            action="<?= site_url() ?>/usuarios/accion_agendar"
+                        <?php endif; ?>
+                        <?php if($reagenda == true): ?>
+                            action="<?= site_url() ?>/usuarios/reagendar"
+                        <?php endif;?>>
+                        
+
                     <div class="modal-body">
                         <input type="text" id="fecha_ini" name="fecha_ini" hidden>
                         <input type="text" id="fecha_ter" name="fecha_ter" hidden>
@@ -283,6 +290,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 </style>
 <script>
     var tipoUsuario = <?php echo json_encode($tipo); ?>;
+    var reagenda = <?php echo json_encode($reagenda);?>
 </script>
 <script
 src="agendar.js">

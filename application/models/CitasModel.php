@@ -101,6 +101,7 @@ class CitasModel extends CI_Model
         //traspasamos una variable para que pueda reconocer el proceso
         //una vez se seleccione llamara a la funcion reagendar para agedar y eliminar la otra pasando los datos de la eliminacion
         //para la funcion eliminar cita y reusar funciones
+        
     }
     public function reagendar(){
         //llamara a eliminar cita para borrar la anterior y pasara a tomar la nueva una vez terminado enviara un mensaje de reagendado con exito.

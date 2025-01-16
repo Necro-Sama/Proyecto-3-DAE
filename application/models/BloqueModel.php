@@ -33,6 +33,13 @@ class BloqueModel extends CI_Model
 
     public function get_bloques_colisionando($carrera, $fecha_ini, $fecha_ter)
     {
+        // Calcular FechaInicioSemana en PHP
+        $fecha_inicio_semana = date(
+            'Y-m-d H:i:s',
+            strtotime($fecha_ini . ' -' . (date('N', strtotime($fecha_ini)) - 1) . ' days')
+        );
+
+        // Obtener los bloques de atención
         $bloques_atencion = $this->db
             ->query(
                 "
@@ -45,7 +52,7 @@ class BloqueModel extends CI_Model
                 ON
                     bla.ID = bl.ID
                 WHERE
-                    FechaInicioSemana = TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY))
+                    FechaInicioSemana = TIMESTAMP(DATE(?))
                 AND (
                         RUNTS = ?
                     OR
@@ -57,8 +64,7 @@ class BloqueModel extends CI_Model
                     ? > FechaInicio
                 ",
                 [
-                    $fecha_ini,
-                    $fecha_ini,
+                    $fecha_inicio_semana,
                     $carrera->RUNTS,
                     $carrera->ReemplazaRUNTS,
                     $fecha_ini,
@@ -66,44 +72,46 @@ class BloqueModel extends CI_Model
                 ]
             )
             ->result();
+
+        // Calcular FechaInicioSemana en PHP
+        $fecha_inicio_semana = date('Y-m-d', strtotime($fecha_ini . ' -' . (date('N', strtotime($fecha_ini)) - 1) . ' days'));
+
+        // Ejecutar la consulta con la fecha ya procesada
         $bloques_bloqueados = $this->db
-            ->query(
-                "
-                SELECT
-                    *
-                FROM
-                    bloque bl
-                JOIN
-                    bloquebloqueado blb
-                ON
-                    blb.ID = bl.ID
-                WHERE
-                    FechaInicioSemana = TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY))
-                AND (
-                        RUNTS = ?
-                    OR
-                        RUNTS = ?
-                )
-                AND
-                    ? < FechaTermino
-                AND
-                    ? > FechaInicio
-                ",
-                [
-                    $fecha_ini,
-                    $fecha_ini,
-                    $carrera->RUNTS,
-                    $carrera->ReemplazaRUNTS,
-                    $fecha_ini,
-                    $fecha_ter,
-                ]
+        ->query(
+            "
+            SELECT
+                *
+            FROM
+                bloque bl
+            LEFT JOIN
+                bloquebloqueado blb
+            ON
+                blb.ID = bl.ID
+            WHERE
+                FechaInicioSemana = ?
+            AND (
+                RUNTS = ? OR RUNTS = ?
             )
-            ->result();
+            AND ? < bl.FechaTermino
+            AND ? > bl.FechaInicio
+            ",
+            [
+                $fecha_inicio_semana, // Fecha calculada de inicio de semana
+                $carrera->RUNTS,
+                $carrera->ReemplazaRUNTS,
+                $fecha_ini,
+                $fecha_ter,
+            ]
+        )
+        ->result();
+
         return [
             "atencion" => $bloques_atencion,
             "bloqueado" => $bloques_bloqueados,
         ];
     }
+
     function agendar_estudiante(
         $RUN_estudiante,
         $fecha_ini,
