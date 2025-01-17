@@ -5,7 +5,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 <head>
     <meta charset="UTF-8">
     <title>Agenda</title>
-    <?php $this->load->view('navbar',$tipo); ?>
+    <?php  $this->load->view('navbar',$tipo); ?>
     <link rel="stylesheet" type="text/css" href="<?= base_url(
         "css/agendar.css"
     ) ?>"/>
@@ -288,7 +288,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 
 </style>
 <script>
-    var tipoUsuario = <?php echo json_encode($tipo); ?>;
+    const tipoUsuario = "<?= $tipo ?>";
     var reagenda = <?php echo json_encode($reagenda);?>
 </script>
 <script

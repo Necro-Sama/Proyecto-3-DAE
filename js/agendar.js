@@ -62,10 +62,8 @@ function cargar_calendario() {
             tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia - 1) * 24 * 3600 * 1000);
 
             if (horario.esAlmuerzo || tiempo_bloque < tiempo_servidor) {
-                // Mostrar que el bloque no está disponible
                 celda.innerHTML = `<div style='color: #ff0000;'>(no disponible)</div>`;
             } else {
-                // Mostrar botones según el tipo de usuario
                 let botonesHtml = "";
 
                 if (tipoUsuario === 'administrador' || tipoUsuario === 'trabajadorsocial') {
@@ -73,32 +71,32 @@ function cargar_calendario() {
                         <button class="btn btn-primary" onClick="bloquearHorario(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque.toISOString()}')">
                             Bloquear
                         </button>`;
-                    
-                    }
-                } else if (tipoUsuario === 'estudiante' || tipoUsuario === 'noestudiante') {
-                        if(!reagenda){
-                            botonesHtml += `
-                        <button class="btn btn-success" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">
+                } 
+
+                if (tipoUsuario === 'estudiante' || tipoUsuario === 'noestudiante') {
+                    botonesHtml += `
+                        <button class="btn btn-success" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque.toISOString()}')">
                             Agendar
                         </button>`;
-                        }
-                        
-                        if (reagenda) {
+
+                    if (reagenda) {
                         botonesHtml += `
-                            <button class="btn btn-warning mt-1" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">
-                                ReAgendar
+                            <button class="btn btn-warning mt-1" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque.toISOString()}')">
+                                Reagendar
                             </button>`;
+                    }
                 }
 
                 celda.innerHTML = `<div>${botonesHtml}</div>`;
             }
- 
+
             fila.appendChild(celda);
         }
 
         tablaHorario.appendChild(fila);
     });
 }
+
 
 window.onload = (e) => {
     cargar_calendario();

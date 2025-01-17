@@ -64,6 +64,7 @@ class CitasController extends CI_Controller
         //traspasamos una variable para que pueda reconocer el proceso
         //una vez se seleccione llamara a la funcion reagendar para agedar y eliminar la otra pasando los datos de la eliminacion
         //para la funcion eliminar cita y reusar funciones
+
         $RUN_usuario = $this->UserController->check_logged_in();
         $data = $this->comprobardatos($RUN_usuario);
         $data['reagenda'] = true;

@@ -106,7 +106,6 @@ class UserModel extends CI_Model {
         
         return $query->num_rows() > 0;
     }
-
     public function get_estudiante($RUN) {
         $query = $this->db->query("
             SELECT e.COD_CARRERA, p.* FROM persona p, estudiante e
@@ -155,7 +154,7 @@ class UserModel extends CI_Model {
             return;
         }
     }
-    function endsWith( $haystack, $needle ) {
+    public function endsWith( $haystack, $needle ) {
         $length = strlen( $needle );
         if( !$length ) {
             return true;
@@ -167,7 +166,6 @@ class UserModel extends CI_Model {
         $query = $this->db->get_where('persona', ['RUN' => $run]);
         return $query->row_array();
     }
-
     public function getEstudiante($run) {
         // Obtener datos adicionales de estudiante
         $this->db->select('c.COD_CARRERA,c.Nombre');
@@ -177,7 +175,6 @@ class UserModel extends CI_Model {
         $query = $this->db->get();
         return $query->row_array();
     }
-
     public function getFuncionario($run) {
         // Obtener datos adicionales de funcionario
         $this->db->select('*');
@@ -186,7 +183,6 @@ class UserModel extends CI_Model {
         $query = $this->db->get();
         return $query->row_array();
     }
-
     public function getAdministrador($run) {
         // Obtener datos adicionales de administrador
         $this->db->select('*');
@@ -207,20 +203,17 @@ class UserModel extends CI_Model {
     {
         return $this->db->insert('persona', $data);
     }
-
     // Insertar datos en la tabla `cliente`
     public function insertCliente($data)
     {
         return $this->db->insert('cliente', $data);
     }
-
     // Insertar datos en la tabla `noestudiante`
     public function insertNoEstudiante($data)
     {
         return $this->db->insert('noestudiante', $data);
     }
 }
-    
 class Trabajadores_model extends CI_Model {
     // Seccion licencias
     public function obtenerTrabajadoresSociales() {
@@ -232,7 +225,6 @@ class Trabajadores_model extends CI_Model {
         $result = $query->result_array();
         return $result;
     }
-
     public function guardarLicencia($run, $fecha_inicio, $fecha_termino) {
         $data = [
             'RUN' => $run,
@@ -253,5 +245,4 @@ class Trabajadores_model extends CI_Model {
         where RUN =?
         ',array($run));
     }
-
 }

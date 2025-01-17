@@ -183,8 +183,6 @@ class UserController extends CI_Controller
         $this->session->mark_as_flash("agendar_exito");
         redirect("/usuarios/agendar");
     }
-
-
     public function logged_in($token)
     {
         if ($token) {

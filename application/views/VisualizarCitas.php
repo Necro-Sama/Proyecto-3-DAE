@@ -127,7 +127,7 @@
                                 <input type="hidden" name="idCita" value="<?= $cita['ID']; ?>">
                                 <input type="hidden" name="runCliente" value="<?= $cita['RUNCliente']; ?>">
                                 
-                                <button class="btn btn-primary mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="button" onClick="seleccionarFecha('<?= $cita['ID']; ?>', '<?= $cita['RUNCliente']; ?>')">
+                                <button class="btn btn-primary mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="button" onClick="seleccionarFecha('<?= $cita['ID']; ?>')">
                                     Reagendar
                                 </button>
 
