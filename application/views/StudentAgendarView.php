@@ -124,7 +124,6 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
                             action="<?= site_url() ?>/usuarios/accion_agendar"
                         <?php endif; ?>
                         <?php if($reagenda == true): ?>
-                            action="<?= site_url() ?>/usuarios/reagendar"
                         <?php endif;?>>
                         
 

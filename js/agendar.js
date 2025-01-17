@@ -38,22 +38,9 @@ function seleccion_semana(e) {
 
 function cargar_calendario() {
     let tiempo_servidor = new Date(document.getElementById("tiempo-servidor").innerHTML);
-    // console.log(tiempo_servidor);
-    
     const tablaHorario = document.getElementById("tabla-horario");
     tablaHorario.innerHTML = "";
     const semana = document.getElementById("semana-select").value.replace("00:00:00", "");
-
-    function marcarTodos(dia) {
-        // Selecciona todos los checkboxes de los bloques para el día específico
-        const checkboxes = document.querySelectorAll(`.checkbox-bloquear-${dia}`);
-        const checked = document.getElementById(`checkbox-${dia}`).checked;
-
-        // Marca o desmarca todos los checkboxes del día según el estado del checkbox de la cabecera
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = checked;
-        });
-    }
 
     horarios.forEach((horario, index) => {
         const fila = document.createElement("tr");
@@ -74,32 +61,41 @@ function cargar_calendario() {
             tiempo_bloque = new Date(tiempo_bloque.getTime() + (dia - 1) * 24 * 3600 * 1000);
             tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia - 1) * 24 * 3600 * 1000);
 
-            // Si el bloque está disponible, muestra el checkbox y el botón de agendar
             if (horario.esAlmuerzo || tiempo_bloque < tiempo_servidor) {
+                // Mostrar que el bloque no está disponible
                 celda.innerHTML = `<div style='color: #ff0000;'>(no disponible)</div>`;
             } else {
-                // Condición para determinar si se muestra el checkbox
-                const mostrarCheckbox = tipoUsuario === 'administrador' || tipoUsuario === 'trabajadorsocial';
-                const reagendar = reagenda;
-            
-                celda.innerHTML = `
-                    <div>
-                        ${reagendar 
-                            ? `<button class="btn" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">ReAgendar</button>`
-                            : `
-                                ${mostrarCheckbox 
-                                    ? `<input type="checkbox" id="bloquear-${horario.id}-${dia}" class="checkbox-bloquear checkbox-bloquear-${['lunes', 'martes', 'miercoles', 'jueves', 'viernes'][dia - 1]}" />`
-                                    : ''}
-                                <button class="btn" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">Agendar</button>
-                              `
-                        }
-                    </div>
-                `;
-            }
-            
-fila.appendChild(celda);
+                // Mostrar botones según el tipo de usuario
+                let botonesHtml = "";
 
+                if (tipoUsuario === 'administrador' || tipoUsuario === 'trabajadorsocial') {
+                    botonesHtml += `
+                        <button class="btn btn-primary" onClick="bloquearHorario(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque.toISOString()}')">
+                            Bloquear
+                        </button>`;
+                    
+                    }
+                } else if (tipoUsuario === 'estudiante' || tipoUsuario === 'noestudiante') {
+                        if(!reagenda){
+                            botonesHtml += `
+                        <button class="btn btn-success" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">
+                            Agendar
+                        </button>`;
+                        }
+                        
+                        if (reagenda) {
+                        botonesHtml += `
+                            <button class="btn btn-warning mt-1" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini}', '${tiempo_bloque}')">
+                                ReAgendar
+                            </button>`;
+                }
+
+                celda.innerHTML = `<div>${botonesHtml}</div>`;
+            }
+ 
+            fila.appendChild(celda);
         }
+
         tablaHorario.appendChild(fila);
     });
 }
