@@ -99,46 +99,57 @@
         </form>
         <div class="card-container">
             <?php if (isset($citas) && !empty($citas)): ?>
-                <?php foreach ($citas as $cita): ?>
-                    <?php
-                    // Crear objetos DateTime para la cita y la fecha actual
-                    $fechaCita = new DateTime($cita['FechaInicio']);
-                    $fechaActual = new DateTime();
+                <?php
+                    foreach ($citas as $cita):
+                        // Crear objetos DateTime para la cita y la fecha actual
+                        $fechaCita = new DateTime($cita['FechaInicio']);
+                        $fechaActual = new DateTime();
 
-                    // Comparar la fecha y hora de la cita con la fecha y hora actuales
-                    $esPasada = $fechaCita < $fechaActual;
+                        // Comparar la fecha y hora de la cita con la fecha y hora actuales
+                        $esPasada = $fechaCita < $fechaActual;
+
+                        // Calcular la diferencia en segundos y convertirla a minutos
+                        $diferenciaSegundos = $fechaCita->getTimestamp() - $fechaActual->getTimestamp();
+                        $diferenciaMinutos = $diferenciaSegundos / 60;
+
+                        // Permitir cancelar si faltan más de 10 minutos
+                        $puedeCancelar = $diferenciaMinutos > 10;
                     ?>
-                    <div class="card">
-                        <div class="card-body">
-                            <?php if ($esPasada): ?>
-                                <h5 class="card-title text-danger">Cita Pasada</h5>
-                            <?php endif; ?>
-                            <h5 class="card-title"><?= htmlspecialchars($cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante']); ?></h5>
-                            <p class="card-text"><strong>Teléfono:</strong> <?= htmlspecialchars($cita['Telefono']); ?></p>
-                            <p class="card-text"><strong>Correo:</strong> <?= htmlspecialchars($cita['Correo']); ?></p>
-                            <p class="card-text"><strong>Trabajador Social:</strong> <?= htmlspecialchars($cita['NombreTS'] . ' ' . $cita['ApellidoTS']); ?></p>
-                            <p class="card-text"><strong>Fecha Inicio:</strong> <?= htmlspecialchars($cita['FechaInicio']); ?></p>
-                            <p class="card-text"><strong>Fecha Término:</strong> <?= htmlspecialchars($cita['FechaTermino']); ?></p>
-                            <p class="card-text"><strong>Motivo:</strong> <?= htmlspecialchars($cita['Motivo']); ?></p>
-                        </div>
-                        <div class="card-footer">
-                            <!-- Botón de cancelar -->
-                            <form method="POST" action="<?= site_url('usuarios/eliminarcita'); ?>" style="display:inline;">
-                                <input type="hidden" name="idCita" value="<?= $cita['ID']; ?>">
-                                <input type="hidden" name="runCliente" value="<?= $cita['RUNCliente']; ?>">
-                                
-                                <button class="btn btn-primary mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="button" onClick="seleccionarFecha('<?= $cita['ID']; ?>')">
-                                    Reagendar
-                                </button>
+                        <div class="card">
+                            <div class="card-body">
+                                <?php if ($esPasada): ?>
+                                    <h5 class="card-title text-danger">Cita Pasada</h5>
+                                <?php endif; ?>
+                                <h5 class="card-title"><?= htmlspecialchars($cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante']); ?></h5>
+                                <p class="card-text"><strong>Teléfono:</strong> <?= htmlspecialchars($cita['Telefono']); ?></p>
+                                <p class="card-text"><strong>Correo:</strong> <?= htmlspecialchars($cita['Correo']); ?></p>
+                                <p class="card-text"><strong>Trabajador Social:</strong> <?= htmlspecialchars($cita['NombreTS'] . ' ' . $cita['ApellidoTS']); ?></p>
+                                <p class="card-text"><strong>Fecha Inicio:</strong> <?= htmlspecialchars($cita['FechaInicio']); ?></p>
+                                <p class="card-text"><strong>Fecha Término:</strong> <?= htmlspecialchars($cita['FechaTermino']); ?></p>
+                                <p class="card-text"><strong>Motivo:</strong> <?= htmlspecialchars($cita['Motivo']); ?></p>
+                            </div>
+                            <div class="card-footer">
+                                <!-- Botón de reagendar -->
+                                <?php if ($tipo === 'estudiante' || $tipo === 'noestudiante'): ?>
+                                    <button class="btn btn-primary mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="button" onClick="seleccionarFecha('<?= $cita['ID']; ?>')">
+                                        Reagendar
+                                    </button>
+                                <?php endif; ?>
 
-                                <button class="btn btn-danger mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="submit">
-                                    Cancelar
-                                </button>
-                                
-                            </form>
+                                <!-- Botón de cancelar -->
+                                <?php if ($tipo === 'estudiante' || $tipo === 'noestudiante'): ?>
+                                    <form method="POST" action="<?= site_url('usuarios/eliminarcita'); ?>" style="display:inline;">
+                                        <input type="hidden" name="idCita" value="<?= $cita['ID']; ?>">
+                                        <input type="hidden" name="runCliente" value="<?= $cita['RUNCliente']; ?>">
+                                        <button class="btn btn-danger mt-2" <?= (!$puedeCancelar || $esPasada) ? 'disabled' : ''; ?> type="submit">
+                                            Cancelar
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+
             <?php else: ?>
                 <div class="alert alert-info text-center w-100">
                     No se encontraron citas.

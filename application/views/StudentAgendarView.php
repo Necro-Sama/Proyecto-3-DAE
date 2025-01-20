@@ -124,8 +124,10 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
                             action="<?= site_url() ?>/usuarios/accion_agendar"
                         <?php endif; ?>
                         <?php if($reagenda == true): ?>
-                        <?php endif;?>>
-                        
+                            action="<?= site_url() ?>/usuarios/reagendar"
+                        <?php endif;?>
+                    >
+
 
                     <div class="modal-body">
                         <input type="text" id="fecha_ini" name="fecha_ini" hidden>

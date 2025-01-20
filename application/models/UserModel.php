@@ -213,7 +213,22 @@ class UserModel extends CI_Model {
     {
         return $this->db->insert('noestudiante', $data);
     }
+    // Método para obtener el correo del usuario desde la tabla persona
+    public function getCorreoUsuario($RUN)
+    {
+        $this->db->select('correo');
+        $this->db->from('persona');
+        $this->db->where('RUN', $RUN); // Asegúrate de que el campo de ID sea el correcto
+        $query = $this->db->get();
+
+        if ($query->num_rows() > 0) {
+            return $query->row()->correo; // Retorna el correo del usuario
+        }
+
+        return null; // Si no se encuentra el correo
+    }
 }
+
 class Trabajadores_model extends CI_Model {
     // Seccion licencias
     public function obtenerTrabajadoresSociales() {

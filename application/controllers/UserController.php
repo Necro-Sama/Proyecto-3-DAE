@@ -133,56 +133,91 @@ class UserController extends CI_Controller
         return $this->UserModel->get_admin($RUN_usuario);
     }
     public function accion_agendar()
-    {
-        $this->session->agendar_exito = "";
-        $this->session->agendar_error = "";
-        $usuario = $this->check_logged_in();
-        if (!$usuario) {
-            session_destroy();
-            redirect("/usuarios/login");
-        }
+{
+    $this->session->agendar_exito = "";
+    $this->session->agendar_error = "";
+    $usuario = $this->check_logged_in();
+    
+    if (!$usuario) {
+        session_destroy();
+        redirect("/usuarios/login");
+    }
 
-        $fecha_ini = $this->input->post("fecha_ini");
-        $fecha_ter = $this->input->post("fecha_ter");
-        $motivo = $this->input->post("motivo");
-        $id_anterior = $this->input->post("id_anterior"); // ID de la cita anterior
+    $fecha_ini = $this->input->post("fecha_ini");
+    $fecha_ter = $this->input->post("fecha_ter");
+    $motivo = $this->input->post("motivo");
+    $id_anterior = $this->input->post("id_anterior"); // ID de la cita anterior
 
-        if (!$motivo) {
-            $this->session->agendar_error = "Por favor seleccione un Motivo.";
-            $this->session->mark_as_flash("agendar_error");
-            redirect("/usuarios/agendar");
-        }
-        if (!$fecha_ini) {
-            $this->session->agendar_error = "No hubo una fecha seleccionada.";
-            $this->session->mark_as_flash("agendar_error");
-            redirect("/usuarios/agendar");
-        }
-
-        try {
-            // Registrar nueva cita
-            $this->BloqueModel->agendar_estudiante(
-                $usuario,
-                $fecha_ini,
-                $fecha_ter,
-                $motivo
-            );
-
-            // Llamar a la función de eliminación en CitasController
-            if ($id_anterior) {
-                $this->load->controller('CitasController'); // Cargar el controlador
-                $this->CitasController->eliminar($id_anterior); // Llamar a la función
-            }
-
-        } catch (Exception $e) {
-            $this->session->agendar_error = $e->getMessage();
-            $this->session->mark_as_flash("agendar_error");
-            redirect("/usuarios/agendar");
-        }
-
-        $this->session->agendar_exito = "Hora agendada con éxito.";
-        $this->session->mark_as_flash("agendar_exito");
+    if (!$motivo) {
+        $this->session->agendar_error = "Por favor seleccione un Motivo.";
+        $this->session->mark_as_flash("agendar_error");
         redirect("/usuarios/agendar");
     }
+    if (!$fecha_ini) {
+        $this->session->agendar_error = "No hubo una fecha seleccionada.";
+        $this->session->mark_as_flash("agendar_error");
+        redirect("/usuarios/agendar");
+    }
+
+    try {
+        // Registrar nueva cita
+        $this->BloqueModel->agendar_estudiante(
+            $usuario,
+            $fecha_ini,
+            $fecha_ter,
+            $motivo
+        );
+        // Llamar a la función de eliminación en CitasController si hay una cita anterior
+        if ($id_anterior) {
+            $this->load->controller('CitasController'); // Cargar el controlador
+            $this->CitasController->eliminar($id_anterior); // Llamar a la función
+        }
+        $RUN_usuario= $this->check_logged_in();
+        // Obtener el correo del usuario desde la tabla persona
+        $correoUsuario = $this->UserModel->getCorreoUsuario($RUN_usuario); // Método que obtiene el correo desde la tabla persona
+
+        if (!$correoUsuario) {
+            $this->session->agendar_error = "No se pudo obtener el correo del usuario.";
+            $this->session->mark_as_flash("agendar_error");
+            redirect("/usuarios/agendar");
+        }
+
+        // Enviar el correo con los detalles de la cita
+        $this->load->library('email'); // Cargar la biblioteca de correo
+
+        // Configuración del correo
+        $this->email->from('gustavo.rios.alvarez@alumnos.uta.cl', 'Sistema de Citas');
+        $this->email->to($correoUsuario); // Enviar al correo del usuario obtenido de la tabla persona
+        $this->email->subject('Confirmación de Cita Agendada');
+
+        // Cuerpo del correo
+        $mensaje = "
+            <h1>Confirmación de Cita</h1>
+            <p><strong>Nombre:</strong> {$usuario['Nombre']} {$usuario['Apellido']}</p>
+            <p><strong>Motivo:</strong> $motivo</p>
+            <p><strong>Fecha y Hora de Inicio:</strong> $fecha_ini</p>
+            <p><strong>Fecha y Hora de Término:</strong> $fecha_ter</p>
+        ";
+        $this->email->message($mensaje);
+
+        // Enviar correo
+        if ($this->email->send()) {
+            $this->session->agendar_exito = "Hora agendada con éxito y correo enviado.";
+            $this->session->mark_as_flash("agendar_exito");
+        } else {
+            $this->session->agendar_error = "Cita agendada, pero no se pudo enviar el correo.";
+            $this->session->mark_as_flash("agendar_error");
+        }
+
+    } catch (Exception $e) {
+        $this->session->agendar_error = $e->getMessage();
+        $this->session->mark_as_flash("agendar_error");
+        redirect("/usuarios/agendar");
+    }
+
+    redirect("/usuarios/agendar");
+}
+
     public function logged_in($token)
     {
         if ($token) {

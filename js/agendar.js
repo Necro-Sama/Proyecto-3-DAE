@@ -21,8 +21,6 @@ let horarios = [
     { id: 18, horaInicio: "18:30", horaFinal: "19:00" },
 ];
 
-
-
 function agendar(dia, bloque, fecha_ini, fecha_ter) {
     fecha_ini = new Date(fecha_ini);
     fecha_ter = new Date(fecha_ter);
@@ -93,8 +91,10 @@ function cargar_calendario() {
             let tiempo_bloque_ini = new Date(semana + tInicio);
             tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia - 1) * 24 * 3600 * 1000); // Ajustar al día correspondiente
 
-            // Validar si es almuerzo o si el bloque ya pasó
-            if (horario.esAlmuerzo || tiempo_bloque_ini < tiempo_servidor) {
+            // Verificar si el bloque está reservado
+            if (horario.estado === 'Reservado') {
+                celda.innerHTML = `<div style='color: #ff0000;'>Reservado</div>`;
+            } else if (horario.esAlmuerzo || tiempo_bloque_ini < tiempo_servidor) {
                 celda.innerHTML = `<div style='color: #ff0000;'>(no disponible)</div>`;
             } else {
                 let botonesHtml = "";
@@ -129,9 +129,6 @@ function cargar_calendario() {
         tablaHorario.appendChild(fila);
     });
 }
-
-
-
 
 window.onload = (e) => {
     cargar_calendario();

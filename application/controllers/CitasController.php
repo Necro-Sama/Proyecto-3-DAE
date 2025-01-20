@@ -78,7 +78,9 @@ class CitasController extends CI_Controller
         }
     }
 
-    public function seleccionarfecha($id) 
+    public function seleccionarfecha($id) {
+
+    
         //la idea principal es enviarlo a la agenda para que seleccione otro dia de las 3 semanas 
         //de esta manera cambiamos el boton de agendar por uno que diga reagendar de la misma manera que bloquear con un if
         //traspasamos una variable para que pueda reconocer el proceso
