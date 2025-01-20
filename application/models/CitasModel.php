@@ -45,56 +45,26 @@ class CitasModel extends CI_Model
         return $this->db->trans_status(); // Retorna el estado de la transacción
     }
 
-    public function verificar_bloque($id_bloque)
+    public function verificarBloque($dia, $id, $fechaInicio)
     {
-        // Verificar si el bloque está reservado en la tabla bloqueatencion
-        
-        $query_atencion =$this->db->query('
-            SELECT ID FROM bloqueantecion
-            where ID = ??
-        ',$id_bloque);
-
-        if ($query_atencion->num_rows() > 0) {
-            return 'Reservado'; // Bloque reservado
-        }
-
-        // Verificar si el bloque está bloqueado en la tabla bloquebloqueado
-        $query_bloqueado =$this->db->query('
-            SELECT ID FROM bloquebloqueado
-            where ID = ??
-        ',$id_bloque);
-        if ($query_bloqueado->num_rows() > 0) {
-            return 'Bloqueado'; // Bloque bloqueado
-        }
-
-        // Si no está ni reservado ni bloqueado
-        return ['estado' => 'Disponible']; // Bloque disponible
+        $this->db->where('id', $id);
+        $this->db->where('fechaInicio', $fechaInicio);
+        $query = $this->db->get('bloquebloqueado');
+        return $query->num_rows() > 0;
     }
-    public function bloquearBloque($id, $fechainicio, $fechafinal, $RUN) {
-        // Verificar si ya existe un bloqueo con la misma fecha inicial
-        $query = $this->db->get_where('bloquebloqueado', ['fechainicio' => $fechainicio]);
-        
-        if ($query->num_rows() > 0) {
-            echo 'Fecha ya Bloqueada';
-        } else {
-            // Datos a insertar en la tabla
-            $data = [
-                'ID' => $id,
-                'fechainicio' => $fechainicio,
-                'fechafinal' => $fechafinal,
-                'RUN' => $RUN
-            ];
-    
-            // Insertar el nuevo registro
-            $this->db->insert('bloquebloqueado', $data);
-    
-            if ($this->db->affected_rows() > 0) {
-                echo 'Bloqueo creado exitosamente';
-            } else {
-                echo 'Error al bloquear el bloque';
-            }
-        }
+
+    // Insertar un nuevo bloqueo
+    public function bloquearHorario($runUsuario, $dia, $id, $fechaInicio, $fechaFinal)
+    {
+        $data = [
+            'RUN' => $runUsuario,
+            'id' => $id,
+            'fechaInicio' => $fechaInicio,
+            'fechaFinal' => $fechaFinal,
+        ];
+        $this->db->insert('bloquebloqueado', $data);
     }
+
     public function seleccionarfecha(){
         //la idea principal es enviarlo a la agenda para que seleccione otro dia de las 3 semanas 
         //de esta manera cambiamos el boton de agendar por uno que diga reagendar de la misma manera que bloquear con un if

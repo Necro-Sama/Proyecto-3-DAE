@@ -7,7 +7,7 @@ class CitasController extends CI_Controller
         parent::__construct();
         $this->load->model('TrabajadorSocialModel');
         $this->load->model('CitasModel');
-        $this->load->model('UserController');
+        $this->load->model('UserModel');
     }
     // Método para eliminar una cita
     public function eliminarCita()
@@ -55,9 +55,29 @@ class CitasController extends CI_Controller
         }
         return $data;
     }
-    function bloquear ($RUN_usuario,$fechainicio,$fechafinal) {
-        
+    public function bloquearHorario()
+    {
+        // Obtener datos desde el cuerpo de la solicitud
+        $input = json_decode($this->input->raw_input_stream, true);
+
+        $id = $input['id'];
+        $fechaInicio = $input['fechaInicio'];
+        $fechaFinal = $input['fechaFinal'];
+        $runUsuario = $this->session->userdata('RUN'); // Obtener el RUN del usuario actual
+
+        // Verificar si el bloque ya está bloqueado
+        $existe = $this->CitasModel->verificarBloque($id, $fechaInicio);
+
+        if ($existe) {
+            // Responder si el bloque ya estaba bloqueado
+            echo json_encode(['success' => false, 'mensaje' => 'El bloque ya está bloqueado.']);
+        } else {
+            // Insertar el bloque bloqueado
+            $this->Horario_model->bloquearHorario($runUsuario, $dia, $id, $fechaInicio, $fechaFinal);
+            echo json_encode(['success' => true, 'mensaje' => 'Bloque bloqueado con éxito.']);
+        }
     }
+
     public function seleccionarfecha($id) 
         //la idea principal es enviarlo a la agenda para que seleccione otro dia de las 3 semanas 
         //de esta manera cambiamos el boton de agendar por uno que diga reagendar de la misma manera que bloquear con un if
