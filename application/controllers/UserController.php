@@ -167,14 +167,12 @@ class UserController extends CI_Controller
             $fecha_ter,
             $motivo
         );
-        // Llamar a la función de eliminación en CitasController si hay una cita anterior
         if ($id_anterior) {
             $this->load->controller('CitasController'); // Cargar el controlador
             $this->CitasController->eliminar($id_anterior); // Llamar a la función
         }
         $RUN_usuario= $this->check_logged_in();
-        // Obtener el correo del usuario desde la tabla persona
-        $correoUsuario = $this->UserModel->getCorreoUsuario($RUN_usuario); // Método que obtiene el correo desde la tabla persona
+        $correoUsuario = $this->UserModel->getCorreoUsuario($RUN_usuario); 
 
         if (!$correoUsuario) {
             $this->session->agendar_error = "No se pudo obtener el correo del usuario.";
@@ -183,14 +181,13 @@ class UserController extends CI_Controller
         }
 
         // Enviar el correo con los detalles de la cita
-        $this->load->library('email'); // Cargar la biblioteca de correo
+        $this->load->library('email'); 
 
         // Configuración del correo
         $this->email->from('gustavo.rios.alvarez@alumnos.uta.cl', 'Sistema de Citas');
-        $this->email->to($correoUsuario); // Enviar al correo del usuario obtenido de la tabla persona
+        $this->email->to($correoUsuario); 
         $this->email->subject('Confirmación de Cita Agendada');
 
-        // Cuerpo del correo
         $mensaje = "
             <h1>Confirmación de Cita</h1>
             <p><strong>Nombre:</strong> {$usuario['Nombre']} {$usuario['Apellido']}</p>

@@ -179,7 +179,7 @@
         }
         function seleccionarFecha(idCita, runCliente) {
             // Redirige a una página para seleccionar una nueva fecha
-            const url = `<?= site_url('usuarios/seleccionarfecha'); ?>?idCita=${idCita}`;
+            const url = `<?= site_url('usuarios/reagendar'); ?>?idCita=${idCita}`;
             window.location.href = url;
         }
     </script>

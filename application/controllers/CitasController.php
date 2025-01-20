@@ -91,8 +91,7 @@ class CitasController extends CI_Controller
         $data = $this->comprobardatos($RUN_usuario);
         $data['reagenda'] = true;
         $data['eliminar'] = $id;
-        $this->load->view('StudentAgendarView',$data);
-        
+        $this->load->view('StudentAgendarView',$data);   
     }
     public function reagendar(){
         //llamara a eliminar cita para borrar la anterior y pasara a tomar la nueva una vez terminado enviara un mensaje de reagendado con exito.
