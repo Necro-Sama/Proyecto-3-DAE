@@ -70,10 +70,12 @@ function seleccion_semana(e) {
 }
 
 function cargar_calendario() {
-    let tiempo_servidor = new Date(document.getElementById("tiempo-servidor").innerHTML);
+    let tiempo_servidor = new Date(document.getElementById("tiempo-servidor").innerText);
     const tablaHorario = document.getElementById("tabla-horario");
-    tablaHorario.innerHTML = "";
+    tablaHorario.innerHTML = ""; // Limpiar la tabla antes de cargar
     const semana = document.getElementById("semana-select").value.replace("00:00:00", "");
+
+    const fragment = document.createDocumentFragment(); // Usar fragmentos para optimizar el DOM
 
     horarios.forEach((horario, index) => {
         const fila = document.createElement("tr");
@@ -85,50 +87,59 @@ function cargar_calendario() {
 
         for (let dia = 1; dia <= 5; dia++) {
             const celda = document.createElement("td");
-            
-            // Calculamos el tiempo de inicio del bloque
-            let tInicio = horario.horaInicio + ":00"; // Convertir a formato completo con segundos
-            let tiempo_bloque_ini = new Date(semana + tInicio);
-            tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia - 1) * 24 * 3600 * 1000); // Ajustar al día correspondiente
 
-            // Verificar si el bloque está reservado
+            // Calcular tiempo de inicio del bloque
+            let tInicio = `${horario.horaInicio}:00`;
+            let tiempo_bloque_ini = new Date(`${semana}${tInicio}`);
+            tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia - 1) * 24 * 3600 * 1000);
+
             if (horario.estado === 'Reservado') {
-                celda.innerHTML = `<div style='color: #ff0000;'>Reservado</div>`;
+                celda.innerHTML = `<div style="color: #ff0000;">Reservado</div>`;
             } else if (horario.esAlmuerzo || tiempo_bloque_ini < tiempo_servidor) {
-                celda.innerHTML = `<div style='color: #ff0000;'>(no disponible)</div>`;
+                celda.innerHTML = `<div style="color: #ff0000;">(no disponible)</div>`;
             } else {
-                let botonesHtml = "";
-
-                if (tipoUsuario === 'administrador' || tipoUsuario === 'trabajadorsocial') {
-                    botonesHtml += `
-                        <button class="btn btn-primary" onClick="bloquear(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
-                            Bloquear
-                        </button>`;
-                } 
-
-                if (tipoUsuario === 'estudiante' || tipoUsuario === 'noestudiante') {
-                    botonesHtml += `
-                        <button class="btn btn-success" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
-                            Agendar
-                        </button>`;
-
-                    if (reagenda) {
-                        botonesHtml += `
-                            <button class="btn btn-warning mt-1" onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
-                                Reagendar
-                            </button>`;
-                    }
-                }
-
-                celda.innerHTML = `<div>${botonesHtml}</div>`;
+                celda.innerHTML = crearBotones(dia, horario, tiempo_bloque_ini);
             }
 
             fila.appendChild(celda);
         }
 
-        tablaHorario.appendChild(fila);
+        fragment.appendChild(fila);
     });
+
+    tablaHorario.appendChild(fragment); // Agregar el fragmento al DOM
 }
+
+function crearBotones(dia, horario, tiempo_bloque_ini) {
+    let botonesHtml = "";
+
+    if (tipoUsuario === "administrador" || tipoUsuario === "trabajadorsocial") {
+        botonesHtml += `
+            <button class="btn btn-primary" 
+                onClick="bloquear(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
+                Bloquear
+            </button>`;
+    }
+
+    if (tipoUsuario === "estudiante" || tipoUsuario === "noestudiante") {
+        botonesHtml += `
+            <button class="btn btn-success" 
+                onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
+                Agendar
+            </button>`;
+
+        if (reagenda) {
+            botonesHtml += `
+                <button class="btn btn-warning mt-1" 
+                    onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
+                    Reagendar
+                </button>`;
+        }
+    }
+
+    return `<div>${botonesHtml}</div>`;
+}
+
 
 window.onload = (e) => {
     cargar_calendario();

@@ -31,6 +31,22 @@ class CitasController extends CI_Controller
     function estadobloque($id_bloque){
         return $this->CitasModel->verificar_bloque($id_bloque);
     }
+    public function check_logged_in()
+    {
+        if ($this->session->token) {
+            return $this->UserModel->login_token($this->session->token);
+        }
+        $cred = $this->input->post("credential");
+        $g_id_token = $cred ? $cred : $this->session->google_token;
+        if (!$g_id_token) {
+            return;
+        }
+        $g_client = $this->UserModel->check_google_logged_in($g_id_token);
+        if ($g_client) {
+            $this->session->google_token = $g_id_token;
+            return $g_client;
+        }
+    }
     public function comprobardatos($RUN_usuario) {
         $data['persona'] = $this->UserModel->getPersona($RUN_usuario);
         
@@ -78,19 +94,14 @@ class CitasController extends CI_Controller
         }
     }
 
-    public function seleccionarfecha($id) {
+    public function seleccionarfecha() {
 
-    
-        //la idea principal es enviarlo a la agenda para que seleccione otro dia de las 3 semanas 
-        //de esta manera cambiamos el boton de agendar por uno que diga reagendar de la misma manera que bloquear con un if
-        //traspasamos una variable para que pueda reconocer el proceso
-        //una vez se seleccione llamara a la funcion reagendar para agedar y eliminar la otra pasando los datos de la eliminacion
-        //para la funcion eliminar cita y reusar funciones
-
-        $RUN_usuario = $this->UserController->check_logged_in();
-        $data = $this->comprobardatos($RUN_usuario);
+        $idCita = $this->input->post('idCita');
+        $run = $this->input->post('runCliente');
+        
+        $data = $this->comprobardatos($run);
         $data['reagenda'] = true;
-        $data['eliminar'] = $id;
+        $data['eliminar'] = $idCita;
         $this->load->view('StudentAgendarView',$data);   
     }
     public function reagendar(){

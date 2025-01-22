@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Visualizar Citas</title>
-    <?php $this->load->view("navbar", $tipo); ?>
+    <?php
+
+use Google\Service\CloudSearch\OnClick;
+
+ $this->load->view("navbar", $tipo); ?>
     <link rel="stylesheet" href="<?= base_url('public/bootstrap/css/bootstrap.min.css'); ?>">
     <style>
         body {
@@ -75,6 +79,7 @@
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="<?= base_url('assets/js/scripts.js') ?>"></script>
 
 </head>
 <body>
@@ -129,15 +134,19 @@
                                 <p class="card-text"><strong>Motivo:</strong> <?= htmlspecialchars($cita['Motivo']); ?></p>
                             </div>
                             <div class="card-footer">
-                                <!-- Botón de reagendar -->
+                                
                                 <?php if ($tipo === 'estudiante' || $tipo === 'noestudiante'): ?>
-                                    <button class="btn btn-primary mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="button" onClick="seleccionarFecha('<?= $cita['ID']; ?>')">
+                                    
+                                    <!-- Botón de reagendar -->
+                                    <form method="POST" action="<?= OnClick(); ?>" style="display:inline;">
+                                        <input type="hidden" name="idCita" value="<?= $cita['ID']; ?>">
+                                        <input type="hidden" name="runCliente" value="<?= $cita['RUNCliente']; ?>">
+                                        <button class="btn btn-primary mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="button">
                                         Reagendar
-                                    </button>
-                                <?php endif; ?>
-
-                                <!-- Botón de cancelar -->
-                                <?php if ($tipo === 'estudiante' || $tipo === 'noestudiante'): ?>
+                                        </button> 
+                                    </form>
+                                    
+                                    <!-- Botón de cancelar -->
                                     <form method="POST" action="<?= site_url('usuarios/eliminarcita'); ?>" style="display:inline;">
                                         <input type="hidden" name="idCita" value="<?= $cita['ID']; ?>">
                                         <input type="hidden" name="runCliente" value="<?= $cita['RUNCliente']; ?>">
@@ -166,10 +175,11 @@
                     idCita: idCita, 
                     runCliente: runCliente 
                 }, function(response) {
-                    if (response.success) {
+                    if (response.success){
                         alert(response.message);
                         location.reload(); // Recarga la página para actualizar el listado
-                    } else {
+                    }
+                    else {
                         alert("Error: " + response.message);
                     }
                 }, "json").fail(function() {
@@ -177,10 +187,26 @@
                 });
             }
         }
-        function seleccionarFecha(idCita, runCliente) {
-            // Redirige a una página para seleccionar una nueva fecha
-            const url = `<?= site_url('usuarios/reagendar'); ?>?idCita=${idCita}`;
-            window.location.href = url;
+        </script>
+        <script>
+        function seleccionarfecha(idCita, runCliente) {
+            if (confirm("¿Estás seguro de que deseas reagendar esta cita?")) {
+                console.log("pasa la pregunta");
+                // Envía la solicitud de reagendar al servidor
+                $.post("<?= site_url('usuarios/reagendar'); ?>", {
+                    idCita: idCita, 
+                    runCliente: runCliente 
+                }, function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        window.location.href = "<?= site_url('usuarios/visualizar-cita'); ?>"; // Redirige a la página deseada
+                    } else {
+                        alert("Error: " + response.message);
+                    }
+                }, "json").fail(function() {
+                    alert("Ocurrió un error al intentar reagendar la cita.");
+                });
+            }
         }
     </script>
 </body>
