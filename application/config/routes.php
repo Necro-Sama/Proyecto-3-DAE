@@ -63,10 +63,15 @@ $route['translate_uri_dashes'] = FALSE;
     $route['usuarios/registrar']= 'UserController/registrar';
     //Home
         $route['usuarios/home'] = 'UserController/home';
-//Rutas de agendar
-    $route['usuarios/agendar'] = 'UserController/agendar';
-    $route['usuarios/accion_agendar'] = 'UserController/accion_agendar';
-    $route['usuarios/reagendar'] = 'CitasController/seleccionarfecha';
+//Gestion de Citas
+    //Rutas de agendar cita
+        $route['usuarios/agendar'] = 'UserController/agendar';
+        $route['usuarios/accion_agendar'] = 'UserController/accion_agendar';
+    //Rutas de reagendar cita
+        $route['usuarios/vistaReagendar'] = 'CitasController/abrirreagendar';
+        $route['usuarios/reagendar'] = 'CitasController/seleccionarfecha';
+    //Rutas de eliminar cita    
+        $route['usuarios/eliminarcita'] = 'CitasController/eliminarCita';
 //Rutas de Gestion TS
     $route['usuarios/gestor_ts'] = 'TrabajadorSocialController/index';
     //gestion de ts
@@ -81,6 +86,5 @@ $route['translate_uri_dashes'] = FALSE;
         $route['usuarios/guardar']= 'UserController/guardar';
 //Ruta general vizualizar cita
     $route['usuarios/visualizar-citas'] = 'TrabajadorSocialController/obtenercita';
-    $route['usuarios/eliminarcita'] = 'CitasController/eliminarCita';
 
 

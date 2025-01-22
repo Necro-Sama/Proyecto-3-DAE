@@ -136,13 +136,11 @@ use Google\Service\CloudSearch\OnClick;
                             <div class="card-footer">
                                 
                                 <?php if ($tipo === 'estudiante' || $tipo === 'noestudiante'): ?>
-                                    
                                     <!-- Botón de reagendar -->
-                                    <form method="POST" action="<?= OnClick(); ?>" style="display:inline;">
+                                    <form method="POST" action="<?= site_url('usuarios/VistaReagendar'); ?>" style="display:inline;">
                                         <input type="hidden" name="idCita" value="<?= $cita['ID']; ?>">
-                                        <input type="hidden" name="runCliente" value="<?= $cita['RUNCliente']; ?>">
                                         <button class="btn btn-primary mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="button">
-                                        Reagendar
+                                            Reagendar
                                         </button> 
                                     </form>
                                     
@@ -187,15 +185,14 @@ use Google\Service\CloudSearch\OnClick;
                 });
             }
         }
-        </script>
-        <script>
-        function seleccionarfecha(idCita, runCliente) {
+    </script>
+    <script>
+        function VistaReagendar(idCita) {
             if (confirm("¿Estás seguro de que deseas reagendar esta cita?")) {
                 console.log("pasa la pregunta");
                 // Envía la solicitud de reagendar al servidor
-                $.post("<?= site_url('usuarios/reagendar'); ?>", {
-                    idCita: idCita, 
-                    runCliente: runCliente 
+                $.post("<?= site_url('usuarios/vistaReagendar'); ?>", {
+                    idCita: idCita
                 }, function(response) {
                     if (response.success) {
                         alert(response.message);

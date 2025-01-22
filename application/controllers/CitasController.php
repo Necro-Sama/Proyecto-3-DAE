@@ -94,6 +94,17 @@ class CitasController extends CI_Controller
         }
     }
 
+
+    //seccion reagendar
+    public function abrirreagendar(){
+        $idCita = $this->input->post('idCita');
+        $run = $this->check_logged_in();
+        
+        $data['persona']= $this->comprobardatos($run);
+        $data['reagenda'] = true;
+        $data['eliminar'] = $idCita;
+        return $this->load->view('ReagendarView',$data);
+    }
     public function seleccionarfecha() {
 
         $idCita = $this->input->post('idCita');
