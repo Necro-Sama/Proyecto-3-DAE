@@ -84,17 +84,30 @@ function cargar_calendario() {
 
 function crearBotones(dia, horario, tiempo_bloque_ini) {
     let botonesHtml = "";
-
-    botonesHtml += `
-        <button class="btn btn-warning mt-1" 
-            onClick="reagendar(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
-            Reagendar
-        </button>`;
-        
-    return `<div>${botonesHtml}</div>`;
+    if (tipoUsuario === "administrador" || tipoUsuario === "trabajadorsocial") {
+        botonesHtml += `
+            <button class="btn btn-primary" 
+                onClick="bloquear(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
+                Bloquear
+            </button>`;
     }
-
+    if (tipoUsuario === "estudiante" || tipoUsuario === "noestudiante") {
+        botonesHtml += `
+            <button class="btn btn-success" 
+                onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
+                Agendar
+            </button>`;
+        if (reagenda) {
+            botonesHtml += `
+                <button class="btn btn-warning mt-1" 
+                    onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
+                    Reagendar
+                </button>`;
+        }
+    }
+    return `<div>${botonesHtml}</div>`;
+}
     
-window.onload = (e) => {
+$(document).ready(function() {
     cargar_calendario();
-};
+});

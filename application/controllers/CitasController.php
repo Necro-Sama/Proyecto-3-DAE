@@ -96,24 +96,21 @@ class CitasController extends CI_Controller
 
 
     //seccion reagendar
-    public function abrirreagendar(){
+    public function abrirreagendar()
+    {
+        // Obtén el ID de la cita desde el formulario
         $idCita = $this->input->post('idCita');
+        
+        // Verifica si el usuario está autenticado
         $run = $this->check_logged_in();
         
-        $data['persona']= $this->comprobardatos($run);
-        $data['reagenda'] = true;
-        $data['eliminar'] = $idCita;
-        return $this->load->view('ReagendarView',$data);
-    }
-    public function seleccionarfecha() {
-
-        $idCita = $this->input->post('idCita');
-        $run = $this->input->post('runCliente');
-        
+        // Obtén los datos necesarios
         $data = $this->comprobardatos($run);
         $data['reagenda'] = true;
         $data['eliminar'] = $idCita;
-        $this->load->view('StudentAgendarView',$data);   
+        
+        // Carga la vista de reagendar
+        return $this->load->view('ReagendarView', $data);
     }
     public function reagendar(){
         //llamara a eliminar cita para borrar la anterior y pasara a tomar la nueva una vez terminado enviara un mensaje de reagendado con exito.

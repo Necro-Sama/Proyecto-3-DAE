@@ -4,8 +4,9 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Agenda</title>
+    <title>Reagendar</title>
     <?php  $this->load->view('navbar',$tipo); ?>
+    <?php print_r($tipo); ?>
     <link rel="stylesheet" type="text/css" href="<?= base_url(
         "css/agendar.css"
     ) ?>"/>
@@ -51,6 +52,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
         <?php  $semanas = $this->BloqueModel->get_semanas(3); ?>
         <select class="form-select" name="semana" id="semana-select" onchange="seleccion_semana(event)">
             <?php foreach ($semanas as $semana) { ?>
+                <?php print_r($semanas);?>
                 <option value="<?= $semana ?>">
                     <?= trim($semana, "00:00:00") ?>
                 </option>
@@ -144,6 +146,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             </div>
         </div>
     </div>
+    <script src="js/agendar.js"></script>
 </body>
 </html>
 <style>
@@ -259,9 +262,5 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     }
 </style>
 <script>
-    const tipoUsuario = "<?= $tipo ?>";
     var reagenda = <?php echo json_encode($reagenda);?>
-</script>
-<script
-src="agendar.js">
 </script>
