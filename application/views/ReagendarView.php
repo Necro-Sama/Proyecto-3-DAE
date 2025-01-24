@@ -8,7 +8,6 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     <?php  $this->load->view('navbar',$tipo); ?>
     <?php print_r($tipo); ?>
     <link rel="stylesheet" type="text/css" href="<?= base_url(
-        "css/agendar.css"
     ) ?>"/>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -27,7 +26,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
         integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
         crossorigin="anonymous"></script>
-    <script src="<?= base_url("js/agendar.js") ?>"></script>
+    
 </head>
 
 <body>
@@ -46,8 +45,6 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             </p>
         <?php endif; ?>
 
-        <div id="tiempo-servidor" hidden><?= $this->BloqueModel->get_tiempo_bd() ?></div>
-        
         <label for="semana">Semana: </label>
         <?php  $semanas = $this->BloqueModel->get_semanas(3); ?>
         <select class="form-select" name="semana" id="semana-select" onchange="seleccion_semana(event)">
@@ -150,6 +147,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 </body>
 </html>
 <style>
+    
     /* Reducir el tamaño vertical del calendario */
     table {
         width: 80%; /* Ancho reducido */

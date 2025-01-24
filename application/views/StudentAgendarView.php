@@ -24,19 +24,6 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
     <script src="<?= base_url("js/agendar.js") ?>"></script>
 
-    <script>
-        $(document).ready(function() {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'es', // Cambiar idioma si es necesario
-                events: [
-                    // Eventos dinámicos o estáticos
-                ]
-            });
-            calendar.render();
-        });
-    </script>
 </head>
 
 <body>
