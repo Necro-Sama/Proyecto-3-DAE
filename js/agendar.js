@@ -43,12 +43,7 @@ function seleccion_semana(e) {
 
 function cargar_calendario() {
     let tiempo_servidor = new Date(document.getElementById("tiempo-servidor").innerText);
-
-    
-    // console.log("tiempo-servidor"+document.getElementById("tiempo-servidor").innerText); // ¿Muestra la fecha esperada?
     const tablaHorario = document.getElementById("tabla-horario");
-    // console.log("tablaHorario"+document.getElementById("tabla-horario")); // ¿Muestra null?
-    
     tablaHorario.innerHTML = ""; // Limpiar la tabla antes de cargar
     const semana = document.getElementById("semana-select").value.replace("00:00:00", "");
 
