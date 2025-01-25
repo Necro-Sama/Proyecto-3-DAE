@@ -288,7 +288,7 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 </script>
 <script
     src="agendar.js">
-    async function bloquear(run, id, fechaInicio, fechaFinal) {
+    function bloquear(run, id, fechaInicio, fechaFinal) {
         try {
             const response = await fetch('/usuarios/bloquear', {
                 method: 'POST',

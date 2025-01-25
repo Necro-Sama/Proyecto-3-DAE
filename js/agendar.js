@@ -87,7 +87,7 @@ function crearBotones(dia, horario, tiempo_bloque_ini) {
 
     if (tipoUsuario === "administrador" || tipoUsuario === "trabajadorsocial") {
         const btnBloquear = document.createElement('button');
-        btnBloquear.className = 'btn btn-primary';
+        btnBloquear.className = 'btn btn-success';
         btnBloquear.innerText = 'Bloquear';
         btnBloquear.onclick = () =>
             bloquear(run, horario.id, tiempo_bloque_ini.toISOString(), tiempo_bloque_ini.toISOString());
@@ -98,7 +98,8 @@ function crearBotones(dia, horario, tiempo_bloque_ini) {
         const btnAgendar = document.createElement('button');
         btnAgendar.className = 'btn btn-success';
         btnAgendar.innerText = 'Agendar';
-        btnAgendar.onclick = () => agendar(dia, horario.id, tiempo_bloque_ini.toISOString(), tiempo_bloque_ini.toISOString());
+        btnAgendar.onclick = () => 
+            agendar(dia, horario.id, tiempo_bloque_ini.toISOString(), tiempo_bloque_ini.toISOString());
         container.appendChild(btnAgendar);
 
         if (reagenda) {
@@ -106,13 +107,14 @@ function crearBotones(dia, horario, tiempo_bloque_ini) {
             btnReagendar.className = 'btn btn-warning mt-1';
             btnReagendar.innerText = 'Reagendar';
             btnReagendar.onclick = () =>
-                bloquear(run, horario.id, tiempo_bloque_ini.toISOString(), tiempo_bloque_ini.toISOString());
+                Reagendar(run, horario.id, tiempo_bloque_ini.toISOString(), tiempo_bloque_ini.toISOString());
             container.appendChild(btnReagendar);
         }
     }
 
     return container.outerHTML;
 }
+
     
 $(document).ready(function() {
     cargar_calendario();
