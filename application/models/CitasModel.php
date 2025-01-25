@@ -48,23 +48,12 @@ class CitasModel extends CI_Model
     public function verificarBloque($dia, $id, $fechaInicio)
     {
         $this->db->where('id', $id);
-        $this->db->where('fechaInicio', $fechaInicio);
         $query = $this->db->get('bloquebloqueado');
         return $query->num_rows() > 0;
     }
-
-    // Insertar un nuevo bloqueo
-    public function bloquearHorario($runUsuario, $dia, $id, $fechaInicio, $fechaFinal)
-    {
-        $data = [
-            'RUN' => $runUsuario,
-            'id' => $id,
-            'fechaInicio' => $fechaInicio,
-            'fechaFinal' => $fechaFinal,
-        ];
-        $this->db->insert('bloquebloqueado', $data);
-    }
-
+    public function insertarBloqueBloqueado($data) {
+            return $this->db->insert('bloquebloqueado', $data);
+        }
     public function seleccionarfecha(){
         //la idea principal es enviarlo a la agenda para que seleccione otro dia de las 3 semanas 
         //de esta manera cambiamos el boton de agendar por uno que diga reagendar de la misma manera que bloquear con un if
@@ -73,10 +62,7 @@ class CitasModel extends CI_Model
         //para la funcion eliminar cita y reusar funciones
         
     }
-    public function reagendar(){
-        //llamara a eliminar cita para borrar la anterior y pasara a tomar la nueva una vez terminado enviara un mensaje de reagendado con exito.
-
-    }
+    
     
 }
 ?>

@@ -83,29 +83,35 @@ function cargar_calendario() {
 }
 
 function crearBotones(dia, horario, tiempo_bloque_ini) {
-    let botonesHtml = "";
+    const container = document.createElement('div');
+
     if (tipoUsuario === "administrador" || tipoUsuario === "trabajadorsocial") {
-        botonesHtml += `
-            <button class="btn btn-primary" 
-                onClick="bloquear(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
-                Bloquear
-            </button>`;
+        const btnBloquear = document.createElement('button');
+        btnBloquear.className = 'btn btn-primary';
+        btnBloquear.innerText = 'Bloquear';
+        btnBloquear.onclick = () =>
+            bloquear(run, horario.id, tiempo_bloque_ini.toISOString(), tiempo_bloque_ini.toISOString());
+        container.appendChild(btnBloquear);
     }
+
     if (tipoUsuario === "estudiante" || tipoUsuario === "noestudiante") {
-        botonesHtml += `
-            <button class="btn btn-success" 
-                onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
-                Agendar
-            </button>`;
+        const btnAgendar = document.createElement('button');
+        btnAgendar.className = 'btn btn-success';
+        btnAgendar.innerText = 'Agendar';
+        btnAgendar.onclick = () => agendar(dia, horario.id, tiempo_bloque_ini.toISOString(), tiempo_bloque_ini.toISOString());
+        container.appendChild(btnAgendar);
+
         if (reagenda) {
-            botonesHtml += `
-                <button class="btn btn-warning mt-1" 
-                    onClick="agendar(${dia}, ${horario.id}, '${tiempo_bloque_ini.toISOString()}', '${tiempo_bloque_ini.toISOString()}')">
-                    Reagendar
-                </button>`;
+            const btnReagendar = document.createElement('button');
+            btnReagendar.className = 'btn btn-warning mt-1';
+            btnReagendar.innerText = 'Reagendar';
+            btnReagendar.onclick = () =>
+                bloquear(run, horario.id, tiempo_bloque_ini.toISOString(), tiempo_bloque_ini.toISOString());
+            container.appendChild(btnReagendar);
         }
     }
-    return `<div>${botonesHtml}</div>`;
+
+    return container.outerHTML;
 }
     
 $(document).ready(function() {

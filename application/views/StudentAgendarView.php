@@ -23,20 +23,6 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
     <script src="<?= base_url("js/agendar.js") ?>"></script>
-
-    <script>
-        $(document).ready(function() {
-            var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                locale: 'es', // Cambiar idioma si es necesario
-                events: [
-                    // Eventos dinámicos o estáticos
-                ]
-            });
-            calendar.render();
-        });
-    </script>
 </head>
 
 <body>
@@ -68,10 +54,6 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
                 </option>
             <?php } ?>
         </select>
-
-        <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
-                <button type="button" class="btn btn-danger" id="btn-bloquear">Bloquear</button>
-        <?php endif; ?>
         <!-- boton "Bloquear" -->
 
         <table class="text-center">
@@ -81,35 +63,35 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
                 <th><div class="p-2 display-7 dia">
                 Lunes
                 <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
-                <input type="checkbox" class="checkbox-dia" id="checkbox-lunes" onchange="marcarTodos('lunes')" />
+                <!-- <input type="checkbox" class="checkbox-dia" id="checkbox-lunes" onchange="marcarTodos('lunes')" /> -->
                 <?php endif; ?>
                     </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                 Martes
                 <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
-                <input type="checkbox" class="checkbox-dia" id="checkbox-martes" onchange="marcarTodos('martes')" />
+                <!-- <input type="checkbox" class="checkbox-dia" id="checkbox-martes" onchange="marcarTodos('martes')" /> -->
                 <?php endif; ?>
                     </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                 Miércoles
                 <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
-                <input type="checkbox" class="checkbox-dia" id="checkbox-miercoles" onchange="marcarTodos('miercoles')" />
+                <!-- <input type="checkbox" class="checkbox-dia" id="checkbox-miercoles" onchange="marcarTodos('miercoles')" /> -->
                 <?php endif; ?>
                     </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                 Jueves
                 <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
-                <input type="checkbox" class="checkbox-dia" id="checkbox-jueves" onchange="marcarTodos('jueves')" />
+                <!-- <input type="checkbox" class="checkbox-dia" id="checkbox-jueves" onchange="marcarTodos('jueves')" /> -->
                 <?php endif; ?>
                     </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                 Viernes
                 <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
-                <input type="checkbox" class="checkbox-dia" id="checkbox-viernes" onchange="marcarTodos('viernes')" />
+                <!-- <input type="checkbox" class="checkbox-dia" id="checkbox-viernes" onchange="marcarTodos('viernes')" /> -->
                 <?php endif; ?>
                     </div>
                 </th>
@@ -305,5 +287,34 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
     var reagenda = <?php echo json_encode($reagenda);?>
 </script>
 <script
-src="agendar.js">
+    src="agendar.js">
+    async function bloquear(run, id, fechaInicio, fechaFinal) {
+        try {
+            const response = await fetch('/usuarios/bloquear', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    run: run,
+                    id: id,
+                    fechaInicio: fechaInicio,
+                    fechaFinal: fechaFinal,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Bloqueo registrado exitosamente');
+                location.reload();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error al registrar el bloqueo:', error);
+            alert('Ocurrió un error al registrar el bloqueo.');
+        }
+    }
+
 </script>

@@ -71,30 +71,48 @@ class CitasController extends CI_Controller
         }
         return $data;
     }
-    public function bloquearHorario()
+    public function bloquear()
     {
-        // Obtener datos desde el cuerpo de la solicitud
-        $input = json_decode($this->input->raw_input_stream, true);
+         
+        $data = json_decode($this->input->raw_input_stream, true);
+        log_message('debug', 'Datos recibidos: ' . print_r($data, true));
+        $run = $data['run'];
+        $id = $data['id'];
+        $fechaInicio = $data['fechaInicio'];
+        $fechaFinal = $data['fechaFinal'];
 
-        $id = $input['id'];
-        $fechaInicio = $input['fechaInicio'];
-        $fechaFinal = $input['fechaFinal'];
-        $runUsuario = $this->session->userdata('RUN'); // Obtener el RUN del usuario actual
+        $this->load->model('CitasModel');
 
-        // Verificar si el bloque ya está bloqueado
-        $existe = $this->CitasModel->verificarBloque($id, $fechaInicio);
+        // Verificar si el bloque ya existe
+        $existe = $this->CitasModel->verificarBloque($id, $fechaInicio, $fechaFinal);
 
         if ($existe) {
-            // Responder si el bloque ya estaba bloqueado
-            echo json_encode(['success' => false, 'mensaje' => 'El bloque ya está bloqueado.']);
+            echo json_encode([
+                'success' => false,
+                'message' => 'El bloque ya está bloqueado o asignado.'
+            ]);
+            return;
+        }
+
+        // Datos para insertar
+        $insertData = [
+            'run' => $run,
+            'id_bloque' => $id,
+            'fecha_inicio' => $fechaInicio,
+            'fecha_final' => $fechaFinal,
+        ];
+
+        $result = $this->CitasModel->insertarBloqueBloqueado($insertData);
+
+        if ($result) {
+            echo json_encode(['success' => true]);
         } else {
-            // Insertar el bloque bloqueado
-            $this->Horario_model->bloquearHorario($runUsuario, $dia, $id, $fechaInicio, $fechaFinal);
-            echo json_encode(['success' => true, 'mensaje' => 'Bloque bloqueado con éxito.']);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Error al insertar en la base de datos.'
+            ]);
         }
     }
-
-
     //seccion reagendar
     public function abrirreagendar()
     {

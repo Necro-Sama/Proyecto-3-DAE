@@ -72,6 +72,8 @@ $route['translate_uri_dashes'] = FALSE;
         $route['usuarios/reagendar'] = 'CitasController/seleccionarfecha';
     //Rutas de eliminar cita    
         $route['usuarios/eliminarcita'] = 'CitasController/eliminarCita';
+    //Rutas de bloquear cita
+        $route['usuarios/bloquear'] = 'CitasController/bloquear';
 //Rutas de Gestion TS
     $route['usuarios/gestor_ts'] = 'TrabajadorSocialController/index';
     //gestion de ts
