@@ -48,34 +48,48 @@ class CitasModel extends CI_Model
     
     public function insertarBloqueBloqueado($data) 
     {
-        // Log para debug
         log_message('debug', '=== Iniciando insertarBloqueBloqueado ===');
         log_message('debug', 'Datos recibidos: ' . print_r($data, true));
 
         try {
-            // Primero verificamos si ya existe un bloque bloqueado
-            $this->db->where('ID', $data['ID']);
-            $this->db->where('fechainicio', $data['fechainicio']);
-            $existe = $this->db->get('bloquebloqueado')->num_rows() > 0;
-
-            if ($existe) {
-                log_message('error', 'El bloque ya está bloqueado');
-                return false;
-            }
-
-            // Intentamos la inserción
             $this->db->trans_start(); // Iniciamos transacción
 
-            $insert_data = array(
+            // Primero insertamos en la tabla bloque
+            $bloque_data = array(
+                'ID' => $data['ID'],
+                'Estado' => 'Bloqueado'  // O el estado que corresponda
+            );
+
+            // Verificar si el bloque ya existe
+            $this->db->where('ID', $data['ID']);
+            $existe_bloque = $this->db->get('bloque')->num_rows() > 0;
+
+            if (!$existe_bloque) {
+                // Si no existe, lo insertamos
+                $this->db->insert('bloque', $bloque_data);
+                log_message('debug', 'Bloque insertado en tabla bloque');
+            }
+
+            // Luego insertamos en bloquebloqueado
+            $bloqueo_data = array(
                 'ID' => $data['ID'],
                 'fechainicio' => $data['fechainicio'],
                 'fechafinal' => $data['fechafinal'],
                 'RUN' => $data['RUN']
             );
 
-            log_message('debug', 'SQL a ejecutar: ' . $this->db->set($insert_data)->get_compiled_insert('bloquebloqueado'));
-            
-            $result = $this->db->insert('bloquebloqueado', $insert_data);
+            // Verificar si ya existe el bloqueo
+            $this->db->where('ID', $data['ID']);
+            $this->db->where('fechainicio', $data['fechainicio']);
+            $existe_bloqueo = $this->db->get('bloquebloqueado')->num_rows() > 0;
+
+            if ($existe_bloqueo) {
+                log_message('error', 'El bloque ya está bloqueado');
+                $this->db->trans_rollback();
+                return false;
+            }
+
+            $result = $this->db->insert('bloquebloqueado', $bloqueo_data);
             
             $this->db->trans_complete(); // Completamos transacción
 
@@ -84,11 +98,12 @@ class CitasModel extends CI_Model
                 return false;
             }
 
-            log_message('debug', 'Inserción completada. Affected rows: ' . $this->db->affected_rows());
+            log_message('debug', 'Inserción completada exitosamente');
             return true;
 
         } catch (Exception $e) {
             log_message('error', 'Exception en insertarBloqueBloqueado: ' . $e->getMessage());
+            $this->db->trans_rollback();
             return false;
         }
     }
