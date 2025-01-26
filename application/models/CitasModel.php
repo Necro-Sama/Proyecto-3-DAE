@@ -45,15 +45,53 @@ class CitasModel extends CI_Model
         return $this->db->trans_status(); // Retorna el estado de la transacción
     }
 
-    public function verificarBloque($dia, $id, $fechaInicio)
+    
+    public function insertarBloqueBloqueado($data) 
     {
-        $this->db->where('id', $id);
-        $query = $this->db->get('bloquebloqueado');
-        return $query->num_rows() > 0;
-    }
-    public function insertarBloqueBloqueado($data) {
-            return $this->db->insert('bloquebloqueado', $data);
+        // Log para debug
+        log_message('debug', '=== Iniciando insertarBloqueBloqueado ===');
+        log_message('debug', 'Datos recibidos: ' . print_r($data, true));
+
+        try {
+            // Primero verificamos si ya existe un bloque bloqueado
+            $this->db->where('ID', $data['ID']);
+            $this->db->where('fechainicio', $data['fechainicio']);
+            $existe = $this->db->get('bloquebloqueado')->num_rows() > 0;
+
+            if ($existe) {
+                log_message('error', 'El bloque ya está bloqueado');
+                return false;
+            }
+
+            // Intentamos la inserción
+            $this->db->trans_start(); // Iniciamos transacción
+
+            $insert_data = array(
+                'ID' => $data['ID'],
+                'fechainicio' => $data['fechainicio'],
+                'fechafinal' => $data['fechafinal'],
+                'RUN' => $data['RUN']
+            );
+
+            log_message('debug', 'SQL a ejecutar: ' . $this->db->set($insert_data)->get_compiled_insert('bloquebloqueado'));
+            
+            $result = $this->db->insert('bloquebloqueado', $insert_data);
+            
+            $this->db->trans_complete(); // Completamos transacción
+
+            if ($this->db->trans_status() === FALSE) {
+                log_message('error', 'Error en la transacción: ' . $this->db->error()['message']);
+                return false;
+            }
+
+            log_message('debug', 'Inserción completada. Affected rows: ' . $this->db->affected_rows());
+            return true;
+
+        } catch (Exception $e) {
+            log_message('error', 'Exception en insertarBloqueBloqueado: ' . $e->getMessage());
+            return false;
         }
+    }
     public function seleccionarfecha(){
         //la idea principal es enviarlo a la agenda para que seleccione otro dia de las 3 semanas 
         //de esta manera cambiamos el boton de agendar por uno que diga reagendar de la misma manera que bloquear con un if

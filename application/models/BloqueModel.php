@@ -326,4 +326,10 @@ class BloqueModel extends CI_Model
         $this->db->insert('bloquebloqueado', $fecha_inicio,$fecha_termino);
 
     }
+    public function verificar_bloque($id)
+    {
+        $this->db->where('ID', $id);
+        $query = $this->db->get('bloque');
+        return $query->num_rows() > 0;
+    }
 }

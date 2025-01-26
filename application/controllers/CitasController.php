@@ -73,45 +73,49 @@ class CitasController extends CI_Controller
     }
     public function bloquear()
     {
-         
-        $data = json_decode($this->input->raw_input_stream, true);
-        log_message('debug', 'Datos recibidos: ' . print_r($data, true));
-        $run = $data['run'];
-        $id = $data['id'];
-        $fechaInicio = $data['fechaInicio'];
-        $fechaFinal = $data['fechaFinal'];
+        log_message('debug', '=== Iniciando función bloquear ===');
+        log_message('debug', 'POST recibido: ' . print_r($_POST, true));
 
-        $this->load->model('CitasModel');
+        // Obtener datos del POST
+        $id = $this->input->post('ID');
+        $fechainicio = $this->input->post('fechainicio');
+        $fechafinal = $this->input->post('fechafinal');
+        $run = $this->input->post('RUN');
 
-        // Verificar si el bloque ya existe
-        $existe = $this->CitasModel->verificarBloque($id, $fechaInicio, $fechaFinal);
-
-        if ($existe) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'El bloque ya está bloqueado o asignado.'
-            ]);
+        // Verificar que tenemos todos los datos necesarios
+        if (empty($id) || empty($fechainicio) || empty($fechafinal) || empty($run)) {
+            log_message('error', 'Faltan datos requeridos');
+            $this->session->set_flashdata('error', 'Faltan datos requeridos');
+            redirect($_SERVER['HTTP_REFERER']);
             return;
         }
 
-        // Datos para insertar
-        $insertData = [
-            'run' => $run,
-            'id_bloque' => $id,
-            'fecha_inicio' => $fechaInicio,
-            'fecha_final' => $fechaFinal,
-        ];
+        // Preparar datos para insertar
+        $data = array(
+            'ID' => $id,
+            'fechainicio' => $fechainicio,
+            'fechafinal' => $fechafinal,
+            'RUN' => $run
+        );
 
-        $result = $this->CitasModel->insertarBloqueBloqueado($insertData);
+        log_message('debug', 'Intentando insertar con datos: ' . print_r($data, true));
+
+        // Cargar el modelo e intentar la inserción
+        $this->load->model('CitasModel');
+        $result = $this->CitasModel->insertarBloqueBloqueado($data);
 
         if ($result) {
-            echo json_encode(['success' => true]);
+            log_message('debug', 'Inserción exitosa');
+            $this->session->set_flashdata('success', 'Bloque bloqueado exitosamente');
         } else {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Error al insertar en la base de datos.'
-            ]);
+            log_message('error', 'Error al insertar en la base de datos');
+            $this->session->set_flashdata('error', 'No se pudo bloquear el horario');
         }
+
+        // Mostrar mensaje flash
+        $this->session->set_flashdata('debug_info', 'Datos procesados: ' . print_r($data, true));
+
+        redirect($_SERVER['HTTP_REFERER']);
     }
     //seccion reagendar
     public function abrirreagendar()

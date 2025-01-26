@@ -114,19 +114,22 @@ class UserController extends CI_Controller
     }
     public function agendar()
     {
-
-        $RUN_usuario = $this->check_logged_in();
-        
-
-        if (!$RUN_usuario) {
-            session_destroy();
-            redirect("/usuarios/login");
+        // Verificar si el usuario está logueado y obtener sus datos
+        $run = $this->check_logged_in();
+        if (!$run) {
+            redirect('usuarios/login');
+            return;
         }
-        $data = $this->comprobardatos($RUN_usuario);
+
+        // Obtener datos del usuario
+        $data = $this->comprobardatos($run);
         
+        // Agregar el RUN a los datos que se pasan a la vista
+        $data['run'] = $run;
         $data['reagenda'] = false;
-       
-        $this->load->view("StudentAgendarView", $data);
+
+        // Cargar la vista con los datos
+        $this->load->view('StudentAgendarView', $data);
     }
     public function gestion_ts($RUN_usuario)
     {

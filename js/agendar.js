@@ -19,6 +19,7 @@ let horarios = [
     { id: 16, horaInicio: "17:30", horaFinal: "18:00" },
     { id: 17, horaInicio: "18:00", horaFinal: "18:30" },
     { id: 18, horaInicio: "18:30", horaFinal: "19:00" },
+    
 ];
 
 function agendar(dia, bloque, fecha_ini, fecha_ter) {
@@ -81,19 +82,82 @@ function cargar_calendario() {
 
     tablaHorario.appendChild(fragment); // Agregar el fragmento al DOM
 }
+async function bloquear(dia, horario, tiempo_bloque_ini) {
+    console.log('Iniciando función bloquear con parámetros:', {
+        dia, 
+        horario, 
+        tiempo_bloque_ini
+    });
+    
+    try {
+        const requestData = {
+            run: run,
+            id: horario,
+            fechaInicio: tiempo_bloque_ini,
+            fechaFinal: tiempo_bloque_ini
+        };
+        
+        console.log('Datos a enviar:', requestData);
+        console.log('URL de destino:', base_url + 'citas/bloquear');
+
+        const response = await fetch(base_url + 'citas/bloquear', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        console.log('Respuesta recibida:', response);
+
+        const result = await response.json();
+        console.log('Datos de respuesta:', result);
+
+        if (result.success) {
+            alert('Bloque bloqueado exitosamente');
+            cargar_calendario();
+        } else {
+            alert('Error: ' + (result.message || 'No se pudo bloquear el horario'));
+        }
+    } catch (error) {
+        console.error('Error detallado:', error);
+        alert('Ocurrió un error al intentar bloquear el horario.');
+    }
+}
 
 function crearBotones(dia, horario, tiempo_bloque_ini) {
     const container = document.createElement('div');
 
     if (tipoUsuario === "administrador" || tipoUsuario === "trabajadorsocial") {
-        const btnBloquear = document.createElement('button');
-        btnBloquear.className = 'btn btn-success';
-        btnBloquear.innerText = 'Bloquear';
-        btnBloquear.onclick = () =>
-            bloquear(run, horario.id, tiempo_bloque_ini.toISOString(), tiempo_bloque_ini.toISOString());
-        container.appendChild(btnBloquear);
-    }
+        // Formatear la fecha para MySQL
+        const formatearFecha = (fecha) => {
+            return fecha.toISOString().slice(0, 19).replace('T', ' ');
+        };
 
+        // Verificar que run esté definido y no esté vacío
+        if (!run || run === '') {
+            console.error('RUN no está definido o está vacío');
+            return '<div class="text-danger">Error: RUN no disponible. Por favor, inicie sesión nuevamente.</div>';
+        }
+
+        container.innerHTML = `
+            <form method="POST" action="${site_url}/citas/bloquear" onsubmit="console.log('Formulario enviado');">
+                <input type="hidden" name="ID" value="${horario.id}">
+                <input type="hidden" name="fechainicio" value="${formatearFecha(tiempo_bloque_ini)}">
+                <input type="hidden" name="fechafinal" value="${formatearFecha(tiempo_bloque_ini)}">
+                <input type="hidden" name="RUN" value="${run}">
+                <button type="submit" class="btn btn-success btn-sm" onclick="console.log('Botón clickeado');">Bloquear</button>
+            </form>
+        `;
+
+        // Debug
+        console.log('Formulario creado con valores:', {
+            ID: horario.id,
+            fechainicio: formatearFecha(tiempo_bloque_ini),
+            fechafinal: formatearFecha(tiempo_bloque_ini),
+            RUN: run
+        });
+    }
     if (tipoUsuario === "estudiante" || tipoUsuario === "noestudiante") {
         const btnAgendar = document.createElement('button');
         btnAgendar.className = 'btn btn-success';
@@ -115,7 +179,20 @@ function crearBotones(dia, horario, tiempo_bloque_ini) {
     return container.outerHTML;
 }
 
-    
+// Agregar un event listener para los formularios después de cargar el calendario
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.addEventListener('submit', function(e) {
+        if (e.target.matches('form[action*="/citas/bloquear"]')) {
+            console.log('Formulario de bloqueo enviado', {
+                ID: e.target.elements.ID.value,
+                fechainicio: e.target.elements.fechainicio.value,
+                fechafinal: e.target.elements.fechafinal.value,
+                RUN: e.target.elements.RUN.value
+            });
+        }
+    });
+});
+
 $(document).ready(function() {
     cargar_calendario();
 });

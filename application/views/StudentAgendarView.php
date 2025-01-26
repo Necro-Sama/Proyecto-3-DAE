@@ -22,6 +22,23 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <script>
+        // Variables globales necesarias para agendar.js
+        const tipoUsuario = "<?= $tipo ?>";
+        const site_url = "<?= site_url() ?>";
+        const base_url = "<?= base_url() ?>";
+        const run = "<?= isset($run) ? $run : '' ?>";
+        var reagenda = <?php echo json_encode($reagenda); ?>;
+
+        // Debug para verificar las variables
+        console.log('Variables inicializadas:', {
+            tipoUsuario,
+            site_url,
+            base_url,
+            run,
+            reagenda
+        });
+    </script>
     <script src="<?= base_url("js/agendar.js") ?>"></script>
 </head>
 
@@ -41,6 +58,24 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             <p class="alert-success font-weight-bold alert alert-dismissible fade show" role="alert">
                 <?= $this->session->agendar_exito ?>
             </p>
+        <?php endif; ?>
+
+        <?php if ($this->session->flashdata('error')): ?>
+            <div class="alert alert-danger">
+                <?= $this->session->flashdata('error') ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($this->session->flashdata('success')): ?>
+            <div class="alert alert-success">
+                <?= $this->session->flashdata('success') ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($this->session->flashdata('debug_info') && ENVIRONMENT === 'development'): ?>
+            <div class="alert alert-info">
+                <pre><?= $this->session->flashdata('debug_info') ?></pre>
+            </div>
         <?php endif; ?>
 
         <div id="tiempo-servidor" hidden><?= $this->BloqueModel->get_tiempo_bd() ?></div>
@@ -282,39 +317,3 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 
 
 </style>
-<script>
-    const tipoUsuario = "<?= $tipo ?>";
-    var reagenda = <?php echo json_encode($reagenda);?>
-</script>
-<script
-    src="agendar.js">
-    function bloquear(run, id, fechaInicio, fechaFinal) {
-        try {
-            const response = await fetch('/usuarios/bloquear', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    run: run,
-                    id: id,
-                    fechaInicio: fechaInicio,
-                    fechaFinal: fechaFinal,
-                }),
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert('Bloqueo registrado exitosamente');
-                location.reload();
-            } else {
-                alert('Error: ' + result.message);
-            }
-        } catch (error) {
-            console.error('Error al registrar el bloqueo:', error);
-            alert('Ocurrió un error al registrar el bloqueo.');
-        }
-    }
-
-</script>
