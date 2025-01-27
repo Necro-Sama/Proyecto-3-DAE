@@ -1,5 +1,11 @@
 <?php
-defined("BASEPATH") or exit("No direct script access allowed"); ?>
+defined("BASEPATH") or exit("No direct script access allowed");
+
+// Al inicio del archivo, verificar que tenemos el tipo
+if (!isset($tipo)) {
+    die('Error: Tipo de usuario no definido');
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -22,23 +28,25 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
             integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+
+    <!-- Inicialización de variables globales -->
     <script>
         // Variables globales necesarias para agendar.js
-        const tipoUsuario = "<?= $tipo ?>";
-        const site_url = "<?= site_url() ?>";
-        const base_url = "<?= base_url() ?>";
-        const run = "<?= isset($run) ? $run : '' ?>";
-        var reagenda = <?php echo json_encode($reagenda); ?>;
+        window.agendarConfig = {
+            tipoUsuario: <?php echo json_encode($tipo); ?>,
+            site_url: <?php echo json_encode(site_url()); ?>,
+            base_url: <?php echo json_encode(base_url()); ?>,
+            run: <?php echo json_encode($run); ?>,
+            reagenda: <?php echo json_encode(isset($reagenda) ? $reagenda : false); ?>,
+            trabajadorSocialActual: <?php echo json_encode(isset($runUsuarioActual) ? $runUsuarioActual : ''); ?>,
+            trabajadorSocialSeleccionado: <?php echo json_encode(isset($tsAsignado) ? $tsAsignado : ''); ?>
+        };
 
         // Debug para verificar las variables
-        console.log('Variables inicializadas:', {
-            tipoUsuario,
-            site_url,
-            base_url,
-            run,
-            reagenda
-        });
+        console.log('Variables inicializadas:', window.agendarConfig);
     </script>
+
+    <!-- Cargar agendar.js después de la inicialización -->
     <script src="<?= base_url("js/agendar.js") ?>"></script>
 </head>
 
@@ -80,16 +88,35 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 
         <div id="tiempo-servidor" hidden><?= $this->BloqueModel->get_tiempo_bd() ?></div>
         
-        <label for="semana">Semana: </label>
-        <?php  $semanas = $this->BloqueModel->get_semanas(3); ?>
-        <select class="form-select" name="semana" id="semana-select" onchange="seleccion_semana(event)">
-            <?php foreach ($semanas as $semana) { ?>
-                <option value="<?= $semana ?>">
-                    <?= trim($semana, "00:00:00") ?>
-                </option>
-            <?php } ?>
-        </select>
-        <!-- boton "Bloquear" -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="semana">Semana: </label>
+                    <?php  $semanas = $this->BloqueModel->get_semanas(3); ?>
+                    <select class="form-select" name="semana" id="semana-select" onchange="seleccion_semana(event)">
+                        <?php foreach ($semanas as $semana) { ?>
+                            <option value="<?= $semana ?>">
+                                <?= trim($semana, "00:00:00") ?>
+                            </option>
+                        <?php } ?>
+                    </select>
+                </div>
+            </div>
+            <!-- Selector de TS solo visible para administradores -->
+            <?php if($tipo === 'administrador'): ?>
+                <div class="form-group mb-3">
+                    <label for="ts-select">Trabajador Social:</label>
+                    <select class="form-control" id="ts-select" name="ts-select" required>
+                        <option value="">Seleccione un Trabajador Social</option>
+                        <?php if(isset($trabajadores_sociales) && !empty($trabajadores_sociales)): ?>
+                            <?php foreach ($trabajadores_sociales as $ts): ?>
+                                <option value="<?= $ts['RUN'] ?>"><?= $ts['NombreCompleto'] ?></option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+            <?php endif; ?>
+        </div>
 
         <table class="text-center">
         <thead>
@@ -138,40 +165,37 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
         </table>
     </div>
 
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Agendar</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-                <form method="post" accept-charset="utf-8" 
-                        <?php if($reagenda == false ):?>
-                            action="<?= site_url() ?>/usuarios/accion_agendar"
-                        <?php endif; ?>
-                        <?php if($reagenda == true): ?>
-                            action="<?= site_url() ?>/usuarios/reagendar"
-                        <?php endif;?>
-                    >
-
-
+    <!-- Modal para agendar -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Agendar Cita</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="POST" action="<?= site_url('usuarios/accion_agendar') ?>">
                     <div class="modal-body">
-                        <input type="text" id="fecha_ini" name="fecha_ini" hidden>
-                        <input type="text" id="fecha_ter" name="fecha_ter" hidden>
+                        <!-- Campos ocultos -->
+                        <input type="hidden" id="fecha_ini" name="fecha_ini">
+                        <input type="hidden" id="fecha_ter" name="fecha_ter">
+                        <input type="hidden" id="runTS" name="RUN">
+                        <input type="hidden" id="run_usuario" name="run_usuario">
+                        
+                        <!-- Campos visibles -->
                         <div class="form-group">
-                            <label for="dia">Día: </label>
-                            <span id="dia"></span>
+                            <label>Día:</label>
+                            <span id="dia" class="ml-2"></span>
                         </div>
                         <div class="form-group">
-                            <label for="bloque_horario">Bloque Horario: </label>
-                            <span id="bloque_horario"></span>
+                            <label>Horario:</label>
+                            <span id="bloque_horario" class="ml-2"></span>
                         </div>
                         <div class="form-group">
-                            <label for="motivo">Motivo: </label>
-                            <select class="form-select" aria-label="Default select example" name="motivo">
-                                <option value="" selected>Seleccionar Motivo...</option>
+                            <label for="motivo">Motivo de la cita:</label>
+                            <select class="form-control" name="motivo" required>
+                                <option value="">Seleccione un motivo...</option>
                                 <?php
                                 $motivos = [
                                     "Gratuidad Mineduc",
@@ -184,23 +208,29 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
                                     "Beca Internado UTA",
                                     "Beca Ayuda Estudiantil UTA",
                                     "Beca PSU-PDT-PAES UTA",
-                                    "Otro",
+                                    "Otro"
                                 ];
                                 foreach ($motivos as $m): ?>
                                     <option value="<?= $m ?>"><?= $m ?></option>
-                                <?php endforeach;
-                                ?>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <input type="submit" class="btn btn-primary" name="agendar" value="Agendar" />
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Confirmar Cita</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- Debug para verificar que el modal se carga -->
+    <script>
+        $(document).ready(function() {
+            console.log('Modal cargado:', $('#exampleModal').length > 0);
+        });
+    </script>
 </body>
 </html>
 <style>
@@ -315,5 +345,68 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
         font-size: 14px;
     }
 
+    /* Actualizar estilos existentes */
+    .form-select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #fff;
+        font-size: 14px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    /* Mejorar estilos de la tabla */
+    table {
+        width: 100%;
+        margin: 20px 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    th {
+        background-color: #4a5568;
+        color: white;
+        padding: 12px;
+        font-weight: 600;
+    }
+
+    td {
+        padding: 8px;
+        vertical-align: middle;
+    }
+
+    /* Agregar hover effect a las filas */
+    tbody tr:hover {
+        background-color: #f8f9fa;
+        transition: background-color 0.2s ease;
+    }
+
+    /* Mejorar estilos de los botones */
+    .btn {
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
 
 </style>

@@ -227,6 +227,72 @@ class UserModel extends CI_Model {
 
         return null; // Si no se encuentra el correo
     }
+    public function obtenerTSAsignado($RUN) {
+        // Primero verificamos si es estudiante
+        $this->db->select('e.COD_CARRERA');
+        $this->db->from('estudiante e');
+        $this->db->where('e.RUN', $RUN);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            // Es estudiante, obtenemos el TS de su carrera
+            $carrera = $query->row()->COD_CARRERA;
+            
+            $this->db->select('c.RUNTS, c.ReemplazaRUNTS, p.Activo');
+            $this->db->from('carrera c');
+            $this->db->join('persona p', 'p.RUN = c.RUNTS');
+            $this->db->where('c.COD_CARRERA', $carrera);
+            $query = $this->db->get();
+            
+            if ($query->num_rows() > 0) {
+                $resultado = $query->row();
+                // Si el TS principal está activo, lo retornamos
+                if ($resultado->Activo == 1) {
+                    return $resultado->RUNTS;
+                }
+                // Si no está activo y hay reemplazo, retornamos el reemplazo
+                else if ($resultado->ReemplazaRUNTS) {
+                    return $resultado->ReemplazaRUNTS;
+                }
+            }
+        } else {
+            // Es no estudiante, buscamos el primer TS disponible
+            $this->db->select('p.RUN');
+            $this->db->from('persona p');
+            $this->db->join('trabajadorsocial ts', 'ts.RUN = p.RUN');
+            $this->db->where('p.Activo', 1);
+            $this->db->order_by('p.RUN', 'ASC');
+            $this->db->limit(1);
+            $query = $this->db->get();
+            
+            if ($query->num_rows() > 0) {
+                return $query->row()->RUN;
+            }
+        }
+        
+        return null; // Si no se encuentra ningún TS
+    }
+    public function obtener_datos_para_correo($run_usuario, $run_ts) {
+        // Obtener datos del usuario
+        $usuario = $this->db->select('Nombre, Apellido, Correo')
+                           ->from('persona')
+                           ->where('RUN', $run_usuario)
+                           ->get()
+                           ->row();
+
+        // Obtener datos del trabajador social
+        $ts = $this->db->select('Nombre, Apellido')
+                       ->from('persona')
+                       ->where('RUN', $run_ts)
+                       ->get()
+                       ->row();
+
+        return array(
+            'nombre_usuario' => $usuario->Nombre . ' ' . $usuario->Apellido,
+            'correo_usuario' => $usuario->Correo,
+            'nombre_ts' => $ts->Nombre . ' ' . $ts->Apellido
+        );
+    }
 }
 
 class Trabajadores_model extends CI_Model {

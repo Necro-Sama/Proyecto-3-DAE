@@ -71,71 +71,57 @@ class CitasController extends CI_Controller
         }
         return $data;
     }
-    public function bloquear()
-    {
-        log_message('debug', '=== Iniciando función bloquear ===');
-        log_message('debug', 'POST recibido: ' . print_r($_POST, true));
+    public function bloquear() {
+        // Definir los campos requeridos
+        $required_fields = ['ID', 'RUN', 'fechainicio', 'fechafinal'];
+        $data = [];
+        
+        // Log para debug
+        log_message('debug', 'Datos POST recibidos en bloquear(): ' . print_r($this->input->post(), TRUE));
+        
+        // Validar cada campo requerido
+        foreach ($required_fields as $field) {
+            if (!$this->input->post($field)) {
+                $this->session->set_flashdata('error', 'Falta el campo requerido: ' . $field);
+                log_message('error', 'Campo faltante en bloquear(): ' . $field);
+                redirect('usuarios/calendario');
+                return;
+            }
+            $data[$field] = $this->input->post($field);
+        }
 
-        // Obtener datos del POST
-        $id = $this->input->post('ID');
-        $fechainicio = $this->input->post('fechainicio');
-        $fechafinal = $this->input->post('fechafinal');
-        $run = $this->input->post('RUN');
-
-        // Verificar que tenemos todos los datos necesarios
-        if (empty($id) || empty($fechainicio) || empty($fechafinal) || empty($run)) {
-            log_message('error', 'Faltan datos requeridos');
-            $this->session->set_flashdata('error', 'Faltan datos requeridos');
-            redirect($_SERVER['HTTP_REFERER']);
+        // Validar formato de fechas
+        if (!strtotime($data['fechainicio']) || !strtotime($data['fechafinal'])) {
+            $this->session->set_flashdata('error', 'Formato de fecha inválido');
+            log_message('error', 'Formato de fecha inválido en bloquear()');
+            redirect('usuarios/calendario');
             return;
         }
 
-        // Preparar datos para insertar
-        $data = array(
-            'ID' => $id,
-            'fechainicio' => $fechainicio,
-            'fechafinal' => $fechafinal,
-            'RUN' => $run
-        );
-
-        log_message('debug', 'Intentando insertar con datos: ' . print_r($data, true));
-
-        // Cargar el modelo e intentar la inserción
-        $this->load->model('CitasModel');
+        // Intentar insertar el bloque bloqueado
         $result = $this->CitasModel->insertarBloqueBloqueado($data);
 
-        if ($result) {
-            log_message('debug', 'Inserción exitosa');
+        if ($result === 'bloqueado') {
+            $this->session->set_flashdata('error', 'Este horario ya está bloqueado');
+            log_message('info', 'Intento de bloquear un horario ya bloqueado');
+        } elseif ($result === true) {
             $this->session->set_flashdata('success', 'Bloque bloqueado exitosamente');
+            log_message('debug', 'Bloque bloqueado exitosamente');
         } else {
-            log_message('error', 'Error al insertar en la base de datos');
-            $this->session->set_flashdata('error', 'No se pudo bloquear el horario');
+            $this->session->set_flashdata('error', 'Error al bloquear el bloque');
+            log_message('error', 'Error al bloquear el bloque en bloquear()');
         }
 
-        // Mostrar mensaje flash
-        $this->session->set_flashdata('debug_info', 'Datos procesados: ' . print_r($data, true));
-
-        redirect($_SERVER['HTTP_REFERER']);
+        redirect('usuarios/agendar');
     }
     //seccion reagendar
-    public function abrirreagendar()
-    {
-        // Obtén el ID de la cita desde el formulario
-        $idCita = $this->input->post('idCita');
+    public function obtener_horarios() {
+        $start = $this->input->get('start');
+        $end = $this->input->get('end');
         
-        // Verifica si el usuario está autenticado
-        $run = $this->check_logged_in();
+        $horarios = $this->CitasModel->obtenerHorariosEnRango($start, $end);
         
-        // Obtén los datos necesarios
-        $data = $this->comprobardatos($run);
-        $data['reagenda'] = true;
-        $data['eliminar'] = $idCita;
-        
-        // Carga la vista de reagendar
-        return $this->load->view('ReagendarView', $data);
-    }
-    public function reagendar(){
-        //llamara a eliminar cita para borrar la anterior y pasara a tomar la nueva una vez terminado enviara un mensaje de reagendado con exito.
-
+        header('Content-Type: application/json');
+        echo json_encode($horarios);
     }
 }

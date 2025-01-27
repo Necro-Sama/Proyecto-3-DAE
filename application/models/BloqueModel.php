@@ -112,201 +112,213 @@ class BloqueModel extends CI_Model
         ];
     }
 
-    function agendar_estudiante(
-        $RUN_estudiante,
-        $fecha_ini,
-        $fecha_ter,
-        $motivo
-    ) {
-        // $horarios = [
-        //     1 => [["08", "00"], ["08", "45"]],
-        //     2 => [["08", "45"], ["09", "30"]],
-        //     3 => [["09", "40"], ["10", "25"]],
-        //     4 => [["10", "25"], ["11", "10"]],
-        //     5 => [["11", "20"], ["12", "05"]],
-        //     6 => [["12", "05"], ["12", "50"]],
-        //     7 => [["14", "45"], ["15", "30"]],
-        //     8 => [["15", "30"], ["16", "15"]],
-        //     9 => [["16", "20"], ["17", "05"]],
-        //     10 => [["17", "05"], ["17", "50"]],
-        //     11 => [["17", "55"], ["18", "40"]],
-        //     12 => [["18", "40"], ["19", "25"]],
-        // ];
-        // $dia_to_num = [
-        //     "Lunes" => 0,
-        //     "Martes" => 1,
-        //     "Miércoles" => 2,
-        //     "Jueves" => 3,
-        //     "Viernes" => 4,
-        // ];
-        $estudiante = $this->db
-            ->query(
-                "
-                SELECT
-                    *
-                FROM
-                    persona p
-                JOIN
-                    estudiante e
-                ON
-                    p.RUN = e.RUN
-                ",
-                $RUN_estudiante
-            )
-            ->row(0);
+    function agendar_estudiante($RUN_estudiante, $fecha_ini, $fecha_ter, $motivo) {
+        $this->db->trans_start();
 
-        $carrera = $this->db
-            ->query(
-                "
-                SELECT * FROM carrera
-                WHERE COD_CARRERA = ?
-                ",
-                $estudiante->COD_CARRERA
-            )
-            ->row(0);
+        try {
+            // Verificar si el bloque ya está reservado
+            $bloque_reservado = $this->db->query("
+                SELECT ba.* 
+                FROM bloque b
+                JOIN bloqueatencion ba ON b.ID = ba.ID
+                WHERE b.FechaInicio = ? 
+                AND b.FechaTermino = ?
+                AND ba.Estado = 'Reservado'
+            ", array($fecha_ini, $fecha_ter))->num_rows() > 0;
 
-        $bloques_overlap = $this->get_bloques_colisionando(
-            $carrera,
-            $fecha_ini,
-            $fecha_ter
-        );
-        print_r($bloques_overlap);
-        foreach ($bloques_overlap["atencion"] as $bloque) {
-            if ($bloque->RUNCliente == $RUN_estudiante) {
-                throw new Exception(
-                    "No puedes agendar dos veces en la misma hora."
-                );
+            if ($bloque_reservado) {
+                throw new Exception("Este horario ya ha sido reservado. Por favor, seleccione otro horario.");
             }
-        }
-        // echo count($bloques_overlap["atencion"]);
-        if (
-            count($bloques_overlap["atencion"]) +
-                count($bloques_overlap["bloqueado"]) >=
-            2
-        ) {
-            throw new Exception("Horario no disponible.");
-        }
-        if (
-            count($bloques_overlap["atencion"]) +
-                count($bloques_overlap["bloqueado"]) ==
-            0
-        ) {
-            // Agendar con TS asignada
-            $run_ts = $carrera->RUNTS;
-        } else {
-            // Agendar con la TS reemplazante si el bloque NO asociado a este, sino, agendarlo a TS asignada
-            if (count($bloques_overlap["bloqueado"])) {
-                if (
-                    $bloques_overlap["bloqueado"][0]->RUNTS ==
-                    $carrera->ReemplazaRUNTS
-                ) {
-                    $run_ts = $carrera->RUNTS;
-                } else {
-                    $run_ts = $carrera->ReemplazaRUNTS;
-                }
-            } elseif (count($bloques_overlap["atencion"])) {
-                if (
-                    $bloques_overlap["atencion"][0]->RUNTS ==
-                    $carrera->ReemplazaRUNTS
-                ) {
-                    $run_ts = $carrera->RUNTS;
-                } else {
-                    $run_ts = $carrera->ReemplazaRUNTS;
-                }
+
+            // Obtener datos de persona
+            $persona = $this->obtener_datos_persona($RUN_estudiante);
+            if (!$persona) {
+                throw new Exception("El RUN no está registrado en el sistema.");
             }
-        }
-        // $h = $horarios[$bloque_horario];
-        $licencias = $this->db
-            ->query(
-                "
-                SELECT
-                    l.*
-                FROM
-                    Licencia l
-                JOIN
-                    persona ts
-                ON
-                    l.RUN = ts.RUN
-                WHERE
-                    l.RUN = ?
-                AND
-                    ? < TIMESTAMP(l.FECHA_TER)
-                AND
-                    ? > TIMESTAMP(l.FECHA_INI)
-                ",
-                [$run_ts, $fecha_ini, $fecha_ter]
-            )
-            ->result();
-        if (count($licencias)) {
-            throw new Exception("Horario no disponible.");
-        }
-        if (
-            $this->db->query("SELECT ? < NOW() AS xd", [$fecha_ter])->row(0)->xd
-        ) {
-            throw new Exception("Fecha inválida.");
-        }
-        // Si no existe calendario para esta semana, creelo automaticamente
-        if (
-            $this->db
-                ->query(
-                    "SELECT *
-                 FROM calendariosemanal
-                 WHERE FechaInicioSemana = TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY))
-                 AND RUNTS = ?",
-                    [$fecha_ini, $fecha_ini, $run_ts]
-                )
-                ->num_rows() == 0
-        ) {
-            echo "XD";
-            $this->db->query(
-                "INSERT INTO calendariosemanal VALUES
-                 (TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY)), ?)",
-                [$fecha_ini, $fecha_ini, $run_ts]
-            );
-        }
-        if (
-            !$this->db->query(
-                "
-                INSERT INTO bloque VALUES (
-                    ?,
-                    ?,
-                    NULL,
-                    TIMESTAMP(DATE(? - INTERVAL (DAYOFWEEK(?) - 2) DAY)),
-                    ?
-                )
-                ",
-                [$fecha_ini, $fecha_ter, $fecha_ini, $fecha_ini, $run_ts]
-            )
-        ) {
-            throw new Exception(
-                "ERROR " .
-                    $this->db->error()->code .
-                    ": " .
-                    $this->db->error()->message
-            );
-        }
-        $insert_id = $this->db->insert_id();
-        if (
-            !$this->db->query(
-                "
-                INSERT INTO bloqueatencion VALUES (
-                    'Reservado',
-                    ?,
-                    ?,
-                    ?
-                )
-                ",
-                [$motivo, $insert_id, $RUN_estudiante]
-            )
-        ) {
-            throw new Exception(
-                "DB ERROR " .
-                    $this->db->error()->code .
-                    ": " .
-                    $this->db->error()->message
-            );
+
+            // Verificar si es estudiante
+            $estudiante = $this->db->query("
+                SELECT * FROM estudiante WHERE RUN = ?
+            ", array($RUN_estudiante))->row();
+
+            // Determinar el trabajador social
+            if (!$estudiante) {
+                // Verificar/crear cliente
+                $cliente_existe = $this->db->query("
+                    SELECT * FROM cliente WHERE RUN = ?
+                ", array($RUN_estudiante))->num_rows() > 0;
+
+                if (!$cliente_existe) {
+                    $this->db->query("
+                        INSERT INTO cliente (RUN) VALUES (?)
+                    ", array($RUN_estudiante));
+                }
+                
+                $run_ts = $this->obtenerTSDisponible();
+            } else {
+                $carrera = $this->db->query("
+                    SELECT * FROM carrera WHERE COD_CARRERA = ?
+                ", array($estudiante->COD_CARRERA))->row();
+
+                if (!$carrera) {
+                    throw new Exception("No se encontró la carrera del estudiante.");
+                }
+                $run_ts = $carrera->RUNTS;
+            }
+
+            // Verificar que tengamos un TS asignado
+            if (!$run_ts) {
+                throw new Exception("No se pudo asignar un trabajador social.");
+            }
+
+            // Obtener fecha inicio de semana
+            $fecha_inicio_semana = date('Y-m-d', strtotime('monday this week', strtotime($fecha_ini)));
+
+            // Verificar/crear calendario semanal
+            $calendario_existe = $this->db->query("
+                SELECT * FROM calendariosemanal 
+                WHERE FechaInicioSemana = ? AND RUNTS = ?
+            ", array($fecha_inicio_semana, $run_ts))->num_rows() > 0;
+
+            if (!$calendario_existe) {
+                $this->db->query("
+                    INSERT INTO calendariosemanal (FechaInicioSemana, RUNTS) 
+                    VALUES (?, ?)
+                ", array($fecha_inicio_semana, $run_ts));
+            }
+
+            // Insertar bloque
+            $result = $this->db->query("
+                INSERT INTO bloque (FechaInicio, FechaTermino, FechaInicioSemana, RUNTS) 
+                VALUES (?, ?, ?, ?)
+            ", array($fecha_ini, $fecha_ter, $fecha_inicio_semana, $run_ts));
+
+            if (!$result) {
+                throw new Exception("Error al crear el bloque de atención.");
+            }
+
+            $bloque_id = $this->db->insert_id();
+
+            // Insertar bloque atención
+            $result = $this->db->query("
+                INSERT INTO bloqueatencion (Estado, Motivo, ID, RUNCliente) 
+                VALUES ('Reservado', ?, ?, ?)
+            ", array($motivo, $bloque_id, $RUN_estudiante));
+
+            if (!$result) {
+                throw new Exception("Error al registrar la atención.");
+            }
+
+            // Intentar enviar el correo sin afectar la transacción
+            $correo_enviado = false;
+            try {
+                $ts_datos = $this->obtener_datos_persona($run_ts);
+                $this->enviar_correo_confirmacion($persona, $ts_datos, $fecha_ini, $fecha_ter, $motivo);
+                $correo_enviado = true;
+            } catch (Exception $e) {
+                // Continuar con la transacción aunque falle el correo
+            }
+
+            $this->db->trans_complete();
+
+            if ($this->db->trans_status() === FALSE) {
+                throw new Exception("Error en la transacción al agendar la cita.");
+            }
+
+            if (!$correo_enviado) {
+                $this->session->set_flashdata('warning', 
+                    'La cita se ha agendado correctamente, pero hubo un problema al enviar el correo de confirmación.');
+            }
+
+            return true;
+
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            throw $e;
         }
     }
+
+    private function obtener_datos_persona($run) {
+        return $this->db->query("
+            SELECT Nombre, Apellido, Correo, RUN 
+            FROM persona 
+            WHERE RUN = ?
+        ", array($run))->row();
+    }
+
+    private function obtenerTSDisponible() {
+        $query = $this->db->query("
+            SELECT 
+                ts.RUN
+            FROM 
+                trabajadorsocial ts
+                JOIN persona p ON ts.RUN = p.RUN
+            WHERE 
+                p.Activo = 1
+                AND NOT EXISTS (
+                    SELECT 1 
+                    FROM licencia l 
+                    WHERE l.RUN = ts.RUN 
+                    AND CURRENT_DATE BETWEEN l.FECHA_INI AND l.FECHA_TER
+                )
+            ORDER BY (
+                SELECT COUNT(*) 
+                FROM bloque b 
+                JOIN bloqueatencion ba ON b.ID = ba.ID 
+                WHERE b.RUNTS = ts.RUN 
+                AND b.FechaInicio > CURRENT_TIMESTAMP
+            ) ASC
+            LIMIT 1
+        ");
+
+        $ts = $query->row();
+        
+        if (!$ts) {
+            throw new Exception("No hay trabajadores sociales disponibles en este momento.");
+        }
+
+        return $ts->RUN;
+    }
+
+    private function enviar_correo_confirmacion($persona, $ts_datos, $fecha_ini, $fecha_ter, $motivo) {
+        $this->load->library('email');
+        
+        $this->email->from($this->config->item('smtp_user'), 'Sistema de Citas UTA');
+        $this->email->to($persona->Correo);
+        $this->email->subject('Confirmación de Cita - Trabajador Social UTA');
+
+        $fecha_formateada = date('d/m/Y', strtotime($fecha_ini));
+        $hora_inicio = date('H:i', strtotime($fecha_ini));
+        $hora_fin = date('H:i', strtotime($fecha_ter));
+
+        $mensaje = "
+            <html>
+            <head>
+                <title>Confirmación de Cita</title>
+            </head>
+            <body>
+                <h2>Confirmación de Cita - Trabajador Social UTA</h2>
+                <p>Estimado/a {$persona->Nombre} {$persona->Apellido},</p>
+                <p>Su cita ha sido agendada exitosamente con los siguientes detalles:</p>
+                <ul>
+                    <li><strong>Fecha:</strong> {$fecha_formateada}</li>
+                    <li><strong>Horario:</strong> {$hora_inicio} - {$hora_fin}</li>
+                    <li><strong>Trabajador Social:</strong> {$ts_datos->Nombre} {$ts_datos->Apellido}</li>
+                    <li><strong>Motivo:</strong> {$motivo}</li>
+                </ul>
+                <p>Por favor, asegúrese de llegar a tiempo a su cita.</p>
+                <p>Si necesita reagendar o cancelar su cita, por favor hágalo con anticipación a través del sistema.</p>
+                <br>
+                <p>Saludos cordiales,</p>
+                <p>Equipo de Trabajo Social UTA</p>
+            </body>
+            </html>
+        ";
+
+        $this->email->message($mensaje);
+        return $this->email->send();
+    }
+
     function get_semanas($num_semanas)
     {
         $query = "SELECT ";

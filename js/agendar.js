@@ -1,3 +1,34 @@
+// Verificar que agendarConfig esté disponible
+if (typeof window.agendarConfig === 'undefined') {
+    console.error('Error: agendarConfig no está definido');
+    throw new Error('agendarConfig no está definido');
+}
+
+// Obtener las variables del objeto global
+const {
+    tipoUsuario,
+    site_url,
+    base_url,
+    run,
+    trabajadorSocialActual,
+    trabajadorSocialSeleccionado
+} = window.agendarConfig;
+
+// Debug
+console.log('Variables extraídas:', {
+    tipoUsuario,
+    site_url,
+    base_url,
+    run,
+    trabajadorSocialActual,
+    trabajadorSocialSeleccionado
+});
+
+// Verificación de variables necesarias
+if (typeof tipoUsuario === 'undefined') {
+    console.error('Error: tipoUsuario no está definido');
+}
+
 let dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 let horarios = [
     { id: 1, horaInicio: "08:00", horaFinal: "08:30" },
@@ -22,20 +53,22 @@ let horarios = [
     
 ];
 
-function agendar(dia, bloque, fecha_ini, fecha_ter) {
-    fecha_ini = new Date(fecha_ini);
-    fecha_ter = new Date(fecha_ter);
-    
+function agendar(bloqueId, horario, fechaInicio, fechaFinal, trabajadorSocial) {
+    const data = {
+        ID: bloqueId,
+        FechaInicio: fechaInicio,
+        FechaTermino: fechaFinal,
+        RUNTS: trabajadorSocial,
+        FechaInicioSemana: obtenerInicioSemana(fechaInicio)
+    };
+
     $("#exampleModal").modal();
-    $("#dia")[0].innerHTML = dias[dia - 1] + " " + fecha_ini.toLocaleString();
-    $("#bloque_horario")[0].innerHTML = bloque;
-    let f = fecha_ini;
-    let ft = fecha_ter;
-    
-    let fecha_in = (new Date(f.getTime() - (f.getTimezoneOffset() * 60000))).toISOString().slice(0, 19).replace('T', ' ');
-    let fecha_te = (new Date(ft.getTime() - (ft.getTimezoneOffset() * 60000))).toISOString().slice(0, 19).replace('T', ' ');
-    $("#fecha_ini")[0].value = fecha_in;
-    $("#fecha_ter")[0].value = fecha_te;
+    $("#bloque_id").val(bloqueId);
+    $("#fecha_ini").val(fechaInicio);
+    $("#fecha_ter").val(fechaFinal);
+    $("#ts_run").val(trabajadorSocial);
+    $("#dia").html(obtenerFechaFormateada(fechaInicio));
+    $("#bloque_horario").html(`${horario.horaInicio} - ${horario.horaFinal}`);
 }
 
 function seleccion_semana(e) {
@@ -82,101 +115,138 @@ function cargar_calendario() {
 
     tablaHorario.appendChild(fragment); // Agregar el fragmento al DOM
 }
-async function bloquear(dia, horario, tiempo_bloque_ini) {
-    console.log('Iniciando función bloquear con parámetros:', {
-        dia, 
-        horario, 
-        tiempo_bloque_ini
-    });
-    
-    try {
-        const requestData = {
-            run: run,
-            id: horario,
-            fechaInicio: tiempo_bloque_ini,
-            fechaFinal: tiempo_bloque_ini
-        };
-        
-        console.log('Datos a enviar:', requestData);
-        console.log('URL de destino:', base_url + 'citas/bloquear');
 
-        const response = await fetch(base_url + 'citas/bloquear', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-        });
-
-        console.log('Respuesta recibida:', response);
-
-        const result = await response.json();
-        console.log('Datos de respuesta:', result);
-
-        if (result.success) {
-            alert('Bloque bloqueado exitosamente');
-            cargar_calendario();
-        } else {
-            alert('Error: ' + (result.message || 'No se pudo bloquear el horario'));
-        }
-    } catch (error) {
-        console.error('Error detallado:', error);
-        alert('Ocurrió un error al intentar bloquear el horario.');
-    }
+function generarIdBloque(fecha, horario, trabajadorSocial) {
+    // Generar un timestamp único basado en la fecha y hora
+    const timestamp = new Date(fecha).getTime();
+    // Crear un ID único combinando timestamp y RUN del TS
+    const id = Math.floor(Math.random() * 1000000); // Número aleatorio para evitar colisiones
+    return id;
 }
 
 function crearBotones(dia, horario, tiempo_bloque_ini) {
-    const container = document.createElement('div');
+    const bloqueId = generarIdBloque(tiempo_bloque_ini, horario);
+    
+    // Formatear fechas para la base de datos
+    const fechaInicio = formatearFechaHora(tiempo_bloque_ini, horario.horaInicio);
+    const fechaFinal = formatearFechaHora(tiempo_bloque_ini, horario.horaFinal);
 
+    let html = '';
+    
     if (tipoUsuario === "administrador" || tipoUsuario === "trabajadorsocial") {
-        // Formatear la fecha para MySQL
-        const formatearFecha = (fecha) => {
-            return fecha.toISOString().slice(0, 19).replace('T', ' ');
-        };
-
-        // Verificar que run esté definido y no esté vacío
-        if (!run || run === '') {
-            console.error('RUN no está definido o está vacío');
-            return '<div class="text-danger">Error: RUN no disponible. Por favor, inicie sesión nuevamente.</div>';
-        }
-
-        container.innerHTML = `
-            <form method="POST" action="${site_url}/citas/bloquear" onsubmit="console.log('Formulario enviado');">
-                <input type="hidden" name="ID" value="${horario.id}">
-                <input type="hidden" name="fechainicio" value="${formatearFecha(tiempo_bloque_ini)}">
-                <input type="hidden" name="fechafinal" value="${formatearFecha(tiempo_bloque_ini)}">
-                <input type="hidden" name="RUN" value="${run}">
-                <button type="submit" class="btn btn-success btn-sm" onclick="console.log('Botón clickeado');">Bloquear</button>
+        // Botón de bloquear para admin y TS
+        html = `
+            <form onsubmit="return validarTrabajadorSocial(event)">
+                <input type="hidden" name="ID" value="${bloqueId}">
+                <input type="hidden" name="fechainicio" value="${fechaInicio}">
+                <input type="hidden" name="fechafinal" value="${fechaFinal}">
+                <button type="submit" class="btn btn-success btn-sm">Bloquear</button>
             </form>
         `;
-
-        // Debug
-        console.log('Formulario creado con valores:', {
-            ID: horario.id,
-            fechainicio: formatearFecha(tiempo_bloque_ini),
-            fechafinal: formatearFecha(tiempo_bloque_ini),
-            RUN: run
-        });
+    } else if (tipoUsuario === "estudiante" || tipoUsuario === "noestudiante") {
+        // Botón de agendar para estudiantes y no estudiantes
+        html = `
+            <button type="button" 
+                    class="btn btn-primary btn-sm" 
+                    onclick="mostrarModalAgendar('${bloqueId}', '${fechaInicio}', '${fechaFinal}')">
+                Agendar
+            </button>
+        `;
     }
-    if (tipoUsuario === "estudiante" || tipoUsuario === "noestudiante") {
-        const btnAgendar = document.createElement('button');
-        btnAgendar.className = 'btn btn-success';
-        btnAgendar.innerText = 'Agendar';
-        btnAgendar.onclick = () => 
-            agendar(dia, horario.id, tiempo_bloque_ini.toISOString(), tiempo_bloque_ini.toISOString());
-        container.appendChild(btnAgendar);
 
-        if (reagenda) {
-            const btnReagendar = document.createElement('button');
-            btnReagendar.className = 'btn btn-warning mt-1';
-            btnReagendar.innerText = 'Reagendar';
-            btnReagendar.onclick = () =>
-                Reagendar(run, horario.id, tiempo_bloque_ini.toISOString(), tiempo_bloque_ini.toISOString());
-            container.appendChild(btnReagendar);
+    return html;
+}
+
+function mostrarModalAgendar(bloqueId, fechaInicio, fechaFinal) {
+    // Debug
+    console.log('Mostrando modal con:', {
+        bloqueId,
+        fechaInicio,
+        fechaFinal,
+        trabajadorSocialSeleccionado
+    });
+
+    // Actualizar los campos ocultos del modal
+    document.getElementById('fecha_ini').value = fechaInicio;
+    document.getElementById('fecha_ter').value = fechaFinal;
+    document.getElementById('runTS').value = trabajadorSocialSeleccionado;
+    document.getElementById('run_usuario').value = run;
+    
+    // Formatear la fecha para mostrar
+    const fecha = new Date(fechaInicio);
+    const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const fechaFormateada = fecha.toLocaleDateString('es-ES', opciones);
+    
+    // Formatear el horario
+    const horaInicio = fechaInicio.split(' ')[1].substring(0, 5);
+    const horaFin = fechaFinal.split(' ')[1].substring(0, 5);
+    
+    // Actualizar los campos de texto del modal
+    document.getElementById('dia').textContent = fechaFormateada;
+    document.getElementById('bloque_horario').textContent = `${horaInicio} - ${horaFin}`;
+    
+    // Mostrar el modal usando jQuery
+    $('#exampleModal').modal('show');
+}
+
+// Función para validar trabajador social (solo para admin y TS)
+function validarTrabajadorSocial(event) {
+    event.preventDefault();
+    let trabajadorSocial;
+    
+    if (tipoUsuario === "administrador") {
+        trabajadorSocial = document.getElementById("ts-select").value;
+        if (!trabajadorSocial) {
+            alert('Por favor seleccione un trabajador social antes de bloquear');
+            return false;
         }
+    } else if (tipoUsuario === "trabajadorsocial") {
+        trabajadorSocial = trabajadorSocialActual; // Esta variable debe estar definida globalmente
     }
 
-    return container.outerHTML;
+    // Si hay trabajador social, crear y enviar el formulario
+    const form = event.target;
+    const nuevoForm = document.createElement('form');
+    nuevoForm.method = 'POST';
+    nuevoForm.action = `${site_url}/citas/bloquear`;
+
+    // Copiar los inputs existentes
+    const inputs = form.getElementsByTagName('input');
+    for (let input of inputs) {
+        const nuevoInput = input.cloneNode(true);
+        nuevoForm.appendChild(nuevoInput);
+    }
+
+    // Agregar el RUN del trabajador social
+    const runInput = document.createElement('input');
+    runInput.type = 'hidden';
+    runInput.name = 'RUN';
+    runInput.value = trabajadorSocial;
+    nuevoForm.appendChild(runInput);
+
+    // Enviar el formulario
+    document.body.appendChild(nuevoForm);
+    nuevoForm.submit();
+    document.body.removeChild(nuevoForm);
+    
+    return false;
+}
+
+function formatearFechaHora(fecha, hora) {
+    const fechaObj = new Date(fecha);
+    const año = fechaObj.getFullYear();
+    const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
+    const dia = String(fechaObj.getDate()).padStart(2, '0');
+    return `${año}-${mes}-${dia} ${hora}`;
+}
+
+function obtenerInicioSemana(fecha) {
+    const fechaObj = new Date(fecha);
+    fechaObj.setHours(0, 0, 0, 0);
+    const dia = fechaObj.getDay();
+    const diff = fechaObj.getDate() - dia + (dia === 0 ? -6 : 1);
+    fechaObj.setDate(diff);
+    return formatearFechaHora(fechaObj, '00:00');
 }
 
 // Agregar un event listener para los formularios después de cargar el calendario
@@ -195,4 +265,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 $(document).ready(function() {
     cargar_calendario();
+    
+    // Debug para verificar que el modal existe
+    console.log('Modal element:', document.getElementById('exampleModal'));
+    
+    // Verificar que jQuery y Bootstrap estén cargados
+    console.log('jQuery version:', $.fn.jquery);
+    console.log('Bootstrap modal:', typeof $('#exampleModal').modal);
 });

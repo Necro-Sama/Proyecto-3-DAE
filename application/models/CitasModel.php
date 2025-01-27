@@ -52,12 +52,48 @@ class CitasModel extends CI_Model
         log_message('debug', 'Datos recibidos: ' . print_r($data, true));
 
         try {
-            $this->db->trans_start(); // Iniciamos transacción
+            // Primero verificamos si el bloque ya está bloqueado
+            $this->db->where('fechainicio', $data['fechainicio']);
+            $this->db->where('fechafinal', $data['fechafinal']);
+            $this->db->where('RUN', $data['RUN']);
+            $bloque_existente = $this->db->get('bloquebloqueado')->num_rows() > 0;
 
-            // Primero insertamos en la tabla bloque
+            if ($bloque_existente) {
+                log_message('error', 'El bloque ya está bloqueado para este horario');
+                return 'bloqueado'; // Retornamos un estado específico
+            }
+
+            $this->db->trans_start();
+
+            // Calcular FechaInicioSemana
+            $fechaInicio = new DateTime($data['fechainicio']);
+            $diaSemana = $fechaInicio->format('w');
+            $diasHastaLunes = $diaSemana == 0 ? 6 : $diaSemana - 1;
+            $fechaInicio->sub(new DateInterval("P{$diasHastaLunes}D"));
+            $fechaInicioSemana = $fechaInicio->format('Y-m-d') . ' 03:00:00';
+
+            // Verificar si existe la semana en calendariosemanal
+            $this->db->where('FechaInicioSemana', $fechaInicioSemana);
+            $this->db->where('RUNTS', $data['RUN']);
+            $existe_semana = $this->db->get('calendariosemanal')->num_rows() > 0;
+
+            // Si no existe la semana, la creamos
+            if (!$existe_semana) {
+                $semana_data = array(
+                    'FechaInicioSemana' => $fechaInicioSemana,
+                    'RUNTS' => $data['RUN']
+                );
+                $this->db->insert('calendariosemanal', $semana_data);
+                log_message('debug', 'Nueva semana insertada en calendariosemanal');
+            }
+
+            // Ahora insertamos en la tabla bloque
             $bloque_data = array(
                 'ID' => $data['ID'],
-                'Estado' => 'Bloqueado'  // O el estado que corresponda
+                'FechaInicio' => $data['fechainicio'],
+                'FechaTermino' => $data['fechafinal'],
+                'FechaInicioSemana' => $fechaInicioSemana,
+                'RUNTS' => $data['RUN']
             );
 
             // Verificar si el bloque ya existe
@@ -65,9 +101,13 @@ class CitasModel extends CI_Model
             $existe_bloque = $this->db->get('bloque')->num_rows() > 0;
 
             if (!$existe_bloque) {
-                // Si no existe, lo insertamos
-                $this->db->insert('bloque', $bloque_data);
-                log_message('debug', 'Bloque insertado en tabla bloque');
+                $result_bloque = $this->db->insert('bloque', $bloque_data);
+                log_message('debug', 'Bloque insertado en tabla bloque: ' . ($result_bloque ? 'true' : 'false'));
+                
+                if (!$result_bloque) {
+                    log_message('error', 'Error al insertar en tabla bloque: ' . print_r($this->db->error(), true));
+                    return false;
+                }
             }
 
             // Luego insertamos en bloquebloqueado
@@ -78,20 +118,15 @@ class CitasModel extends CI_Model
                 'RUN' => $data['RUN']
             );
 
-            // Verificar si ya existe el bloqueo
-            $this->db->where('ID', $data['ID']);
-            $this->db->where('fechainicio', $data['fechainicio']);
-            $existe_bloqueo = $this->db->get('bloquebloqueado')->num_rows() > 0;
-
-            if ($existe_bloqueo) {
-                log_message('error', 'El bloque ya está bloqueado');
-                $this->db->trans_rollback();
+            $result_bloqueado = $this->db->insert('bloquebloqueado', $bloqueo_data);
+            log_message('debug', 'Bloque insertado en tabla bloquebloqueado: ' . ($result_bloqueado ? 'true' : 'false'));
+            
+            if (!$result_bloqueado) {
+                log_message('error', 'Error al insertar en tabla bloquebloqueado: ' . print_r($this->db->error(), true));
                 return false;
             }
 
-            $result = $this->db->insert('bloquebloqueado', $bloqueo_data);
-            
-            $this->db->trans_complete(); // Completamos transacción
+            $this->db->trans_complete();
 
             if ($this->db->trans_status() === FALSE) {
                 log_message('error', 'Error en la transacción: ' . $this->db->error()['message']);
@@ -116,6 +151,17 @@ class CitasModel extends CI_Model
         
     }
     
-    
+    public function obtenerTrabajadoresSociales() {
+        $this->db->select('p.RUN, CONCAT(p.Nombre, " ", p.Apellido) as NombreCompleto');
+        $this->db->from('persona p');
+        $this->db->join('trabajadorsocial ts', 'p.RUN = ts.RUN');
+        $this->db->where('p.Activo', 1);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            return $query->result_array();
+        }
+        return array();
+    }
 }
 ?>

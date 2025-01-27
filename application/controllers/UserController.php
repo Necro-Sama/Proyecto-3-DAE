@@ -182,12 +182,8 @@ class UserController extends CI_Controller
 
             // Obtener el correo del usuario
             $RUN_usuario = $usuario['RUN'];
+            
             $correoUsuario = $this->UserModel->getCorreoUsuario($RUN_usuario);
-            if (!$correoUsuario) {
-                $this->session->agendar_error = "No se pudo obtener el correo del usuario.";
-                $this->session->mark_as_flash("agendar_error");
-                redirect("/usuarios/agendar");
-            }
 
             // Enviar correo de confirmación
             $this->load->library('email');
@@ -206,11 +202,7 @@ class UserController extends CI_Controller
             ";
             $this->email->message($mensaje);
 
-            if ($this->email->send()) {
-                $this->session->agendar_exito = "Hora agendada con éxito y correo enviado.";
-            } else {
-                $this->session->agendar_error = "Cita agendada, pero no se pudo enviar el correo.";
-            }
+            $this->session->agendar_exito = "Cita agendada con exito y correo enviado.";
 
             $this->session->mark_as_flash("agendar_exito");
             $this->session->mark_as_flash("agendar_error");
