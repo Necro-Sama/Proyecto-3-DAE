@@ -103,17 +103,24 @@ if (!isset($tipo)) {
                 </div>
             </div>
             <!-- Selector de TS solo visible para administradores -->
-            <?php if($tipo === 'administrador'): ?>
+            <?php if($tipo === 'administrador' || $tipo === 'trabajadorsocial'): ?>
                 <div class="form-group mb-3">
                     <label for="ts-select">Trabajador Social:</label>
-                    <select class="form-control" id="ts-select" name="ts-select" required>
+                    <select class="form-control" id="ts-select" name="ts-select" required 
+                            <?php echo ($tipo === 'trabajadorsocial') ? 'disabled' : ''; ?>>
                         <option value="">Seleccione un Trabajador Social</option>
                         <?php if(isset($trabajadores_sociales) && !empty($trabajadores_sociales)): ?>
                             <?php foreach ($trabajadores_sociales as $ts): ?>
-                                <option value="<?= $ts['RUN'] ?>"><?= $ts['NombreCompleto'] ?></option>
+                                <option value="<?= $ts['RUN'] ?>" 
+                                        <?php echo ($tipo === 'trabajadorsocial') ? 'selected' : ''; ?>>
+                                    <?= $ts['Nombre'] . ' ' . $ts['Apellido'] ?>
+                                </option>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </select>
+                    <?php if($tipo === 'trabajadorsocial'): ?>
+                        <input type="hidden" name="ts-select" value="<?= $trabajadores_sociales[0]['RUN'] ?>">
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -123,39 +130,39 @@ if (!isset($tipo)) {
             <tr>
                 <th><div class="p-2 display-7 dia">Hora</div></th>
                 <th><div class="p-2 display-7 dia">
-                Lunes
-                <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
-                <!-- <input type="checkbox" class="checkbox-dia" id="checkbox-lunes" onchange="marcarTodos('lunes')" /> -->
-                <?php endif; ?>
-                    </div>
+                    Lunes
+                    <?php if ($tipo === 'administrador' or $tipo === 'trabajadorsocial'): ?>
+                        <input type="checkbox" class="checkbox-dia" id="checkbox-lunes" onchange="marcarTodos('lunes')" />
+                    <?php endif; ?>
+                </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
-                Martes
-                <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
-                <!-- <input type="checkbox" class="checkbox-dia" id="checkbox-martes" onchange="marcarTodos('martes')" /> -->
-                <?php endif; ?>
-                    </div>
+                    Martes
+                    <?php if ($tipo === 'administrador' or $tipo === 'trabajadorsocial'): ?>
+                        <input type="checkbox" class="checkbox-dia" id="checkbox-martes" onchange="marcarTodos('martes')" />
+                    <?php endif; ?>
+                </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
-                Miércoles
-                <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
-                <!-- <input type="checkbox" class="checkbox-dia" id="checkbox-miercoles" onchange="marcarTodos('miercoles')" /> -->
-                <?php endif; ?>
-                    </div>
+                    Miércoles
+                    <?php if ($tipo === 'administrador' or $tipo === 'trabajadorsocial'): ?>
+                        <input type="checkbox" class="checkbox-dia" id="checkbox-miercoles" onchange="marcarTodos('miercoles')" />
+                    <?php endif; ?>
+                </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
-                Jueves
-                <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
-                <!-- <input type="checkbox" class="checkbox-dia" id="checkbox-jueves" onchange="marcarTodos('jueves')" /> -->
-                <?php endif; ?>
-                    </div>
+                    Jueves
+                    <?php if ($tipo === 'administrador' or $tipo === 'trabajadorsocial'): ?>
+                        <input type="checkbox" class="checkbox-dia" id="checkbox-jueves" onchange="marcarTodos('jueves')" />
+                    <?php endif; ?>
+                </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
-                Viernes
-                <?php if ($tipo === 'administrador' or $tipo ==='trabajadorsocial'): ?>
-                <!-- <input type="checkbox" class="checkbox-dia" id="checkbox-viernes" onchange="marcarTodos('viernes')" /> -->
-                <?php endif; ?>
-                    </div>
+                    Viernes
+                    <?php if ($tipo === 'administrador' or $tipo === 'trabajadorsocial'): ?>
+                        <input type="checkbox" class="checkbox-dia" id="checkbox-viernes" onchange="marcarTodos('viernes')" />
+                    <?php endif; ?>
+                </div>
                 </th>
             </tr>
         </thead>

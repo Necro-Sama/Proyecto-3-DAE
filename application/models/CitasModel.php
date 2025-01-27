@@ -142,24 +142,30 @@ class CitasModel extends CI_Model
             return false;
         }
     }
-    public function seleccionarfecha(){
-        //la idea principal es enviarlo a la agenda para que seleccione otro dia de las 3 semanas 
-        //de esta manera cambiamos el boton de agendar por uno que diga reagendar de la misma manera que bloquear con un if
-        //traspasamos una variable para que pueda reconocer el proceso
-        //una vez se seleccione llamara a la funcion reagendar para agedar y eliminar la otra pasando los datos de la eliminacion
-        //para la funcion eliminar cita y reusar funciones
-        
-    }
     
     public function obtenerTrabajadoresSociales() {
-        $this->db->select('p.RUN, CONCAT(p.Nombre, " ", p.Apellido) as NombreCompleto');
+        $this->db->select('p.RUN, p.Nombre, p.Apellido');
         $this->db->from('persona p');
         $this->db->join('trabajadorsocial ts', 'p.RUN = ts.RUN');
-        $this->db->where('p.Activo', 1);
+        $this->db->where('p.Activo', 1); // Solo trabajadores sociales activos
         $query = $this->db->get();
         
         if ($query->num_rows() > 0) {
             return $query->result_array();
+        }
+        return array();
+    }
+
+    public function obtenerTrabajadorSocialPorRUN($run) {
+        $this->db->select('p.RUN, p.Nombre, p.Apellido');
+        $this->db->from('persona p');
+        $this->db->join('trabajadorsocial ts', 'p.RUN = ts.RUN');
+        $this->db->where('p.RUN', $run);
+        $this->db->where('p.Activo', 1);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            return array($query->row_array()); // Devolver como array para mantener consistencia
         }
         return array();
     }

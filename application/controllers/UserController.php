@@ -128,6 +128,18 @@ class UserController extends CI_Controller
         $data['run'] = $run;
         $data['reagenda'] = false;
 
+        // Cargar el modelo de citas
+        $this->load->model('CitasModel');
+
+        // Si es trabajador social, obtener solo sus datos
+        if ($data['tipo'] === 'trabajadorsocial') {
+            $data['trabajadores_sociales'] = $this->CitasModel->obtenerTrabajadorSocialPorRUN($run);
+        } 
+        // Si es administrador, obtener todos los trabajadores sociales
+        else if ($data['tipo'] === 'administrador') {
+            $data['trabajadores_sociales'] = $this->CitasModel->obtenerTrabajadoresSociales();
+        }
+
         // Cargar la vista con los datos
         $this->load->view('StudentAgendarView', $data);
     }

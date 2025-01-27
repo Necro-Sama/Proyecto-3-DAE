@@ -72,6 +72,42 @@ class CitasController extends CI_Controller
         return $data;
     }
     public function bloquear() {
+        // Verificar si es una solicitud AJAX
+        if ($this->input->is_ajax_request()) {
+            $response = ['success' => false, 'message' => ''];
+            
+            try {
+                // Obtener los datos del POST
+                $data = [
+                    'ID' => $this->input->post('ID'),
+                    'RUN' => $this->input->post('RUN'),
+                    'fechainicio' => $this->input->post('fechainicio'),
+                    'fechafinal' => $this->input->post('fechafinal')
+                ];
+
+                // Intentar insertar el bloque bloqueado
+                $result = $this->CitasModel->insertarBloqueBloqueado($data);
+
+                if ($result === true) {
+                    $response['success'] = true;
+                    $response['message'] = 'Bloque bloqueado exitosamente';
+                } elseif ($result === 'bloqueado') {
+                    $response['message'] = 'Este horario ya está bloqueado';
+                } else {
+                    $response['message'] = 'Error al bloquear el bloque';
+                }
+
+            } catch (Exception $e) {
+                $response['message'] = $e->getMessage();
+            }
+
+            // Enviar respuesta JSON
+            header('Content-Type: application/json');
+            echo json_encode($response);
+            return;
+        }
+
+        // Si no es AJAX, procesar como antes
         // Definir los campos requeridos
         $required_fields = ['ID', 'RUN', 'fechainicio', 'fechafinal'];
         $data = [];

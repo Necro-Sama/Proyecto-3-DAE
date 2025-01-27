@@ -273,3 +273,113 @@ $(document).ready(function() {
     console.log('jQuery version:', $.fn.jquery);
     console.log('Bootstrap modal:', typeof $('#exampleModal').modal);
 });
+
+// Función para marcar todos los bloques de un día
+function marcarTodos(dia) {
+    const checkbox = document.getElementById(`checkbox-${dia}`);
+    const tabla = document.getElementById('tabla-horario');
+    const filas = tabla.getElementsByTagName('tr');
+    const diaIndex = getDiaIndex(dia);
+    
+    // Obtener el trabajador social seleccionado
+    const tsSelect = document.getElementById('ts-select');
+    const trabajadorSocial = tsSelect ? tsSelect.value : trabajadorSocialActual;
+    
+    if (!trabajadorSocial) {
+        alert('Por favor seleccione un trabajador social antes de bloquear');
+        checkbox.checked = false;
+        return;
+    }
+
+    // Array para almacenar todas las promesas de bloqueo
+    const promesasBloqueo = [];
+
+    // Iterar sobre cada fila (horario)
+    for (let i = 1; i < filas.length; i++) { // Empezamos desde 1 para saltar el encabezado
+        const fila = filas[i];
+        const celdas = fila.getElementsByTagName('td');
+        
+        if (celdas.length > diaIndex) {
+            const celda = celdas[diaIndex];
+            const horario = horarios[i-1]; // i-1 porque horarios empieza desde 0
+
+            // Saltar el horario de almuerzo
+            if (horario.esAlmuerzo) continue;
+
+            // Obtener la fecha y hora para este bloque
+            const fechaInicio = obtenerFechaHoraBloque(dia, horario.horaInicio);
+            const fechaFinal = obtenerFechaHoraBloque(dia, horario.horaFinal);
+
+            if (checkbox.checked) {
+                // Generar ID único para el bloque
+                const bloqueId = generarIdBloque(fechaInicio, horario);
+
+                // Crear los datos para el bloqueo
+                const datos = {
+                    ID: bloqueId,
+                    RUN: trabajadorSocial,
+                    fechainicio: fechaInicio,
+                    fechafinal: fechaFinal
+                };
+
+                // Agregar la promesa de bloqueo al array
+                promesasBloqueo.push(bloquearHorario(datos));
+            }
+        }
+    }
+
+    // Procesar todos los bloqueos
+    Promise.all(promesasBloqueo)
+        .then(() => {
+            // Recargar el calendario después de que todos los bloqueos se completen
+            cargar_calendario();
+        })
+        .catch(error => {
+            console.error('Error al bloquear horarios:', error);
+            alert('Hubo un error al bloquear algunos horarios');
+        });
+}
+
+// Función auxiliar para obtener el índice del día en la tabla
+function getDiaIndex(dia) {
+    const dias = {
+        'lunes': 1,
+        'martes': 2,
+        'miercoles': 3,
+        'jueves': 4,
+        'viernes': 5
+    };
+    return dias[dia.toLowerCase()];
+}
+
+// Función para obtener la fecha y hora formateada para un bloque
+function obtenerFechaHoraBloque(dia, hora) {
+    const semana = document.getElementById("semana-select").value.replace("00:00:00", "");
+    const fecha = new Date(semana);
+    const diasHasta = getDiaIndex(dia) - 1;
+    fecha.setDate(fecha.getDate() + diasHasta);
+    return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')} ${hora}`;
+}
+
+// Función para realizar el bloqueo de un horario específico
+async function bloquearHorario(datos) {
+    try {
+        const response = await fetch(`${site_url}/citas/bloquear`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(datos)
+        });
+
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error('Error al bloquear horario:', error);
+        throw error;
+    }
+}
