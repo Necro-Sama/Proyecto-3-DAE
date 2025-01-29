@@ -94,33 +94,70 @@ if (!isset($tipo)) {
                     <label for="semana">Semana: </label>
                     <?php  $semanas = $this->BloqueModel->get_semanas(3); ?>
                     <select class="form-select" name="semana" id="semana-select" onchange="seleccion_semana(event)">
-                        <?php foreach ($semanas as $semana) { ?>
+                        <?php foreach ($semanas as $semana) { 
+                            $fecha = new DateTime($semana);
+                            $fechaFin = clone $fecha;
+                            $fechaFin->modify('+4 days');
+                        ?>
                             <option value="<?= $semana ?>">
-                                <?= trim($semana, "00:00:00") ?>
+                                <?= $fecha->format('d/m/Y') ?> - <?= $fechaFin->format('d/m/Y') ?>
                             </option>
                         <?php } ?>
                     </select>
                 </div>
             </div>
-            <!-- Selector de TS solo visible para administradores -->
+            
             <?php if($tipo === 'administrador' || $tipo === 'trabajadorsocial'): ?>
-                <div class="form-group mb-3">
-                    <label for="ts-select">Trabajador Social:</label>
-                    <select class="form-control" id="ts-select" name="ts-select" required 
-                            <?php echo ($tipo === 'trabajadorsocial') ? 'disabled' : ''; ?>>
-                        <option value="">Seleccione un Trabajador Social</option>
-                        <?php if(isset($trabajadores_sociales) && !empty($trabajadores_sociales)): ?>
-                            <?php foreach ($trabajadores_sociales as $ts): ?>
-                                <option value="<?= $ts['RUN'] ?>" 
-                                        <?php echo ($tipo === 'trabajadorsocial') ? 'selected' : ''; ?>>
-                                    <?= $ts['Nombre'] . ' ' . $ts['Apellido'] ?>
-                                </option>
-                            <?php endforeach; ?>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="ts-select">Trabajador Social:</label>
+                        <select class="form-control" id="ts-select" name="ts-select" required 
+                                <?php echo ($tipo === 'trabajadorsocial') ? 'disabled' : ''; ?>>
+                            <option value="">Seleccione un Trabajador Social</option>
+                            <?php if(isset($trabajadores_sociales) && !empty($trabajadores_sociales)): ?>
+                                <?php foreach ($trabajadores_sociales as $ts): ?>
+                                    <option value="<?= $ts['RUN'] ?>" 
+                                            <?php echo ($tipo === 'trabajadorsocial') ? 'selected' : ''; ?>>
+                                        <?= $ts['Nombre'] . ' ' . $ts['Apellido'] ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                        <?php if($tipo === 'trabajadorsocial'): ?>
+                            <input type="hidden" name="ts-select" value="<?= $trabajadores_sociales[0]['RUN'] ?>">
                         <?php endif; ?>
-                    </select>
-                    <?php if($tipo === 'trabajadorsocial'): ?>
-                        <input type="hidden" name="ts-select" value="<?= $trabajadores_sociales[0]['RUN'] ?>">
-                    <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="col-12 mt-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">Seleccionar días a bloquear para la semana seleccionada:</h6>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input dia-checkbox" type="checkbox" id="check-lunes" value="lunes">
+                                <label class="form-check-label" for="check-lunes">Lunes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input dia-checkbox" type="checkbox" id="check-martes" value="martes">
+                                <label class="form-check-label" for="check-martes">Martes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input dia-checkbox" type="checkbox" id="check-miercoles" value="miercoles">
+                                <label class="form-check-label" for="check-miercoles">Miércoles</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input dia-checkbox" type="checkbox" id="check-jueves" value="jueves">
+                                <label class="form-check-label" for="check-jueves">Jueves</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input dia-checkbox" type="checkbox" id="check-viernes" value="viernes">
+                                <label class="form-check-label" for="check-viernes">Viernes</label>
+                            </div>
+                            <button type="button" class="btn btn-warning mt-2" id="btn-bloquear">
+                                Bloquear días seleccionados
+                            </button>
+                        </div>
+                    </div>
                 </div>
             <?php endif; ?>
         </div>
@@ -238,6 +275,36 @@ if (!isset($tipo)) {
             console.log('Modal cargado:', $('#exampleModal').length > 0);
         });
     </script>
+
+    <!-- Al final del archivo, justo antes de cerrar el body -->
+    <script>
+        console.log('Vista cargada - Verificando elementos...');
+        
+        // Verificar que jQuery esté disponible
+        if (typeof jQuery !== 'undefined') {
+            console.log('jQuery está disponible:', jQuery.fn.jquery);
+        } else {
+            console.error('jQuery no está disponible!');
+        }
+        
+        // Verificar que el botón existe
+        $(document).ready(function() {
+            console.log('DOM listo - Buscando elementos...');
+            
+            const btnBloquear = $('#btn-bloquear');
+            console.log('Botón de bloquear:', btnBloquear.length ? 'Encontrado' : 'No encontrado');
+            
+            if (btnBloquear.length) {
+                console.log('Agregando evento click al botón...');
+                btnBloquear.on('click', function() {
+                    console.log('Botón clickeado!');
+                });
+            }
+        });
+    </script>
+
+    <!-- Asegurarse que el archivo agendar.js se carga después -->
+    <script src="<?php echo base_url('js/agendar.js'); ?>"></script>
 </body>
 </html>
 <style>

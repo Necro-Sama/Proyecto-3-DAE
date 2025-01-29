@@ -46,99 +46,32 @@ class CitasModel extends CI_Model
     }
 
     
-    public function insertarBloqueBloqueado($data) 
-    {
-        log_message('debug', '=== Iniciando insertarBloqueBloqueado ===');
-        log_message('debug', 'Datos recibidos: ' . print_r($data, true));
-
+    public function insertarBloqueBloqueado($data) {
         try {
-            // Primero verificamos si el bloque ya está bloqueado
-            $this->db->where('fechainicio', $data['fechainicio']);
-            $this->db->where('fechafinal', $data['fechafinal']);
-            $this->db->where('RUN', $data['RUN']);
-            $bloque_existente = $this->db->get('bloquebloqueado')->num_rows() > 0;
+            $this->db->trans_begin();
 
-            if ($bloque_existente) {
-                log_message('error', 'El bloque ya está bloqueado para este horario');
-                return 'bloqueado'; // Retornamos un estado específico
-            }
-
-            $this->db->trans_start();
-
-            // Calcular FechaInicioSemana
-            $fechaInicio = new DateTime($data['fechainicio']);
-            $diaSemana = $fechaInicio->format('w');
-            $diasHastaLunes = $diaSemana == 0 ? 6 : $diaSemana - 1;
-            $fechaInicio->sub(new DateInterval("P{$diasHastaLunes}D"));
-            $fechaInicioSemana = $fechaInicio->format('Y-m-d') . ' 03:00:00';
-
-            // Verificar si existe la semana en calendariosemanal
-            $this->db->where('FechaInicioSemana', $fechaInicioSemana);
-            $this->db->where('RUNTS', $data['RUN']);
-            $existe_semana = $this->db->get('calendariosemanal')->num_rows() > 0;
-
-            // Si no existe la semana, la creamos
-            if (!$existe_semana) {
-                $semana_data = array(
-                    'FechaInicioSemana' => $fechaInicioSemana,
-                    'RUNTS' => $data['RUN']
-                );
-                $this->db->insert('calendariosemanal', $semana_data);
-                log_message('debug', 'Nueva semana insertada en calendariosemanal');
-            }
-
-            // Ahora insertamos en la tabla bloque
-            $bloque_data = array(
-                'ID' => $data['ID'],
-                'FechaInicio' => $data['fechainicio'],
-                'FechaTermino' => $data['fechafinal'],
-                'FechaInicioSemana' => $fechaInicioSemana,
-                'RUNTS' => $data['RUN']
-            );
-
-            // Verificar si el bloque ya existe
-            $this->db->where('ID', $data['ID']);
-            $existe_bloque = $this->db->get('bloque')->num_rows() > 0;
-
-            if (!$existe_bloque) {
-                $result_bloque = $this->db->insert('bloque', $bloque_data);
-                log_message('debug', 'Bloque insertado en tabla bloque: ' . ($result_bloque ? 'true' : 'false'));
-                
-                if (!$result_bloque) {
-                    log_message('error', 'Error al insertar en tabla bloque: ' . print_r($this->db->error(), true));
-                    return false;
-                }
-            }
-
-            // Luego insertamos en bloquebloqueado
-            $bloqueo_data = array(
+            // Insertar en la tabla bloquebloqueado
+            $dataBloque = [
                 'ID' => $data['ID'],
                 'fechainicio' => $data['fechainicio'],
                 'fechafinal' => $data['fechafinal'],
                 'RUN' => $data['RUN']
-            );
+            ];
 
-            $result_bloqueado = $this->db->insert('bloquebloqueado', $bloqueo_data);
-            log_message('debug', 'Bloque insertado en tabla bloquebloqueado: ' . ($result_bloqueado ? 'true' : 'false'));
+            $resultado = $this->db->insert('bloquebloqueado', $dataBloque);
             
-            if (!$result_bloqueado) {
-                log_message('error', 'Error al insertar en tabla bloquebloqueado: ' . print_r($this->db->error(), true));
+            if (!$resultado) {
+                $this->db->trans_rollback();
+                log_message('error', 'Error al insertar en tabla bloquebloqueado: ' . $this->db->error()['message']);
                 return false;
             }
 
-            $this->db->trans_complete();
-
-            if ($this->db->trans_status() === FALSE) {
-                log_message('error', 'Error en la transacción: ' . $this->db->error()['message']);
-                return false;
-            }
-
-            log_message('debug', 'Inserción completada exitosamente');
+            $this->db->trans_commit();
             return true;
 
         } catch (Exception $e) {
-            log_message('error', 'Exception en insertarBloqueBloqueado: ' . $e->getMessage());
             $this->db->trans_rollback();
+            log_message('error', 'Error en insertarBloqueBloqueado: ' . $e->getMessage());
             return false;
         }
     }
@@ -168,6 +101,138 @@ class CitasModel extends CI_Model
             return array($query->row_array()); // Devolver como array para mantener consistencia
         }
         return array();
+    }
+
+    public function verificarDisponibilidadBloque($fechainicio, $rut_trabajador) {
+        try {
+            // Log para debug
+            log_message('debug', 'Verificando bloque - Fecha: ' . $fechainicio . ' RUT: ' . $rut_trabajador);
+
+            // Consulta para verificar si existe el bloque
+            $this->db->where('FechaInicio', $fechainicio);
+            $this->db->where('RUNTS', $rut_trabajador);
+            $query = $this->db->get('bloque');
+
+            if ($query === FALSE) {
+                log_message('error', 'Error en consulta SQL: ' . $this->db->error()['message']);
+                throw new Exception('Error al consultar la base de datos');
+            }
+
+            $existe = ($query->num_rows() > 0);
+            
+            // Log del resultado
+            log_message('debug', 'Bloque ' . ($existe ? 'existe' : 'no existe') . ' para fecha: ' . $fechainicio);
+
+            return !$existe;
+
+        } catch (Exception $e) {
+            log_message('error', 'Error en verificarDisponibilidadBloque: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function obtenerBloquesBloqueados($fecha, $runts) {
+        $this->db->select('b.*, ba.Estado')
+            ->from('bloque b')
+            ->join('bloqueatencion ba', 'b.ID = ba.ID')
+            ->where('DATE(b.FechaInicio)', $fecha)
+            ->where('b.RUNTS', $runts)
+            ->where('ba.Estado', 'CanceladoTS');
+        
+        $query = $this->db->get();
+        
+        if ($query === FALSE) {
+            throw new Exception('Error al consultar bloques bloqueados');
+        }
+        
+        return $query->result();
+    }
+
+    public function desbloquearBloque($id, $runts) {
+        try {
+            $this->db->trans_begin();
+
+            // Eliminar de bloqueatencion
+            $this->db->where('ID', $id)
+                ->where('Estado', 'CanceladoTS')
+                ->delete('bloqueatencion');
+
+            // Eliminar de bloque
+            $this->db->where('ID', $id)
+                ->where('RUNTS', $runts)
+                ->delete('bloque');
+
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+                return false;
+            }
+
+            $this->db->trans_commit();
+            return true;
+
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            log_message('error', 'Error en desbloquearBloque: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function insertarBloqueDiaCompleto($data) {
+        try {
+            $this->db->trans_begin();
+
+            $dataBloque = [
+                'ID' => $data['ID'],
+                'fechainicio' => $data['fechainicio'],
+                'fechafinal' => $data['fechafinal'],
+                'RUN' => $data['RUN']
+            ];
+
+            $resultado = $this->db->insert('bloquebloqueado', $dataBloque);
+            
+            if (!$resultado) {
+                $this->db->trans_rollback();
+                log_message('error', 'Error al insertar bloque día completo: ' . $this->db->error()['message']);
+                return false;
+            }
+
+            $this->db->trans_commit();
+            return true;
+
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            log_message('error', 'Error en insertarBloqueDiaCompleto: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function insertarBloqueIndividual($data) {
+        try {
+            $this->db->trans_begin();
+
+            $dataBloque = [
+                'ID' => $data['ID'],
+                'fechainicio' => $data['fechainicio'],
+                'fechafinal' => $data['fechafinal'],
+                'RUN' => $data['RUN']
+            ];
+
+            $resultado = $this->db->insert('bloquebloqueado', $dataBloque);
+            
+            if (!$resultado) {
+                $this->db->trans_rollback();
+                log_message('error', 'Error al insertar bloque individual: ' . $this->db->error()['message']);
+                return false;
+            }
+
+            $this->db->trans_commit();
+            return true;
+
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            log_message('error', 'Error en insertarBloqueIndividual: ' . $e->getMessage());
+            return false;
+        }
     }
 }
 ?>

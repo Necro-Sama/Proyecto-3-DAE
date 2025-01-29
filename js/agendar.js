@@ -1,10 +1,12 @@
-// Verificar que agendarConfig esté disponible
+console.log('agendar.js cargado correctamente');
+
 if (typeof window.agendarConfig === 'undefined') {
     console.error('Error: agendarConfig no está definido');
     throw new Error('agendarConfig no está definido');
 }
 
-// Obtener las variables del objeto global
+console.log('Variables de configuración:', window.agendarConfig);
+
 const {
     tipoUsuario,
     site_url,
@@ -14,7 +16,6 @@ const {
     trabajadorSocialSeleccionado
 } = window.agendarConfig;
 
-// Debug
 console.log('Variables extraídas:', {
     tipoUsuario,
     site_url,
@@ -24,7 +25,6 @@ console.log('Variables extraídas:', {
     trabajadorSocialSeleccionado
 });
 
-// Verificación de variables necesarias
 if (typeof tipoUsuario === 'undefined') {
     console.error('Error: tipoUsuario no está definido');
 }
@@ -72,16 +72,17 @@ function agendar(bloqueId, horario, fechaInicio, fechaFinal, trabajadorSocial) {
 }
 
 function seleccion_semana(e) {
+    document.querySelectorAll('.dia-checkbox').forEach(cb => cb.checked = false);
     cargar_calendario();
 }
 
 function cargar_calendario() {
     let tiempo_servidor = new Date(document.getElementById("tiempo-servidor").innerText);
     const tablaHorario = document.getElementById("tabla-horario");
-    tablaHorario.innerHTML = ""; // Limpiar la tabla antes de cargar
+    tablaHorario.innerHTML = ""; 
     const semana = document.getElementById("semana-select").value.replace("00:00:00", "");
 
-    const fragment = document.createDocumentFragment(); // Usar fragmentos para optimizar el DOM
+    const fragment = document.createDocumentFragment(); 
 
     horarios.forEach((horario, index) => {
         const fila = document.createElement("tr");
@@ -94,7 +95,6 @@ function cargar_calendario() {
         for (let dia = 1; dia <= 5; dia++) {
             const celda = document.createElement("td");
 
-            // Calcular tiempo de inicio del bloque
             let tInicio = `${horario.horaInicio}:00`;
             let tiempo_bloque_ini = new Date(`${semana}${tInicio}`);
             tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia - 1) * 24 * 3600 * 1000);
@@ -113,38 +113,55 @@ function cargar_calendario() {
         fragment.appendChild(fila);
     });
 
-    tablaHorario.appendChild(fragment); // Agregar el fragmento al DOM
+    tablaHorario.appendChild(fragment);
 }
 
-function generarIdBloque(fecha, horario, trabajadorSocial) {
-    // Generar un timestamp único basado en la fecha y hora
-    const timestamp = new Date(fecha).getTime();
-    // Crear un ID único combinando timestamp y RUN del TS
-    const id = Math.floor(Math.random() * 1000000); // Número aleatorio para evitar colisiones
-    return id;
+function generarIdBloque(fechaInicio, horario) {
+
+    const fecha = new Date(fechaInicio);
+    const year = fecha.getFullYear();
+    const month = String(fecha.getMonth() + 1).padStart(2, '0');
+    const day = String(fecha.getDate()).padStart(2, '0');
+    return `BLQ${year}${month}${day}${horario.id}`;
 }
 
 function crearBotones(dia, horario, tiempo_bloque_ini) {
     const bloqueId = generarIdBloque(tiempo_bloque_ini, horario);
-    
-    // Formatear fechas para la base de datos
     const fechaInicio = formatearFechaHora(tiempo_bloque_ini, horario.horaInicio);
     const fechaFinal = formatearFechaHora(tiempo_bloque_ini, horario.horaFinal);
 
     let html = '';
     
     if (tipoUsuario === "administrador" || tipoUsuario === "trabajadorsocial") {
-        // Botón de bloquear para admin y TS
-        html = `
-            <form onsubmit="return validarTrabajadorSocial(event)">
-                <input type="hidden" name="ID" value="${bloqueId}">
-                <input type="hidden" name="fechainicio" value="${fechaInicio}">
-                <input type="hidden" name="fechafinal" value="${fechaFinal}">
-                <button type="submit" class="btn btn-success btn-sm">Bloquear</button>
-            </form>
-        `;
+        let trabajadorSocial;
+        
+        if (tipoUsuario === "trabajadorsocial") {
+            // Para TS, usar directamente su RUN
+            trabajadorSocial = trabajadorSocialActual;
+        } else {
+            // Para administrador, mantener el select
+            const selectTS = document.getElementById('ts-select');
+            trabajadorSocial = selectTS ? selectTS.value : null;
+        }
+
+        if (trabajadorSocial) {
+            html = `
+                <form class="bloqueo-individual-form">
+                    <input type="hidden" name="ID" value="${bloqueId}">
+                    <input type="hidden" name="RUNTS" value="${trabajadorSocial}">
+                    <input type="hidden" name="FechaInicio" value="${fechaInicio}">
+                    <input type="hidden" name="FechaTermino" value="${fechaFinal}">
+                    <button type="button" 
+                            class="btn btn-success btn-sm btn-bloquear-individual"
+                            onclick="handleBloqueoIndividual(event, '${bloqueId}', '${fechaInicio}', '${fechaFinal}', '${trabajadorSocial}')">
+                        Bloquear
+                    </button>
+                </form>
+            `;
+        } else if (tipoUsuario === "administrador") {
+            html = '<div class="text-danger">Seleccione un trabajador social</div>';
+        }
     } else if (tipoUsuario === "estudiante" || tipoUsuario === "noestudiante") {
-        // Botón de agendar para estudiantes y no estudiantes
         html = `
             <button type="button" 
                     class="btn btn-primary btn-sm" 
@@ -158,7 +175,7 @@ function crearBotones(dia, horario, tiempo_bloque_ini) {
 }
 
 function mostrarModalAgendar(bloqueId, fechaInicio, fechaFinal) {
-    // Debug
+
     console.log('Mostrando modal con:', {
         bloqueId,
         fechaInicio,
@@ -166,30 +183,24 @@ function mostrarModalAgendar(bloqueId, fechaInicio, fechaFinal) {
         trabajadorSocialSeleccionado
     });
 
-    // Actualizar los campos ocultos del modal
     document.getElementById('fecha_ini').value = fechaInicio;
     document.getElementById('fecha_ter').value = fechaFinal;
     document.getElementById('runTS').value = trabajadorSocialSeleccionado;
     document.getElementById('run_usuario').value = run;
     
-    // Formatear la fecha para mostrar
     const fecha = new Date(fechaInicio);
     const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const fechaFormateada = fecha.toLocaleDateString('es-ES', opciones);
     
-    // Formatear el horario
     const horaInicio = fechaInicio.split(' ')[1].substring(0, 5);
     const horaFin = fechaFinal.split(' ')[1].substring(0, 5);
     
-    // Actualizar los campos de texto del modal
     document.getElementById('dia').textContent = fechaFormateada;
     document.getElementById('bloque_horario').textContent = `${horaInicio} - ${horaFin}`;
     
-    // Mostrar el modal usando jQuery
     $('#exampleModal').modal('show');
 }
 
-// Función para validar trabajador social (solo para admin y TS)
 function validarTrabajadorSocial(event) {
     event.preventDefault();
     let trabajadorSocial;
@@ -201,30 +212,26 @@ function validarTrabajadorSocial(event) {
             return false;
         }
     } else if (tipoUsuario === "trabajadorsocial") {
-        trabajadorSocial = trabajadorSocialActual; // Esta variable debe estar definida globalmente
+        trabajadorSocial = trabajadorSocialActual; 
     }
 
-    // Si hay trabajador social, crear y enviar el formulario
     const form = event.target;
     const nuevoForm = document.createElement('form');
     nuevoForm.method = 'POST';
     nuevoForm.action = `${site_url}/citas/bloquear`;
-
-    // Copiar los inputs existentes
+    
     const inputs = form.getElementsByTagName('input');
     for (let input of inputs) {
         const nuevoInput = input.cloneNode(true);
         nuevoForm.appendChild(nuevoInput);
     }
 
-    // Agregar el RUN del trabajador social
     const runInput = document.createElement('input');
     runInput.type = 'hidden';
     runInput.name = 'RUN';
     runInput.value = trabajadorSocial;
     nuevoForm.appendChild(runInput);
 
-    // Enviar el formulario
     document.body.appendChild(nuevoForm);
     nuevoForm.submit();
     document.body.removeChild(nuevoForm);
@@ -249,7 +256,6 @@ function obtenerInicioSemana(fecha) {
     return formatearFechaHora(fechaObj, '00:00');
 }
 
-// Agregar un event listener para los formularios después de cargar el calendario
 document.addEventListener('DOMContentLoaded', function() {
     document.body.addEventListener('submit', function(e) {
         if (e.target.matches('form[action*="/citas/bloquear"]')) {
@@ -266,22 +272,65 @@ document.addEventListener('DOMContentLoaded', function() {
 $(document).ready(function() {
     cargar_calendario();
     
-    // Debug para verificar que el modal existe
     console.log('Modal element:', document.getElementById('exampleModal'));
     
-    // Verificar que jQuery y Bootstrap estén cargados
     console.log('jQuery version:', $.fn.jquery);
     console.log('Bootstrap modal:', typeof $('#exampleModal').modal);
+
+    const $btnDesbloquear = $('#btn-desbloquear');
+    
+    $btnDesbloquear.on('click', async function(e) {
+        e.preventDefault();
+        console.log('Click en botón de desbloqueo');
+        
+        try {
+            const checkboxes = document.querySelectorAll('.dia-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('Por favor seleccione al menos un día para desbloquear');
+                return;
+            }
+
+            const tsSelect = document.getElementById('ts-select');
+            const trabajadorSocial = tsSelect ? tsSelect.value : trabajadorSocialActual;
+            
+            if (!trabajadorSocial) {
+                alert('Por favor seleccione un trabajador social');
+                return;
+            }
+
+            if (!confirm('¿Está seguro que desea desbloquear los días seleccionados?')) {
+                return;
+            }
+
+            $btnDesbloquear.prop('disabled', true).text('Desbloqueando...');
+
+            const resultados = await Promise.all(
+                Array.from(checkboxes).map(checkbox => 
+                    desbloquearDiaCompleto(checkbox.value, trabajadorSocial)
+                )
+            );
+
+            const mensajes = resultados.map(r => r.message);
+            alert(mensajes.join('\n'));
+            
+            checkboxes.forEach(cb => cb.checked = false);
+            cargar_calendario();
+
+        } catch (error) {
+            console.error('Error al desbloquear días:', error);
+            alert('Error al desbloquear los días: ' + error.message);
+        } finally {
+            $btnDesbloquear.prop('disabled', false).text('Desbloquear días seleccionados');
+        }
+    });
 });
 
-// Función para marcar todos los bloques de un día
 function marcarTodos(dia) {
     const checkbox = document.getElementById(`checkbox-${dia}`);
     const tabla = document.getElementById('tabla-horario');
     const filas = tabla.getElementsByTagName('tr');
     const diaIndex = getDiaIndex(dia);
     
-    // Obtener el trabajador social seleccionado
     const tsSelect = document.getElementById('ts-select');
     const trabajadorSocial = tsSelect ? tsSelect.value : trabajadorSocialActual;
     
@@ -291,30 +340,27 @@ function marcarTodos(dia) {
         return;
     }
 
-    // Array para almacenar todas las promesas de bloqueo
     const promesasBloqueo = [];
 
-    // Iterar sobre cada fila (horario)
-    for (let i = 1; i < filas.length; i++) { // Empezamos desde 1 para saltar el encabezado
+    for (let i = 1; i < filas.length; i++) { 
         const fila = filas[i];
         const celdas = fila.getElementsByTagName('td');
         
         if (celdas.length > diaIndex) {
             const celda = celdas[diaIndex];
-            const horario = horarios[i-1]; // i-1 porque horarios empieza desde 0
+            const horario = horarios[i-1];
 
-            // Saltar el horario de almuerzo
+
             if (horario.esAlmuerzo) continue;
 
-            // Obtener la fecha y hora para este bloque
+
             const fechaInicio = obtenerFechaHoraBloque(dia, horario.horaInicio);
             const fechaFinal = obtenerFechaHoraBloque(dia, horario.horaFinal);
 
             if (checkbox.checked) {
-                // Generar ID único para el bloque
+
                 const bloqueId = generarIdBloque(fechaInicio, horario);
 
-                // Crear los datos para el bloqueo
                 const datos = {
                     ID: bloqueId,
                     RUN: trabajadorSocial,
@@ -322,16 +368,15 @@ function marcarTodos(dia) {
                     fechafinal: fechaFinal
                 };
 
-                // Agregar la promesa de bloqueo al array
                 promesasBloqueo.push(bloquearHorario(datos));
             }
         }
     }
 
-    // Procesar todos los bloqueos
+
     Promise.all(promesasBloqueo)
         .then(() => {
-            // Recargar el calendario después de que todos los bloqueos se completen
+
             cargar_calendario();
         })
         .catch(error => {
@@ -340,7 +385,7 @@ function marcarTodos(dia) {
         });
 }
 
-// Función auxiliar para obtener el índice del día en la tabla
+
 function getDiaIndex(dia) {
     const dias = {
         'lunes': 1,
@@ -352,34 +397,475 @@ function getDiaIndex(dia) {
     return dias[dia.toLowerCase()];
 }
 
-// Función para obtener la fecha y hora formateada para un bloque
+
 function obtenerFechaHoraBloque(dia, hora) {
-    const semana = document.getElementById("semana-select").value.replace("00:00:00", "");
-    const fecha = new Date(semana);
-    const diasHasta = getDiaIndex(dia) - 1;
-    fecha.setDate(fecha.getDate() + diasHasta);
-    return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')} ${hora}`;
+    const semanaSelect = document.getElementById("semana-select");
+    const fechaInicio = new Date(semanaSelect.value);
+    
+    // Mapeo de días a números (0 = domingo, 1 = lunes, etc.)
+    const diasSemana = {
+        'lunes': 1,
+        'martes': 2,
+        'miercoles': 3,
+        'jueves': 4,
+        'viernes': 5
+    };
+
+    // Ajustar la fecha al día seleccionado
+    const diaNumero = diasSemana[dia.toLowerCase()];
+    fechaInicio.setDate(fechaInicio.getDate() + (diaNumero - fechaInicio.getDay()));
+
+    // Formatear la fecha y hora
+    const [hours, minutes] = hora.split(':');
+    fechaInicio.setHours(parseInt(hours), parseInt(minutes), 0);
+
+    // Retornar en formato MySQL datetime
+    return fechaInicio.toISOString().slice(0, 19).replace('T', ' ');
 }
 
-// Función para realizar el bloqueo de un horario específico
 async function bloquearHorario(datos) {
+    console.log('Intentando bloquear horario:', datos);
+    
     try {
+        const datosAjustados = {
+            ...datos,
+            run_trabajador: datos.RUN
+        };
+        delete datosAjustados.RUN;
+
+        const formData = new URLSearchParams();
+        for (const [key, value] of Object.entries(datosAjustados)) {
+            formData.append(key, value);
+        }
+
         const response = await fetch(`${site_url}/citas/bloquear`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: new URLSearchParams(datos)
+            body: formData
         });
 
-        if (!response.ok) {
-            throw new Error('Error en la respuesta del servidor');
+        const responseText = await response.text();
+        console.log('Respuesta del servidor:', responseText);
+
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (e) {
+            console.error('Error al parsear respuesta:', responseText);
+            throw new Error('Error en la respuesta del servidor: ' + responseText.substring(0, 100));
         }
 
-        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.message || 'Error al bloquear horario');
+        }
+
         return result;
     } catch (error) {
         console.error('Error al bloquear horario:', error);
         throw error;
     }
 }
+
+// Funciones para el bloqueo de horarios
+async function bloquearHorarioIndividual(datos) {
+    console.log('Bloqueando horario individual:', datos);
+    
+    try {
+        const datosAjustados = {
+            ...datos,
+            rut_trabajador: datos.RUN
+        };
+        delete datosAjustados.RUN;
+
+        const formData = new URLSearchParams(datosAjustados);
+        
+        const response = await fetch(`${site_url}/citas/bloquear`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const responseText = await response.text();
+        console.log('Respuesta del servidor:', responseText);
+
+        try {
+            return JSON.parse(responseText);
+        } catch (e) {
+            console.error('Respuesta no válida:', responseText);
+            throw new Error('Respuesta del servidor no válida');
+        }
+    } catch (error) {
+        console.error('Error al bloquear horario individual:', error);
+        throw error;
+    }
+}
+
+async function bloquearDiaCompleto(dia, trabajadorSocial) {
+    try {
+        if (!horarios || !Array.isArray(horarios)) {
+            throw new Error('Error en la configuración de horarios');
+        }
+
+        const bloques = horarios
+            .filter(h => !h.esAlmuerzo)
+            .map(horario => {
+                const fechaInicio = obtenerFechaHoraBloque(dia, horario.horaInicio);
+                const fechaFin = obtenerFechaHoraBloque(dia, horario.horaFinal);
+                
+                return {
+                    ID: `BLQ${Date.now()}${Math.random().toString(36).substr(2, 5)}`,
+                    run_trabajador: trabajadorSocial,
+                    fechainicio: fechaInicio,
+                    fechafinal: fechaFin
+                };
+            });
+
+        const resultados = await Promise.all(
+            bloques.map(async bloque => {
+                try {
+                    const bloqueoResponse = await fetch(`${site_url}/citas/bloquear_dia_completo`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(bloque)
+                    });
+
+                    if (!bloqueoResponse.ok) {
+                        throw new Error(`Error HTTP: ${bloqueoResponse.status}`);
+                    }
+
+                    const resultado = await bloqueoResponse.json();
+                    if (!resultado.success) {
+                        throw new Error(resultado.message);
+                    }
+
+                    return { success: true };
+                } catch (error) {
+                    return { success: false, error: error.message };
+                }
+            })
+        );
+
+        const exitosos = resultados.filter(r => r.success).length;
+        
+        return {
+            success: exitosos > 0,
+            message: `Se bloquearon ${exitosos} de ${bloques.length} bloques.`
+        };
+
+    } catch (error) {
+        return {
+            success: false,
+            message: `Error al bloquear el día: ${error.message}`
+        };
+    }
+}
+
+// Nueva función para obtener la fecha de inicio de semana
+function obtenerFechaInicioSemana(fecha) {
+    const date = new Date(fecha);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // ajusta cuando es domingo
+    const lunes = new Date(date.setDate(diff));
+    lunes.setHours(0, 0, 0, 0);
+    return lunes.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+async function desbloquearDiaCompleto(dia, trabajadorSocial) {
+    console.log('Desbloqueando día completo:', { dia, trabajadorSocial });
+    
+    try {
+        if (!horarios || !Array.isArray(horarios)) {
+            throw new Error('Error en la configuración de horarios');
+        }
+
+        const fechaSeleccionada = obtenerFechaHoraBloque(dia, '00:00:00').split(' ')[0];
+        console.log('Fecha seleccionada:', fechaSeleccionada);
+
+        // Obtener bloques bloqueados del día
+        const response = await fetch(`${site_url}/citas/obtener_bloques_bloqueados`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                fecha: fechaSeleccionada,
+                rut_trabajador: trabajadorSocial
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const { bloques } = await response.json();
+        
+        if (!bloques || bloques.length === 0) {
+            return {
+                success: false,
+                message: `No hay bloques bloqueados para desbloquear el día ${dia}`
+            };
+        }
+
+        const resultados = await Promise.all(
+            bloques.map(async bloque => {
+                try {
+                    const response = await fetch(`${site_url}/citas/desbloquear`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            ID: bloque.ID,
+                            RUNTS: trabajadorSocial
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error en desbloqueo:', error);
+                    return { success: false };
+                }
+            })
+        );
+
+        const exitosos = resultados.filter(r => r.success).length;
+        const totalBloques = bloques.length;
+
+        return {
+            success: exitosos > 0,
+            message: `Día ${dia}: Se desbloquearon ${exitosos} de ${totalBloques} bloques.`
+        };
+
+    } catch (error) {
+        console.error('Error al desbloquear día completo:', error);
+        return {
+            success: false,
+            message: `Error al desbloquear el día ${dia}: ${error.message}`
+        };
+    }
+}
+
+console.log('=== INICIO CARGA AGENDAR.JS ===');
+
+// Función para inicializar los eventos
+function inicializarEventos() {
+    console.log('Iniciando configuración de eventos...');
+    
+    // Verificar que estamos en el contexto correcto
+    if (typeof $ === 'undefined') {
+        console.error('jQuery no está disponible en inicializarEventos');
+        return;
+    }
+
+    const btnBloquear = $('#btn-bloquear');
+    console.log('Buscando botón de bloquear...', btnBloquear.length ? 'Encontrado' : 'No encontrado');
+
+    if (!btnBloquear.length) {
+        console.error('No se encontró el botón de bloquear');
+        return;
+    }
+
+    // Remover eventos previos y agregar el nuevo
+    btnBloquear
+        .off('click')
+        .on('click', async function(e) {
+            e.preventDefault();
+            console.log('Click en botón de bloquear');
+            alert('Botón clickeado - Iniciando proceso de bloqueo');
+
+            const $btnBloquear = $(this);
+            $btnBloquear.prop('disabled', true).text('Procesando...');
+
+            try {
+                const checkboxes = $('.dia-checkbox:checked');
+                console.log('Días seleccionados:', checkboxes.length);
+
+                if (checkboxes.length === 0) {
+                    throw new Error('Por favor, seleccione al menos un día para bloquear');
+                }
+
+                let trabajadorSocial;
+                
+                if (tipoUsuario === "trabajadorsocial") {
+                    // Para TS, usar directamente su RUN
+                    trabajadorSocial = trabajadorSocialActual;
+                } else {
+                    // Para administrador, obtener del select
+                    trabajadorSocial = $('#ts-select').val();
+                }
+
+                if (!trabajadorSocial) {
+                    throw new Error('Por favor, seleccione un trabajador social');
+                }
+
+                const resultados = await Promise.all(
+                    checkboxes.map(async function() {
+                        const dia = $(this).val();
+                        console.log('Procesando día:', dia);
+                        return bloquearDiaCompleto(dia, trabajadorSocial);
+                    }).get()
+                );
+
+                console.log('Resultados:', resultados);
+                alert('Proceso completado:\n' + resultados.map(r => r.message).join('\n'));
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message);
+            } finally {
+                $btnBloquear.prop('disabled', false).text('Bloquear días seleccionados');
+            }
+        });
+
+    console.log('Eventos configurados correctamente');
+}
+
+// Función para ocultar/mostrar el select de TS según el tipo de usuario
+function configurarInterfazSegunUsuario() {
+    if (tipoUsuario === "trabajadorsocial") {
+        // Ocultar el select para TS
+        const selectContainer = document.querySelector('.ts-select-container');
+        if (selectContainer) {
+            selectContainer.style.display = 'none';
+        }
+    }
+}
+
+// Inicializar cuando el documento esté listo
+$(document).ready(function() {
+    console.log('Documento listo - Inicializando...');
+    configurarInterfazSegunUsuario();
+    inicializarEventos();
+});
+
+// También inicializar cuando se muestre el modal
+$(document).on('shown.bs.modal', '#exampleModal', function() {
+    console.log('Modal mostrado - Reinicializando...');
+    inicializarEventos();
+});
+
+console.log('=== FIN CARGA AGENDAR.JS ===');
+
+async function bloquearIndividual(bloque) {
+    try {
+        // Asegurarnos de que tenemos todos los datos necesarios
+        const trabajadorSocial = document.getElementById('ts-select').value;
+        
+        const datosBloqueo = {
+            RUNTS: trabajadorSocial,
+            FechaInicio: bloque.fechainicio,
+            FechaTermino: bloque.fechafinal || bloque.fechainicio
+        };
+
+        console.log('Datos de bloqueo individual:', datosBloqueo); // Para debug
+
+        const response = await fetch(`${site_url}/citas/bloquear_individual`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(datosBloqueo)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const resultado = await response.json();
+        if (!resultado.success) {
+            throw new Error(resultado.message);
+        }
+
+        return resultado;
+    } catch (error) {
+        console.error('Error en bloqueo individual:', error);
+        return {
+            success: false,
+            message: error.message
+        };
+    }
+}
+
+// Actualizar la función handleBloqueoIndividual para recibir todos los parámetros
+async function handleBloqueoIndividual(event, bloqueId, fechaInicio, fechaFinal, trabajadorSocial) {
+    event.preventDefault();
+    
+    if (!trabajadorSocial) {
+        alert('No se ha seleccionado un trabajador social');
+        return;
+    }
+
+    if (confirm('¿Está seguro que desea bloquear este horario?')) {
+        try {
+            const datosBloqueo = {
+                ID: bloqueId,
+                RUNTS: trabajadorSocial,
+                FechaInicio: fechaInicio,
+                FechaTermino: fechaFinal
+            };
+
+            const response = await fetch(`${site_url}/citas/bloquear_individual`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(datosBloqueo)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error de conexión`);
+            }
+
+            const resultado = await response.json();
+
+            if (resultado.success) {
+                alert('Bloque bloqueado correctamente');
+                location.reload();
+            } else {
+                alert('Error al bloquear: ' + resultado.message);
+            }
+        } catch (error) {
+            alert('Error al procesar el bloqueo');
+        }
+    }
+}
+
+// Asegurarse de que los botones de bloqueo individual tengan el evento asignado
+function inicializarBotonesBloqueo() {
+    const botonesBloqueo = document.querySelectorAll('.btn-bloquear-individual');
+    botonesBloqueo.forEach(boton => {
+        boton.addEventListener('click', handleBloqueoIndividual);
+    });
+}
+
+// Llamar a la inicialización cuando el documento esté listo
+document.addEventListener('DOMContentLoaded', inicializarBotonesBloqueo);
+
+// Agregar función para actualizar los botones cuando cambie el select
+function actualizarBotonesAlCambiarTS() {
+    const selectTS = document.getElementById('ts-select');
+    if (selectTS) {
+        selectTS.addEventListener('change', function() {
+            cargar_calendario(); // Recargar el calendario para actualizar los botones
+        });
+    }
+}
+
+// Llamar a la función cuando el documento esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarBotonesAlCambiarTS();
+});
