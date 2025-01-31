@@ -96,7 +96,7 @@ class TrabajadorSocialModel extends CI_Model {
                 bl.FechaInicio, bl.FechaTermino, bl.ID, 
                 p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo, 
                 ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS,
-                b.Motivo AS Motivo, b.RUNCliente AS RUNCliente
+                b.Motivo AS Motivo, b.RUNCliente AS RUNCliente, b.estado AS Estado
             FROM bloqueatencion b
             JOIN persona p ON b.RUNCliente = p.RUN
             JOIN bloque bl ON b.ID = bl.ID
@@ -104,16 +104,13 @@ class TrabajadorSocialModel extends CI_Model {
 
         if ($filtro) {
             $sql .= ' WHERE p.RUN LIKE ? OR p.Nombre LIKE ? OR ts.Nombre LIKE ?';
-            $sql .= ' ORDER BY bl.FechaInicio DESC'; // Orden por fecha de inicio, más reciente primero
+            $sql .= ' ORDER BY bl.FechaInicio DESC';
             return $this->db->query($sql, ["%$filtro%", "%$filtro%", "%$filtro%"])->result_array();
         }
 
-        // Si no hay filtro, ordena las citas por la más próxima a la fecha y hora actual
-        $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC'; // Ordena por la más cercana a la fecha actual
+        $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC';
         return $this->db->query($sql)->result_array();
     }
-
-
 
     public function obtenerCitasPorTS($RUNTS, $filtro = null)
     {
@@ -122,7 +119,7 @@ class TrabajadorSocialModel extends CI_Model {
                 bl.FechaInicio, bl.FechaTermino, bl.ID,
                 p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo, 
                 ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS,
-                b.Motivo AS Motivo, b.RUNCliente AS RUNCliente
+                b.Motivo AS Motivo, b.RUNCliente AS RUNCliente, b.estado AS Estado
             FROM bloqueatencion b
             JOIN persona p ON b.RUNCliente = p.RUN
             JOIN bloque bl ON b.ID = bl.ID
@@ -131,14 +128,13 @@ class TrabajadorSocialModel extends CI_Model {
 
         if ($filtro) {
             $sql .= ' AND (p.RUN LIKE ? OR p.Nombre LIKE ?)';
-            $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC'; // Ordena por la más cercana a la fecha actual
+            $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC';
             return $this->db->query($sql, [$RUNTS, "%$filtro%", "%$filtro%"])->result_array();
         }
 
-        $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC'; // Ordena por la más cercana a la fecha actual
+        $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC';
         return $this->db->query($sql, [$RUNTS])->result_array();
     }
-
 
     public function obtenerCitaEstudiante($RUNTS, $RUNU, $filtro = null)
     {
@@ -147,7 +143,7 @@ class TrabajadorSocialModel extends CI_Model {
                 bl.FechaInicio, bl.FechaTermino, bl.ID,
                 p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo,
                 ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS,
-                b.Motivo AS Motivo, b.RUNCliente AS RUNCliente
+                b.Motivo AS Motivo, b.RUNCliente AS RUNCliente, b.estado AS Estado
             FROM bloqueatencion b
             JOIN persona p ON b.RUNCliente = p.RUN
             JOIN bloque bl ON b.ID = bl.ID
@@ -156,11 +152,11 @@ class TrabajadorSocialModel extends CI_Model {
 
         if ($filtro) {
             $sql .= ' AND (p.RUN LIKE ? OR p.Nombre LIKE ? OR ts.Nombre LIKE ?)';
-            $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC'; // Ordena por la más cercana a la fecha actual
+            $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC';
             return $this->db->query($sql, [$RUNU, "%$filtro%", "%$filtro%", "%$filtro%"])->result_array();
         }
 
-        $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC'; // Ordena por la más cercana a la fecha actual
+        $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC';
         return $this->db->query($sql, [$RUNU])->result_array();
     }
     public function obtenerCitasNoEstudiante($RUNNoEstudiante, $filtro = null)
@@ -170,7 +166,7 @@ class TrabajadorSocialModel extends CI_Model {
                 bl.FechaInicio, bl.FechaTermino, bl.ID,
                 p.Nombre AS NombreEstudiante, p.Apellido AS ApellidoEstudiante, p.Telefono, p.Correo,
                 ts.Nombre AS NombreTS, ts.Apellido AS ApellidoTS, ts.Telefono AS TelefonoTS, ts.Correo AS CorreoTS,
-                b.Motivo AS Motivo, b.RUNCliente AS RUNCliente
+                b.Motivo AS Motivo, b.RUNCliente AS RUNCliente, b.estado AS Estado
             FROM bloqueatencion b
             JOIN persona p ON b.RUNCliente = p.RUN
             JOIN bloque bl ON b.ID = bl.ID
@@ -179,11 +175,11 @@ class TrabajadorSocialModel extends CI_Model {
 
         if ($filtro) {
             $sql .= ' AND (p.RUN LIKE ? OR p.Nombre LIKE ?)';
-            $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC'; // Ordena por la más cercana a la fecha actual
+            $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC';
             return $this->db->query($sql, [$RUNNoEstudiante, "%$filtro%", "%$filtro%"])->result_array();
         }
 
-        $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC'; // Ordena por la más cercana a la fecha actual
+        $sql .= ' ORDER BY ABS(TIMESTAMPDIFF(SECOND, NOW(), bl.FechaInicio)) ASC';
         return $this->db->query($sql, [$RUNNoEstudiante])->result_array();
     }
     public function obtenerRUNTS($RUN){

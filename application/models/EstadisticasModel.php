@@ -3,42 +3,63 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class EstadisticasModel extends CI_Model {
     
-    public function obtenerEstadisticas($fecha_inicio, $fecha_fin = null) {
-        if ($fecha_fin === null) {
-            // Si solo se proporciona un año
-            $fecha_inicio = $fecha_inicio . '-01-01';
-            $fecha_fin = $fecha_inicio . '-12-31';
+    public function __construct() {
+        parent::__construct();
+        $this->load->database();
+    }
+
+    public function obtenerEstadisticas($fecha_inicio = null, $fecha_fin = null) {
+        // Si no se proporcionan fechas, usar el año actual
+        if (!$fecha_inicio || !$fecha_fin) {
+            $fecha_inicio = date('Y-01-01');
+            $fecha_fin = date('Y-12-31');
         }
 
-        // Estadísticas por carrera
-        $this->db->select('carrera.nombre_carrera, COUNT(*) as total');
-        $this->db->from('citas');
-        $this->db->join('usuarios', 'usuarios.rut = citas.rut_estudiante');
-        $this->db->join('carrera', 'carrera.id_carrera = usuarios.id_carrera');
-        $this->db->where('citas.fecha_inicio >=', $fecha_inicio);
-        $this->db->where('citas.fecha_inicio <=', $fecha_fin);
-        $this->db->group_by('carrera.nombre_carrera');
-        $por_carrera = $this->db->get()->result();
-
-        // Citas canceladas
-        $this->db->where('estado', 'cancelada');
-        $this->db->where('fecha_inicio >=', $fecha_inicio);
-        $this->db->where('fecha_inicio <=', $fecha_fin);
-        $canceladas = $this->db->count_all_results('citas');
-
-        // Temas recurrentes
-        $this->db->select('bloqueatencion.estado, COUNT(*) as total');
-        $this->db->from('bloqueatencion');
-        $this->db->join('citas', 'citas.id_cita = bloqueatencion.id_cita');
-        $this->db->where('citas.fecha_inicio >=', $fecha_inicio);
-        $this->db->where('citas.fecha_inicio <=', $fecha_fin);
-        $this->db->group_by('bloqueatencion.estado');
-        $temas = $this->db->get()->result();
-
         return [
-            'por_carrera' => $por_carrera,
-            'canceladas' => $canceladas,
-            'temas' => $temas
+            'por_carrera' => $this->obtenerEstadisticasPorCarrera($fecha_inicio, $fecha_fin),
+            'por_motivo' => $this->obtenerEstadisticasPorMotivo($fecha_inicio, $fecha_fin),
+            'estados' => $this->obtenerEstadisticasPorEstado($fecha_inicio, $fecha_fin),
+            'total_citas' => $this->obtenerTotalCitas($fecha_inicio, $fecha_fin)
         ];
+    }
+
+    private function obtenerEstadisticasPorCarrera($fecha_inicio, $fecha_fin) {
+        $this->db->select('c.Nombre as nombre_carrera, COUNT(*) as total');
+        $this->db->from('bloqueatencion ba');
+        $this->db->join('estudiante e', 'ba.RUNCliente = e.RUN', 'left');
+        $this->db->join('carrera c', 'e.COD_CARRERA = c.COD_CARRERA', 'left');
+        $this->db->join('bloque b', 'ba.ID = b.ID');
+        $this->db->where('b.FechaInicio >=', $fecha_inicio);
+        $this->db->where('b.FechaInicio <=', $fecha_fin);
+        $this->db->group_by('c.COD_CARRERA');
+        return $this->db->get()->result_array();
+    }
+
+    private function obtenerEstadisticasPorMotivo($fecha_inicio, $fecha_fin) {
+        $this->db->select('Motivo, COUNT(*) as total');
+        $this->db->from('bloqueatencion ba');
+        $this->db->join('bloque b', 'ba.ID = b.ID');
+        $this->db->where('b.FechaInicio >=', $fecha_inicio);
+        $this->db->where('b.FechaInicio <=', $fecha_fin);
+        $this->db->group_by('Motivo');
+        return $this->db->get()->result_array();
+    }
+
+    private function obtenerEstadisticasPorEstado($fecha_inicio, $fecha_fin) {
+        $this->db->select('Estado, COUNT(*) as total');
+        $this->db->from('bloqueatencion ba');
+        $this->db->join('bloque b', 'ba.ID = b.ID');
+        $this->db->where('b.FechaInicio >=', $fecha_inicio);
+        $this->db->where('b.FechaInicio <=', $fecha_fin);
+        $this->db->group_by('Estado');
+        return $this->db->get()->result_array();
+    }
+
+    private function obtenerTotalCitas($fecha_inicio, $fecha_fin) {
+        $this->db->from('bloqueatencion ba');
+        $this->db->join('bloque b', 'ba.ID = b.ID');
+        $this->db->where('b.FechaInicio >=', $fecha_inicio);
+        $this->db->where('b.FechaInicio <=', $fecha_fin);
+        return $this->db->count_all_results();
     }
 }

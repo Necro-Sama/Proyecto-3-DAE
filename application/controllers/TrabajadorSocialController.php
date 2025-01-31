@@ -9,6 +9,7 @@ class TrabajadorSocialController extends CI_Controller {
         $this->load->model('TrabajadorSocialModel');
         $this->load->model('CarreraModel');
         $this->load->helper('url');
+        $this->load->model('EliminarCitaModel');
     }
     // Método para mostrar el formulario de asignación
     public function asignarTSACarrera() {
@@ -110,15 +111,15 @@ class TrabajadorSocialController extends CI_Controller {
         } else {
             $data['citas'] = [];
         }
+
         //print_r($data);
         $this->load->view('VisualizarCitas', $data);
     }
     public function filtrar_citas()
     {
         $futuras = $this->input->post('futuras');
-        $citas = $this->Citas_model->get_citas_futuras($futuras); // Asumiendo que tienes un modelo que retorna las citas filtradas
-
-        echo json_encode($citas); // Devolver las citas como JSON
+        $citas = $this->Citas_model->get_citas_futuras($futuras);
+        echo json_encode($citas);
     }
     public function comprobardatos($RUN_usuario) {
         $data['persona'] = $this->UserModel->getPersona($RUN_usuario);

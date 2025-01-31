@@ -70,7 +70,7 @@ $route['translate_uri_dashes'] = FALSE;
     //Rutas de reagendar cita
         $route['usuarios/vistaReagendar'] = 'CitasController/abrirreagendar';
     //Rutas de eliminar cita    
-        $route['usuarios/eliminarcita'] = 'CitasController/eliminarCita';
+        $route['usuarios/eliminarcita'] = 'EliminarCitaController/eliminarCita';
     //Rutas de bloquear cita
         $route['citas/bloquear'] = 'CitasController/bloquear';
         $route['citas/verificar_disponibilidad'] = 'CitasController/verificar_disponibilidad';
@@ -97,7 +97,7 @@ $route['translate_uri_dashes'] = FALSE;
     $route['usuarios/visualizar-citas'] = 'TrabajadorSocialController/obtenercita';
 
 //Rutas de Estadísticas
-$route['usuarios/estadisticas'] = 'EstadisticasController/index';
+$route['usuarios/estadisticas'] = 'EstadisticasController/cargarVista';
 $route['usuarios/estadisticas/obtener_datos'] = 'EstadisticasController/obtenerDatos';
 
 

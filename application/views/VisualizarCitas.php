@@ -19,18 +19,13 @@
                 flex-wrap: wrap;
                 gap: 20px;
                 justify-content: center;
+                padding: 20px;
             }
 
             .card {
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                background-color: #FDDEAA;
-                border: 2px solid #FDD188;
-                border-radius: 15px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 width: 300px;
-                height: 450px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             }
 
             .card-body {
@@ -41,8 +36,9 @@
             }
 
             .card-title {
-                color: #060EAE;
                 font-weight: bold;
+                margin-bottom: 1rem;
+                text-align: center;
             }
 
             .btn-primary {
@@ -75,6 +71,27 @@
                     height: auto;
                 }
             }
+
+            .text-warning {
+                color: #ffc107 !important;
+            }
+            
+            .text-success {
+                color: #28a745 !important;
+            }
+            
+            .text-danger {
+                color: #dc3545 !important;
+            }
+            
+            .text-primary {
+                color: #007bff !important;
+            }
+            
+            .btn {
+                margin-top: 10px;
+                width: 100%;
+            }
         </style>
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
@@ -104,63 +121,56 @@
             </form>
             <div class="card-container">
                 <?php if (isset($citas) && !empty($citas)): ?>
-                    <?php
-                        foreach ($citas as $cita):
-                            // Crear objetos DateTime para la cita y la fecha actual
-                            $fechaCita = new DateTime($cita['FechaInicio']);
-                            $fechaActual = new DateTime();
+                    <?php foreach ($citas as $cita):
+                        // Crear objetos DateTime para la cita y la fecha actual
+                        $fechaCita = new DateTime($cita['FechaInicio']);
+                        $fechaActual = new DateTime();
+                        $esPasada = $fechaCita < $fechaActual;
+                        
+                        // Obtener el estado de la cita
+                        $estado = isset($cita['Estado']) ? $cita['Estado'] : '';
+                        
+                        // Determinar el estilo según el estado
+                        $estadoClass = '';
+                        $estadoText = '';
+                        
+                        if ($esPasada && $estado !== 'Atendido' && $estado !== 'Cancelado') {
+                            $estadoClass = 'text-danger';
+                            $estadoText = 'Cita Pasada';
+                        } elseif ($estado === 'Cancelado') {
+                            $estadoClass = 'text-warning';
+                            $estadoText = 'Cita Cancelada';
+                        } elseif ($estado === 'Atendido') {
+                            $estadoClass = 'text-success';
+                            $estadoText = 'Cita Atendida';
+                        } elseif ($estado === 'Reservado') {
+                            $estadoClass = 'text-primary';
+                            $estadoText = 'Cita Reservada';
+                        }
+                    ?>
+                        <div class="card">
+                            <div class="card-body">
+                                <?php if (!empty($estadoText)): ?>
+                                    <h5 class="card-title <?= $estadoClass ?>"><?= $estadoText ?></h5>
+                                <?php endif; ?>
 
-                            // Comparar la fecha y hora de la cita con la fecha y hora actuales
-                            $esPasada = $fechaCita < $fechaActual;
-
-                            // Calcular la diferencia en segundos y convertirla a minutos
-                            $diferenciaSegundos = $fechaCita->getTimestamp() - $fechaActual->getTimestamp();
-                            $diferenciaMinutos = $diferenciaSegundos / 60;
-
-                            // Permitir cancelar si faltan más de 10 minutos
-                            $puedeCancelar = $diferenciaMinutos > 10;
-                        ?>
-                            <div class="card">
-                                <div class="card-body">
-                                    <?php if ($esPasada): ?>
-                                        <h5 class="card-title text-danger">Cita Pasada</h5>
-                                    <?php endif; ?>
-                                    <h5 class="card-title"><?= htmlspecialchars($cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante']); ?></h5>
-                                    <p class="card-text"><strong>Teléfono:</strong> <?= htmlspecialchars($cita['Telefono']); ?></p>
-                                    <p class="card-text"><strong>Correo:</strong> <?= htmlspecialchars($cita['Correo']); ?></p>
-                                    <p class="card-text"><strong>Trabajador Social:</strong> <?= htmlspecialchars($cita['NombreTS'] . ' ' . $cita['ApellidoTS']); ?></p>
-                                    <p class="card-text"><strong>Fecha Inicio:</strong> <?= htmlspecialchars($cita['FechaInicio']); ?></p>
-                                    <p class="card-text"><strong>Fecha Término:</strong> <?= htmlspecialchars($cita['FechaTermino']); ?></p>
-                                    <p class="card-text"><strong>Motivo:</strong> <?= htmlspecialchars($cita['Motivo']); ?></p>
-                                </div>
-                                <div class="card-footer">
-                                    
-                                    <?php if ($tipo === 'estudiante' || $tipo === 'noestudiante'): ?>
-                                        <!-- Botón de reagendar -->
-                                        <form method="GET" action="<?= site_url('usuarios/agendar'); ?>" style="display:inline;">
-                                            <input type="hidden" name="idCita" value="<?= $cita['ID']; ?>">
-                                            <input type="hidden" name="reagenda" value="true">
-                                            <input type="hidden" name="fechaInicio" value="<?= $cita['FechaInicio']; ?>">
-                                            <input type="hidden" name="fechaTermino" value="<?= $cita['FechaTermino']; ?>">
-                                            <input type="hidden" name="motivo" value="<?= $cita['Motivo']; ?>">
-                                            <input type="hidden" name="runTS" value="<?= $cita['RUNTS']; ?>">
-                                            <button class="btn btn-primary mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="submit">
-                                                Reagendar
-                                            </button>
-                                        </form>
-                                        
-                                        <!-- Botón de cancelar -->
-                                        <form method="POST" action="<?= site_url('usuarios/eliminarcita'); ?>" style="display:inline;">
-                                            <input type="hidden" name="idCita" value="<?= $cita['ID']; ?>">
-                                            <input type="hidden" name="runCliente" value="<?= $cita['RUNCliente']; ?>">
-                                            <button class="btn btn-danger mt-2" <?= (!$puedeCancelar || $esPasada) ? 'disabled' : ''; ?> type="submit">
-                                                Cancelar
-                                            </button>
-                                        </form>
-                                    <?php endif; ?>
-                                </div>
+                                <p class="card-text"><strong>Fecha:</strong> <?= date('d/m/Y H:i', strtotime($cita['FechaInicio'])) ?></p>
+                                <p class="card-text"><strong>Estudiante:</strong> <?= $cita['NombreEstudiante'] . ' ' . $cita['ApellidoEstudiante'] ?></p>
+                                <p class="card-text"><strong>Trabajador Social:</strong> <?= $cita['NombreTS'] . ' ' . $cita['ApellidoTS'] ?></p>
+                                <p class="card-text"><strong>Motivo:</strong> <?= $cita['Motivo'] ?></p>
+                                
+                                <?php if ($estado !== 'Cancelado' && $estado !== 'Atendido' && !$esPasada): ?>
+                                    <form method="POST" action="<?= site_url('usuarios/eliminarcita'); ?>" style="display:inline;">
+                                        <input type="hidden" name="idCita" value="<?= $cita['ID'] ?>">
+                                        <input type="hidden" name="runCliente" value="<?= $cita['RUNCliente'] ?>">
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas cancelar esta cita?')">
+                                            Cancelar Cita
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
                             </div>
-                        <?php endforeach; ?>
+                        </div>
+                    <?php endforeach; ?>
 
                 <?php else: ?>
                     <div class="alert alert-info text-center w-100">

@@ -67,10 +67,11 @@
         <?php endif; ?>
         <?php if ($tipo === 'administrador'): ?>
           <li class="nav-item text-center mx-2 mx-lg-1">
-            <a class="nav-link" href="<?php echo site_url('usuarios/estadisticas'); ?>">
+            <a class="nav-link" href="<?php echo site_url('usuarios/estadisticas'); ?>" onclick="console.log('URL:', '<?php echo site_url('usuarios/estadisticas'); ?>')">
               <div>
-                <i class="fas fa-chart-bar fa-lg mb-1" style="color: #fddeaa;">Estadísticas</i>
+                <i class="fas fa-chart-bar fa-lg mb-1" style="color: #fddeaa;"></i>
               </div>
+              Estadísticas
             </a>
           </li>
         <?php endif; ?>
