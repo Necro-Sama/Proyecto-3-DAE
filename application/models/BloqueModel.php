@@ -334,14 +334,321 @@ class BloqueModel extends CI_Model
     {
         return $this->db->query("SELECT NOW() AS t")->row(0)->t;
     }
-    function bloquear($fecha_inicio,$fecha_termino){
-        $this->db->insert('bloquebloqueado', $fecha_inicio,$fecha_termino);
-
+    function bloquear($fecha_inicio, $fecha_termino) {
+        $this->db->insert('bloquebloqueado', $fecha_inicio, $fecha_termino);
     }
     public function verificar_bloque($id)
     {
         $this->db->where('ID', $id);
         $query = $this->db->get('bloque');
         return $query->num_rows() > 0;
+    }
+
+    public function obtener_bloques_por_dia_ts($run_trabajador, $fecha) {
+        $fecha_inicio = date('Y-m-d 00:00:00', strtotime($fecha));
+        $fecha_fin = date('Y-m-d 23:59:59', strtotime($fecha));
+
+        $this->db->where('run_trabajador', $run_trabajador);
+        $this->db->where('fechainicio >=', $fecha_inicio);
+        $this->db->where('fechainicio <=', $fecha_fin);
+        
+        return $this->db->get('bloque')->result();
+    }
+
+    public function verificar_bloque_disponible($fecha_inicio, $fecha_fin, $run_ts) {
+        // Primero, asegurarnos de que las fechas estén en el formato correcto
+        $fecha_inicio = date('Y-m-d H:i:s', strtotime($fecha_inicio));
+        $fecha_fin = date('Y-m-d H:i:s', strtotime($fecha_fin));
+
+        $this->db->select('COUNT(*) as total');
+        $this->db->from('bloque');
+        $this->db->where('RUNTS', $run_ts);
+        $this->db->where("(
+            (FechaInicio <= '$fecha_inicio' AND FechaTermino >= '$fecha_inicio')
+            OR (FechaInicio <= '$fecha_fin' AND FechaTermino >= '$fecha_fin')
+            OR (FechaInicio >= '$fecha_inicio' AND FechaTermino <= '$fecha_fin')
+        )");
+
+        $query = $this->db->get();
+        $result = $query->row();
+        
+        // Para debug
+        log_message('debug', 'SQL Query: ' . $this->db->last_query());
+        log_message('debug', 'Resultado: ' . print_r($result, true));
+
+        return ($result->total > 0);
+    }
+
+    public function bloquear_horario($datos) {
+        try {
+            log_message('debug', '[INICIO] bloquear_horario - Datos recibidos: ' . json_encode($datos));
+
+            // Validar datos de entrada
+            if (empty($datos['ID']) || empty($datos['RUNTS']) || 
+                empty($datos['FechaInicio']) || empty($datos['FechaTermino'])) {
+                log_message('error', 'Datos incompletos: ' . json_encode($datos));
+                return false;
+            }
+
+            // Formatear fechas
+            $fecha_inicio = date('Y-m-d H:i:s', strtotime($datos['FechaInicio']));
+            $fecha_termino = date('Y-m-d H:i:s', strtotime($datos['FechaTermino']));
+            
+            log_message('debug', 'Fechas formateadas: Inicio=' . $fecha_inicio . ', Fin=' . $fecha_termino);
+
+            // Iniciar transacción
+            $this->db->trans_start();
+
+            try {
+                // 1. Insertar en bloque
+                $bloque_data = [
+                    'ID' => $datos['ID'],
+                    'RUNTS' => $datos['RUNTS'],
+                    'FechaInicio' => $fecha_inicio,
+                    'FechaTermino' => $fecha_termino
+                ];
+
+                log_message('debug', 'Intentando insertar en bloque: ' . json_encode($bloque_data));
+                
+                // Verificar si el bloque ya existe
+                $bloque_existe = $this->db->where('ID', $datos['ID'])
+                                        ->get('bloque')
+                                        ->num_rows() > 0;
+
+                if (!$bloque_existe) {
+                    if (!$this->db->insert('bloque', $bloque_data)) {
+                        $error = $this->db->error();
+                        log_message('error', 'Error al insertar en bloque: ' . json_encode($error));
+                        throw new Exception('Error al insertar en la tabla bloque');
+                    }
+                    log_message('debug', 'Bloque insertado correctamente');
+                } else {
+                    log_message('debug', 'Bloque ya existe, continuando...');
+                }
+
+                // 2. Insertar en bloquebloqueado
+                $bloqueo_data = [
+                    'ID' => $datos['ID'],
+                    'fechainicio' => $fecha_inicio,
+                    'fechafinal' => $fecha_termino,
+                    'RUN' => $datos['RUNTS']
+                ];
+
+                log_message('debug', 'Intentando insertar en bloquebloqueado: ' . json_encode($bloqueo_data));
+
+                // Primero eliminar si existe
+                $this->db->where('ID', $datos['ID'])->delete('bloquebloqueado');
+                
+                if (!$this->db->insert('bloquebloqueado', $bloqueo_data)) {
+                    $error = $this->db->error();
+                    log_message('error', 'Error al insertar en bloquebloqueado: ' . json_encode($error));
+                    throw new Exception('Error al insertar en la tabla bloquebloqueado');
+                }
+                
+                log_message('debug', 'Bloqueo insertado correctamente');
+
+                // Completar transacción
+                $this->db->trans_complete();
+
+                if ($this->db->trans_status() === FALSE) {
+                    $error = $this->db->error();
+                    log_message('error', 'Error en transacción final: ' . json_encode($error));
+                    throw new Exception('Error en la transacción de base de datos');
+                }
+
+                log_message('debug', '[FIN] bloquear_horario - Proceso completado exitosamente');
+                return true;
+
+            } catch (Exception $e) {
+                log_message('error', 'Error específico en bloqueo: ' . $e->getMessage());
+                $this->db->trans_rollback();
+                throw $e;
+            }
+
+        } catch (Exception $e) {
+            log_message('error', 'Error general en bloqueo_horario: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function agendar_cita($usuario, $fecha_ini, $fecha_ter, $motivo, $runTS = null) {
+        try {
+            // Desactivar autocommit temporalmente
+            $this->db->query('SET autocommit=0');
+            
+            // Generar ID único
+            $bloque_id = 'AGD' . date('YmdHis') . sprintf('%04d', mt_rand(0, 9999));
+            
+            // Obtener fecha inicio de semana
+            $fecha_inicio_semana = date('Y-m-d', strtotime('monday this week', strtotime($fecha_ini)));
+
+            // Log de datos iniciales
+            log_message('debug', 'Iniciando agendamiento con datos: ' . json_encode([
+                'bloque_id' => $bloque_id,
+                'fecha_inicio_semana' => $fecha_inicio_semana,
+                'runTS' => $runTS,
+                'fecha_ini' => $fecha_ini,
+                'fecha_ter' => $fecha_ter
+            ]));
+
+            // Verificar y crear calendario semanal
+            $sql_check_calendar = "SELECT * FROM calendariosemanal WHERE FechaInicioSemana = ? AND RUNTS = ?";
+            $calendario_existe = $this->db->query($sql_check_calendar, array($fecha_inicio_semana, $runTS))->num_rows() > 0;
+
+            if (!$calendario_existe) {
+                $sql_insert_calendar = "INSERT INTO calendariosemanal (FechaInicioSemana, RUNTS) VALUES (?, ?)";
+                if (!$this->db->query($sql_insert_calendar, array($fecha_inicio_semana, $runTS))) {
+                    throw new Exception('Error al crear el calendario semanal');
+                }
+                log_message('debug', 'Calendario semanal creado');
+            } else {
+                log_message('debug', 'Calendario semanal ya existe');
+            }
+
+            // Insertar bloque
+            $sql_insert_bloque = "INSERT INTO bloque (ID, FechaInicio, FechaTermino, FechaInicioSemana, RUNTS) 
+                                 VALUES (?, ?, ?, ?, ?)";
+            
+            $result_bloque = $this->db->query($sql_insert_bloque, array(
+                $bloque_id,
+                $fecha_ini,
+                $fecha_ter,
+                $fecha_inicio_semana,
+                $runTS
+            ));
+
+            if (!$result_bloque) {
+                $error = $this->db->error();
+                log_message('error', 'Error al insertar bloque: ' . json_encode($error));
+                throw new Exception('Error al crear el bloque: ' . $error['message']);
+            }
+
+            // Verificar la inserción del bloque inmediatamente
+            $sql_verify_bloque = "SELECT * FROM bloque WHERE ID = ?";
+            $bloque_result = $this->db->query($sql_verify_bloque, array($bloque_id));
+            
+            if ($bloque_result->num_rows() == 0) {
+                log_message('error', 'Bloque no encontrado después de inserción');
+                throw new Exception('El bloque no se creó correctamente');
+            }
+
+            log_message('debug', 'Bloque creado exitosamente');
+
+            // Commit después de crear el bloque
+            $this->db->query('COMMIT');
+            log_message('debug', 'Commit realizado después de crear bloque');
+
+            // Insertar en bloqueatencion
+            $sql_insert_atencion = "INSERT INTO bloqueatencion (ID, RUNCliente, Motivo, Estado) 
+                                   VALUES (?, ?, ?, ?)";
+            
+            $result_atencion = $this->db->query($sql_insert_atencion, array(
+                $bloque_id,
+                $usuario['RUN'],
+                $motivo,
+                'Agendado'
+            ));
+
+            if (!$result_atencion) {
+                $error = $this->db->error();
+                log_message('error', 'Error al insertar atención: ' . json_encode($error));
+                // Eliminar el bloque si falla la atención
+                $this->db->query("DELETE FROM bloque WHERE ID = ?", array($bloque_id));
+                throw new Exception('Error al crear la atención: ' . $error['message']);
+            }
+
+            log_message('debug', 'Atención creada exitosamente');
+
+            // Commit final
+            $this->db->query('COMMIT');
+            
+            // Restaurar autocommit
+            $this->db->query('SET autocommit=1');
+
+            log_message('debug', 'Proceso de agendamiento completado exitosamente');
+            return $bloque_id;
+
+        } catch (Exception $e) {
+            // Rollback en caso de error
+            $this->db->query('ROLLBACK');
+            $this->db->query('SET autocommit=1');
+            log_message('error', 'Error en agendar_cita: ' . $e->getMessage());
+            throw new Exception('Error al agendar la cita: ' . $e->getMessage());
+        }
+    }
+
+    public function obtener_ts_por_carrera($run_estudiante) {
+        try {
+            // Primero obtenemos la carrera del estudiante
+            $this->db->select('c.ID as CarreraID')
+                ->from('estudiante e')
+                ->join('carrera c', 'e.CarreraID = c.ID')
+                ->where('e.RUN', $run_estudiante);
+            
+            $query = $this->db->get();
+            if ($query->num_rows() == 0) {
+                return null;
+            }
+            
+            $carrera = $query->row_array();
+            
+            // Ahora buscamos el TS principal activo para esta carrera
+            $this->db->select('ts.RUN')
+                ->from('trabajadorsocial ts')
+                ->join('persona p', 'ts.RUN = p.RUN')
+                ->join('carrera_ts cts', 'ts.RUN = cts.RUNTS')
+                ->where('cts.CarreraID', $carrera['CarreraID'])
+                ->where('p.Activo', 1)
+                ->where('cts.EsPrincipal', 1);
+            
+            $query = $this->db->get();
+            
+            // Si encontramos un TS principal activo, lo retornamos
+            if ($query->num_rows() > 0) {
+                return $query->row()->RUN;
+            }
+            
+            // Si no hay TS principal activo, buscamos el TS de reemplazo
+            $this->db->select('ts.RUN')
+                ->from('trabajadorsocial ts')
+                ->join('persona p', 'ts.RUN = p.RUN')
+                ->join('carrera_ts cts', 'ts.RUN = cts.RUNTS')
+                ->where('cts.CarreraID', $carrera['CarreraID'])
+                ->where('p.Activo', 1)
+                ->where('cts.EsPrincipal', 0);
+            
+            $query = $this->db->get();
+            
+            if ($query->num_rows() > 0) {
+                return $query->row()->RUN;
+            }
+            
+            return null;
+        } catch (Exception $e) {
+            log_message('error', 'Error en obtener_ts_por_carrera: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function obtener_primer_ts_disponible() {
+        try {
+            $this->db->select('ts.RUN')
+                ->from('trabajadorsocial ts')
+                ->join('persona p', 'ts.RUN = p.RUN')
+                ->where('p.Activo', 1)
+                ->order_by('RAND()')
+                ->limit(1);
+            
+            $query = $this->db->get();
+            
+            if ($query->num_rows() > 0) {
+                return $query->row()->RUN;
+            }
+            
+            return null;
+        } catch (Exception $e) {
+            log_message('error', 'Error en obtener_primer_ts_disponible: ' . $e->getMessage());
+            return null;
+        }
     }
 }

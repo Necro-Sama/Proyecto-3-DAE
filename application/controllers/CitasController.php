@@ -260,51 +260,181 @@ class CitasController extends CI_Controller
         }
     }
     public function bloquear_individual() {
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+        
         header('Content-Type: application/json');
         
         try {
-            // Obtener y validar los datos
-            $runTS = $this->input->post('RUNTS');
-            $fechaInicio = $this->input->post('FechaInicio');
-            $fechaFinal = $this->input->post('FechaTermino');
-            $id = $this->input->post('ID');
+            log_message('debug', '[INICIO] bloquear_individual');
+            
+            // Obtener datos
+            $bloque_id = trim($this->input->post('ID'));
+            $run_ts = trim($this->input->post('RUNTS'));
+            $fecha_inicio = trim($this->input->post('FechaInicio'));
+            $fecha_termino = trim($this->input->post('FechaTermino'));
 
-            // Log para debug
-            log_message('debug', 'Datos recibidos en bloquear_individual: ' . 
-                json_encode([
-                    'RUNTS' => $runTS,
-                    'FechaInicio' => $fechaInicio,
-                    'FechaTermino' => $fechaFinal,
-                    'ID' => $id
-                ])
-            );
+            log_message('debug', 'Datos recibidos en controlador: ' . json_encode([
+                'ID' => $bloque_id,
+                'RUNTS' => $run_ts,
+                'FechaInicio' => $fecha_inicio,
+                'FechaTermino' => $fecha_termino
+            ]));
 
-            // Validar datos requeridos
-            if (!$runTS || !$fechaInicio) {
-                throw new Exception('Datos incompletos: Se requiere RUN del trabajador social y fecha de inicio');
+            // Validación
+            if (empty($bloque_id) || empty($run_ts) || 
+                empty($fecha_inicio) || empty($fecha_termino)) {
+                throw new Exception('Datos incompletos para el bloqueo');
             }
 
-            $data = array(
-                'ID' => $id ?: 'BLQ' . time() . rand(1000, 9999),
-                'RUN' => $runTS,
-                'fechainicio' => $fechaInicio,
-                'fechafinal' => $fechaFinal ?: $fechaInicio
-            );
+            $this->load->model('BloqueModel');
 
-            $this->load->model('CitasModel');
-            $resultado = $this->CitasModel->insertarBloqueIndividual($data);
-
-            echo json_encode([
-                'success' => $resultado,
-                'message' => $resultado ? 'Bloque bloqueado correctamente' : 'No se pudo bloquear el bloque'
+            $resultado = $this->BloqueModel->bloquear_horario([
+                'ID' => $bloque_id,
+                'RUNTS' => $run_ts,
+                'FechaInicio' => $fecha_inicio,
+                'FechaTermino' => $fecha_termino
             ]);
 
+            if (!$resultado) {
+                $last_error = $this->db->error();
+                log_message('error', 'Error de base de datos: ' . json_encode($last_error));
+                throw new Exception('Error al realizar el bloqueo: ' . $last_error['message']);
+            }
+
+            log_message('debug', '[FIN] bloquear_individual - Éxito');
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Bloque bloqueado correctamente'
+            ]);
+            
         } catch (Exception $e) {
             log_message('error', 'Error en bloquear_individual: ' . $e->getMessage());
+            
             echo json_encode([
                 'success' => false,
                 'message' => $e->getMessage()
             ]);
+        }
+    }
+    public function obtener_datos_ts($run) {
+        // Verificar si es una petición AJAX
+        if (!$this->input->is_ajax_request()) {
+            show_404();
+            return;
+        }
+
+        try {
+            // Cargar el modelo necesario
+            $this->load->model('TrabajadorSocialModel');
+            
+            // Obtener datos del TS
+            $datos = $this->TrabajadorSocialModel->obtenerTrabajadorSocialPorRUN($run);
+            
+            // Enviar respuesta
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'data' => $datos
+            ]);
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+    public function verificar_disponibilidad_dia() {
+        try {
+            $run_trabajador = $this->input->post('run_trabajador');
+            $fecha = $this->input->post('fecha');
+
+            // Verificar si hay bloques existentes para ese día y TS
+            $bloques_existentes = $this->BloqueModel->obtener_bloques_por_dia_ts($run_trabajador, $fecha);
+
+            $response = [
+                'disponible' => count($bloques_existentes) === 0,
+                'mensaje' => count($bloques_existentes) === 0 ? 
+                            'Día disponible' : 
+                            'El trabajador social ya tiene bloques en este día'
+            ];
+
+            header('Content-Type: application/json');
+            echo json_encode($response);
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'disponible' => false,
+                'mensaje' => $e->getMessage()
+            ]);
+        }
+    }
+    public function verificar_disponibilidad_bloque() {
+        // Asegurarse de que es una petición AJAX
+        if (!$this->input->is_ajax_request()) {
+            exit(json_encode(['status' => 'error', 'mensaje' => 'Petición no válida']));
+        }
+
+        // Limpiar cualquier salida previa
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        // Establecer headers
+        header('Content-Type: application/json');
+
+        try {
+            // Obtener datos POST
+            $fecha_inicio = $this->input->post('fecha_inicio');
+            $fecha_fin = $this->input->post('fecha_fin');
+            $run_ts = $this->input->post('run_ts');
+
+            // Log para debugging
+            log_message('debug', sprintf(
+                'Verificando bloque - Inicio: %s, Fin: %s, RUN: %s',
+                $fecha_inicio,
+                $fecha_fin,
+                $run_ts
+            ));
+
+            // Validar datos
+            if (empty($fecha_inicio) || empty($fecha_fin) || empty($run_ts)) {
+                exit(json_encode([
+                    'status' => 'error',
+                    'mensaje' => 'Faltan datos requeridos'
+                ]));
+            }
+
+            // Cargar modelo si no está cargado
+            if (!isset($this->BloqueModel)) {
+                $this->load->model('BloqueModel');
+            }
+
+            // Verificar disponibilidad
+            $bloque_existente = $this->BloqueModel->verificar_bloque_disponible(
+                $fecha_inicio,
+                $fecha_fin,
+                $run_ts
+            );
+
+            // Enviar respuesta
+            exit(json_encode([
+                'status' => 'success',
+                'disponible' => !$bloque_existente,
+                'mensaje' => !$bloque_existente ? 
+                    'Bloque disponible' : 
+                    'Este trabajador social ya tiene bloqueado este horario'
+            ]));
+
+        } catch (Exception $e) {
+            log_message('error', 'Error en verificación: ' . $e->getMessage());
+            exit(json_encode([
+                'status' => 'error',
+                'mensaje' => 'Error al verificar disponibilidad: ' . $e->getMessage()
+            ]));
         }
     }
 }

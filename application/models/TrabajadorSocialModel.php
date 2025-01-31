@@ -218,5 +218,15 @@ class TrabajadorSocialModel extends CI_Model {
         $this->db->where('RUN', $run);
         return $this->db->delete('administrador');
     }
+
+    public function obtenerTrabajadorSocialPorRUN($run) {
+        $this->db->select('ts.RUN, p.Nombre, p.Apellido');
+        $this->db->from('trabajadorsocial ts');
+        $this->db->join('persona p', 'ts.RUN = p.RUN');
+        $this->db->where('ts.RUN', $run);
+        $query = $this->db->get();
+        
+        return $query->result();
+    }
 }
 ?>

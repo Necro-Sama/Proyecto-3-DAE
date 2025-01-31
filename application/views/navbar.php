@@ -65,7 +65,15 @@
             </a>
           </li>
         <?php endif; ?>
-        <?php ?>
+        <?php if ($tipo === 'administrador'): ?>
+          <li class="nav-item text-center mx-2 mx-lg-1">
+            <a class="nav-link" href="<?php echo site_url('usuarios/estadisticas'); ?>">
+              <div>
+                <i class="fas fa-chart-bar fa-lg mb-1" style="color: #fddeaa;">Estadísticas</i>
+              </div>
+            </a>
+          </li>
+        <?php endif; ?>
           <li class="nav-item text-center mx-2 mx-lg-1">
             <a class="nav-link" href="<?php echo site_url('usuarios/visualizar-citas') ?>" >
               <div>

@@ -78,8 +78,9 @@ $route['translate_uri_dashes'] = FALSE;
         $route['citas/obtener_bloques_bloqueados'] = 'CitasController/obtener_bloques_bloqueados';
         $route['citas/desbloquear'] = 'CitasController/desbloquear';
         // Rutas para bloqueo de citas
-        $route['citas/bloquear_dia_completo'] = 'CitasController/bloquear_dia_completo';
+        $route['citas/verificar_disponibilidad_bloque'] = 'CitasController/verificar_disponibilidad_bloque';
         $route['citas/bloquear_individual'] = 'CitasController/bloquear_individual';
+        $route['citas/bloquear_dia_completo'] = 'CitasController/bloquear_dia_completo';
 //Rutas de Gestion TS
     $route['usuarios/gestor_ts'] = 'TrabajadorSocialController/index';
     //gestion de ts
@@ -94,6 +95,10 @@ $route['translate_uri_dashes'] = FALSE;
         $route['usuarios/guardar']= 'UserController/guardar';
 //Ruta general vizualizar cita
     $route['usuarios/visualizar-citas'] = 'TrabajadorSocialController/obtenercita';
+
+//Rutas de Estadísticas
+$route['usuarios/estadisticas'] = 'EstadisticasController/index';
+$route['usuarios/estadisticas/obtener_datos'] = 'EstadisticasController/obtenerDatos';
 
 
 

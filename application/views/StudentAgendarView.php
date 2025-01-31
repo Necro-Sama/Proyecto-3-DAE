@@ -38,8 +38,9 @@ if (!isset($tipo)) {
             base_url: <?php echo json_encode(base_url()); ?>,
             run: <?php echo json_encode($run); ?>,
             reagenda: <?php echo json_encode(isset($reagenda) ? $reagenda : false); ?>,
+            id_cita_anterior: <?php echo json_encode(isset($id_cita_anterior) ? $id_cita_anterior : null); ?>,
             trabajadorSocialActual: <?php echo json_encode(isset($runUsuarioActual) ? $runUsuarioActual : ''); ?>,
-            trabajadorSocialSeleccionado: <?php echo json_encode(isset($tsAsignado) ? $tsAsignado : ''); ?>
+            trabajadorSocialSeleccionado: <?php echo json_encode(isset($runTS) ? $runTS : ''); ?>
         };
 
         // Debug para verificar las variables
@@ -262,7 +263,12 @@ if (!isset($tipo)) {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Confirmar Cita</button>
+                        <button type="submit" class="btn btn-primary">
+                            <?php echo isset($reagenda) && $reagenda ? 'Reagendar Cita' : 'Agendar Cita'; ?>
+                        </button>
+                        <?php if (isset($reagenda) && $reagenda): ?>
+                            <input type="hidden" name="id_cita_anterior" value="<?php echo $id_cita_anterior; ?>">
+                        <?php endif; ?>
                     </div>
                 </form>
             </div>
@@ -303,7 +309,7 @@ if (!isset($tipo)) {
         });
     </script>
 
-    <!-- Asegurarse que el archivo agendar.js se carga después -->
+    <!-- Asegurarse que el archivo agendar.js se carga después -->  
     <script src="<?php echo base_url('js/agendar.js'); ?>"></script>
 </body>
 </html>

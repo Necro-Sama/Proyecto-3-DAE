@@ -137,8 +137,13 @@
                                     
                                     <?php if ($tipo === 'estudiante' || $tipo === 'noestudiante'): ?>
                                         <!-- Botón de reagendar -->
-                                        <form method="POST" action="<?= site_url('usuarios/vistaReagendar'); ?>" style="display:inline;">
+                                        <form method="GET" action="<?= site_url('usuarios/agendar'); ?>" style="display:inline;">
                                             <input type="hidden" name="idCita" value="<?= $cita['ID']; ?>">
+                                            <input type="hidden" name="reagenda" value="true">
+                                            <input type="hidden" name="fechaInicio" value="<?= $cita['FechaInicio']; ?>">
+                                            <input type="hidden" name="fechaTermino" value="<?= $cita['FechaTermino']; ?>">
+                                            <input type="hidden" name="motivo" value="<?= $cita['Motivo']; ?>">
+                                            <input type="hidden" name="runTS" value="<?= $cita['RUNTS']; ?>">
                                             <button class="btn btn-primary mt-2" <?= $esPasada ? 'disabled' : ''; ?> type="submit">
                                                 Reagendar
                                             </button>
