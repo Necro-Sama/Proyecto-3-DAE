@@ -99,8 +99,11 @@ $route['translate_uri_dashes'] = FALSE;
     $route['usuarios/visualizar-citas'] = 'TrabajadorSocialController/obtenercita';
 
 //Rutas de Estadísticas
-$route['usuarios/estadisticas'] = 'EstadisticasController/cargarVista';
-$route['usuarios/estadisticas/obtener_datos'] = 'EstadisticasController/obtenerDatos';
+$route['usuarios/estadisticas'] = 'EstadisticasController/EstadisticaView';
+$route['usuarios/estadisticas/obtenerDatos'] = 'EstadisticasController/obtenerDatos';
+$route['usuarios/exportarPDF'] = 'EstadisticasController/exportarPDF';
+
+
 
 
 

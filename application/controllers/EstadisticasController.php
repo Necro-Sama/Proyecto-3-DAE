@@ -10,23 +10,95 @@ class EstadisticasController extends CI_Controller {
         $this->load->helper('url');
     }
 
-    public function cargarVista() {
+    public function EstadisticaView() {
         $RUN_usuario = $this->check_logged_in();
         if (!$RUN_usuario) {
             redirect("/usuarios/login");
         }
 
         $data = $this->comprobardatos($RUN_usuario);
-        
         if ($data['tipo'] !== 'administrador') {
             redirect('usuarios/home');
             return;
         }
 
-        // Si llegamos aquí, el usuario es administrador
-        $año_actual = date('Y');
-        $data['estadisticas'] = $this->EstadisticasModel->obtenerEstadisticas($año_actual);
         $this->load->view('EstadisticaView', $data);
+    }
+
+    public function obtenerDatos() {
+        header('Content-Type: application/json');
+        ob_clean();
+        
+        try {
+            $estadisticas = $this->EstadisticasModel->obtenerEstadisticas();
+            echo json_encode(['data' => $estadisticas]);
+        } catch (Exception $e) {
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+        exit();
+    }
+
+    public function exportarPDF() {
+        // Cargar la librería PDF
+        $this->load->library('pdf');
+        
+        // Obtener los datos
+        $data['estadisticas'] = $this->EstadisticasModel->obtenerEstadisticas();
+        
+        // Crear nuevo PDF
+        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        
+        // Configurar el documento
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('Sistema de Citas');
+        $pdf->SetTitle('Estadísticas de Citas');
+        
+        // Configurar márgenes
+        $pdf->SetMargins(15, 15, 15);
+        $pdf->SetHeaderMargin(5);
+        $pdf->SetFooterMargin(10);
+        
+        // Agregar página
+        $pdf->AddPage();
+        
+        // Establecer fuente
+        $pdf->SetFont('helvetica', '', 12);
+        
+        // Título
+        $pdf->Cell(0, 10, 'Estadísticas de Citas', 0, 1, 'C');
+        $pdf->Ln(10);
+        
+        // Estadísticas por Carrera
+        $pdf->SetFont('helvetica', 'B', 14);
+        $pdf->Cell(0, 10, 'Por Carrera', 0, 1, 'L');
+        $pdf->SetFont('helvetica', '', 12);
+        foreach ($data['estadisticas']['por_carrera'] as $item) {
+            $pdf->Cell(140, 8, $item['nombre'], 0, 0);
+            $pdf->Cell(40, 8, $item['total'] . ' citas', 0, 1, 'R');
+        }
+        $pdf->Ln(10);
+        
+        // Estadísticas por Motivo
+        $pdf->SetFont('helvetica', 'B', 14);
+        $pdf->Cell(0, 10, 'Por Motivo', 0, 1, 'L');
+        $pdf->SetFont('helvetica', '', 12);
+        foreach ($data['estadisticas']['por_motivo'] as $item) {
+            $pdf->Cell(140, 8, $item['nombre'], 0, 0);
+            $pdf->Cell(40, 8, $item['total'] . ' citas', 0, 1, 'R');
+        }
+        $pdf->Ln(10);
+        
+        // Estadísticas por Estado
+        $pdf->SetFont('helvetica', 'B', 14);
+        $pdf->Cell(0, 10, 'Por Estado', 0, 1, 'L');
+        $pdf->SetFont('helvetica', '', 12);
+        foreach ($data['estadisticas']['por_estado'] as $item) {
+            $pdf->Cell(140, 8, $item['nombre'], 0, 0);
+            $pdf->Cell(40, 8, $item['total'] . ' citas', 0, 1, 'R');
+        }
+        
+        // Generar el PDF
+        $pdf->Output('estadisticas_citas.pdf', 'D');
     }
 
     public function check_logged_in() {
@@ -68,24 +140,5 @@ class EstadisticasController extends CI_Controller {
             $data['tipo'] = '';
         }
         return $data;
-    }
-
-    public function obtenerDatos() {
-        if (!$this->check_logged_in()) {
-            echo json_encode(['error' => 'No hay sesión activa']);
-            return;
-        }
-
-        $fecha_inicio = $this->input->post('fecha_inicio');
-        $fecha_fin = $this->input->post('fecha_fin');
-
-        // Validar fechas
-        if (!$fecha_inicio || !$fecha_fin) {
-            $fecha_inicio = date('Y-01-01');
-            $fecha_fin = date('Y-12-31');
-        }
-
-        $estadisticas = $this->EstadisticasModel->obtenerEstadisticas($fecha_inicio, $fecha_fin);
-        echo json_encode($estadisticas);
     }
 }

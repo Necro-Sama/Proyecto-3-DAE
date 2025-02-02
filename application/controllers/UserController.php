@@ -195,21 +195,11 @@ class UserController extends CI_Controller
                     'horario_seleccionado'
                 ));
                 $this->session->sess_regenerate(true);
-                
-                echo "<script>
-                    console.log('Reagendamiento completado');
-                    console.log('Redirigiendo en 7 segundos...');
-                    setTimeout(function() {
-                        window.location.href = '" . site_url("usuarios/agendar") . "';
-                    }, 7000);
-                </script>";
             } else {
                 echo "<script>
-                    console.log('Agendamiento normal completado');
-                    console.log('Redirigiendo en 7 segundos...');
                     setTimeout(function() {
                         window.location.href = '" . site_url("usuarios/agendar") . "';
-                    }, 7000);
+                    }, 500);
                 </script>";
             }
             return;
@@ -217,11 +207,9 @@ class UserController extends CI_Controller
         } catch (Exception $e) {
             $this->session->set_flashdata('agendar_error', $e->getMessage());
             echo "<script>
-                console.error('Error: " . addslashes($e->getMessage()) . "');
-                console.log('Redirigiendo en 7 segundos...');
                 setTimeout(function() {
                     window.location.href = '" . site_url("usuarios/agendar") . "';
-                }, 7000);
+                }, 500);
             </script>";
             return;
         }
