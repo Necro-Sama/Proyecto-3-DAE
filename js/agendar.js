@@ -1,11 +1,8 @@
-console.log('agendar.js cargado correctamente');
 
 if (typeof window.agendarConfig === 'undefined') {
     console.error('Error: agendarConfig no está definido');
     throw new Error('agendarConfig no está definido');
 }
-
-console.log('Variables de configuración:', window.agendarConfig);
 
 const {
     tipoUsuario,
@@ -15,19 +12,6 @@ const {
     trabajadorSocialActual,
     trabajadorSocialSeleccionado
 } = window.agendarConfig;
-
-console.log('Variables extraídas:', {
-    tipoUsuario,
-    site_url,
-    base_url,
-    run,
-    trabajadorSocialActual,
-    trabajadorSocialSeleccionado
-});
-
-if (typeof tipoUsuario === 'undefined') {
-    console.error('Error: tipoUsuario no está definido');
-}
 
 let dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 let horarios = [
@@ -114,6 +98,8 @@ function cargar_calendario() {
     });
 
     tablaHorario.appendChild(fragment);
+
+    mostrarBotonCancelar();
 }
 
 function generarIdBloque(fechaInicio, horario) {
@@ -132,20 +118,47 @@ function crearBotones(dia, horario, tiempo_bloque_ini) {
 
     let html = '';
     
-    if (tipoUsuario === "administrador") {
-        const selectTS = document.getElementById('ts-select');
-        const trabajadorSocial = selectTS ? selectTS.value : null;
+    if (tipoUsuario === "administrador" || tipoUsuario === "trabajadorsocial") {
+        let trabajadorSocial;
         
-        if (trabajadorSocial) {
+        if (tipoUsuario === "trabajadorsocial") {
+            // Para TS, usar directamente su RUN
+            trabajadorSocial = trabajadorSocialActual;
             html = `
-                <button type="button" 
-                        class="btn btn-success btn-sm btn-bloquear-individual"
-                        onclick="handleBloqueoIndividual(event, '${bloqueId}', '${fechaInicio}', '${fechaFinal}')">
-                    Bloquear
-                </button>
+                <form class="bloqueo-individual-form">
+                    <input type="hidden" name="ID" value="${bloqueId}">
+                    <input type="hidden" name="RUNTS" value="${trabajadorSocial}">
+                    <input type="hidden" name="FechaInicio" value="${fechaInicio}">
+                    <input type="hidden" name="FechaTermino" value="${fechaFinal}">
+                    <button type="button" 
+                            class="btn btn-success btn-sm btn-bloquear-individual"
+                            onclick="handleBloqueoIndividual(event, '${bloqueId}', '${fechaInicio}', '${fechaFinal}', '${trabajadorSocial}')">
+                        Bloquear
+                    </button>
+                </form>
             `;
         } else {
-            html = '<div class="text-danger">Seleccione un trabajador social</div>';
+            // Para administrador, mantener el select
+            const selectTS = document.getElementById('ts-select');
+            trabajadorSocial = selectTS ? selectTS.value : null;
+            
+            if (trabajadorSocial) {
+                html = `
+                    <form class="bloqueo-individual-form">
+                        <input type="hidden" name="ID" value="${bloqueId}">
+                        <input type="hidden" name="RUNTS" value="${trabajadorSocial}">
+                        <input type="hidden" name="FechaInicio" value="${fechaInicio}">
+                        <input type="hidden" name="FechaTermino" value="${fechaFinal}">
+                        <button type="button" 
+                                class="btn btn-success btn-sm btn-bloquear-individual"
+                                onclick="handleBloqueoIndividual(event, '${bloqueId}', '${fechaInicio}', '${fechaFinal}', '${trabajadorSocial}')">
+                            Bloquear
+                        </button>
+                    </form>
+                `;
+            } else {
+                html = '<div class="text-danger">Seleccione un trabajador social</div>';
+            }
         }
     } else if (tipoUsuario === "estudiante" || tipoUsuario === "noestudiante") {
         html = `
@@ -162,12 +175,6 @@ function crearBotones(dia, horario, tiempo_bloque_ini) {
 
 function mostrarModalAgendar(bloqueId, fechaInicio, fechaFinal) {
 
-    console.log('Mostrando modal con:', {
-        bloqueId,
-        fechaInicio,
-        fechaFinal,
-        trabajadorSocialSeleccionado
-    });
 
     document.getElementById('fecha_ini').value = fechaInicio;
     document.getElementById('fecha_ter').value = fechaFinal;
@@ -183,14 +190,6 @@ function mostrarModalAgendar(bloqueId, fechaInicio, fechaFinal) {
     
     document.getElementById('dia').textContent = fechaFormateada;
     document.getElementById('bloque_horario').textContent = `${horaInicio} - ${horaFin}`;
-    
-    const submitBtn = document.querySelector('#exampleModal button[type="submit"]');
-    if (window.agendarConfig.reagenda) {
-        submitBtn.textContent = 'Reagendar Cita';
-        document.getElementById('motivo').value = window.agendarConfig.motivo || '';
-    } else {
-        submitBtn.textContent = 'Agendar Cita';
-    }
     
     $('#exampleModal').modal('show');
 }
@@ -264,18 +263,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 $(document).ready(function() {
-    cargar_calendario();
+    if (typeof cargar_calendario === 'function') {
+        cargar_calendario();
+    }
     
-    console.log('Modal element:', document.getElementById('exampleModal'));
-    
-    console.log('jQuery version:', $.fn.jquery);
-    console.log('Bootstrap modal:', typeof $('#exampleModal').modal);
-
     const $btnDesbloquear = $('#btn-desbloquear');
     
     $btnDesbloquear.on('click', async function(e) {
         e.preventDefault();
-        console.log('Click en botón de desbloqueo');
         
         try {
             const checkboxes = document.querySelectorAll('.dia-checkbox:checked');
@@ -300,7 +295,7 @@ $(document).ready(function() {
 
             const resultados = await Promise.all(
                 Array.from(checkboxes).map(checkbox => 
-                    desbloquearDiaCompleto(checkbox.value)
+                    desbloquearDiaCompleto(checkbox.value, trabajadorSocial)
                 )
             );
 
@@ -311,7 +306,6 @@ $(document).ready(function() {
             cargar_calendario();
 
         } catch (error) {
-            console.error('Error al desbloquear días:', error);
             alert('Error al desbloquear los días: ' + error.message);
         } finally {
             $btnDesbloquear.prop('disabled', false).text('Desbloquear días seleccionados');
@@ -418,7 +412,6 @@ function obtenerFechaHoraBloque(dia, hora) {
 }
 
 async function bloquearHorario(datos) {
-    console.log('Intentando bloquear horario:', datos);
     
     try {
         const datosAjustados = {
@@ -441,7 +434,6 @@ async function bloquearHorario(datos) {
         });
 
         const responseText = await response.text();
-        console.log('Respuesta del servidor:', responseText);
 
         let result;
         try {
@@ -462,125 +454,48 @@ async function bloquearHorario(datos) {
     }
 }
 
-// Función para bloqueo individual
-async function handleBloqueoIndividual(event, bloqueId, fechaInicio, fechaFinal) {
-    event.preventDefault();
-    
-    // Definir las URLs al inicio de la función
-    const verificarUrl = `${base_url}index.php/citas/verificar_disponibilidad_bloque`;
-    const bloquearUrl = `${base_url}index.php/citas/bloquear_individual`;
+// Funciones para el bloqueo de horarios
+async function bloquearHorarioIndividual(datos) {
     
     try {
-        if (tipoUsuario !== "administrador") {
-            throw new Error('No tiene permisos para realizar esta acción');
-        }
+        const datosAjustados = {
+            ...datos,
+            rut_trabajador: datos.RUN
+        };
+        delete datosAjustados.RUN;
 
-        const runTS = document.getElementById('ts-select')?.value;
-        if (!runTS) {
-            throw new Error('Por favor, seleccione un trabajador social');
-        }
-
-        console.log('Enviando verificación a:', verificarUrl);
+        const formData = new URLSearchParams(datosAjustados);
         
-        // Verificar disponibilidad
-        const formData = new URLSearchParams({
-            fecha_inicio: fechaInicio,
-            fecha_fin: fechaFinal,
-            run_ts: runTS
-        });
-
-        const verificacionResponse = await fetch(verificarUrl, {
+        const response = await fetch(`${site_url}/citas/bloquear`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'X-Requested-With': 'XMLHttpRequest'
             },
             body: formData
         });
 
-        if (!verificacionResponse.ok) {
-            console.error('Error en verificación:', verificacionResponse);
-            throw new Error(`Error HTTP: ${verificacionResponse.status}`);
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
         }
 
-        const verificacion = await verificacionResponse.json();
-        
-        if (!verificacion.disponible) {
-            throw new Error(verificacion.mensaje || 'Bloque no disponible');
-        }
+        const responseText = await response.text();
 
-        if (confirm('¿Está seguro que desea bloquear este horario?')) {
-            console.log('Enviando bloqueo a:', bloquearUrl);
-            
-            const datosBloqueo = new URLSearchParams({
-                ID: bloqueId,
-                RUNTS: runTS,
-                FechaInicio: fechaInicio,
-                FechaTermino: fechaFinal
-            });
-
-            console.log('Datos de bloqueo:', Object.fromEntries(datosBloqueo));
-
-            const response = await fetch(bloquearUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: datosBloqueo
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Error response:', errorText);
-                throw new Error(`Error en el servidor: ${response.status}`);
-            }
-
-            const resultado = await response.json();
-            console.log('Resultado del bloqueo:', resultado);
-            
-            if (resultado.success) {
-                alert('Bloque bloqueado correctamente');
-                location.reload();
-            } else {
-                throw new Error(resultado.message || 'Error al bloquear el horario');
-            }
+        try {
+            return JSON.parse(responseText);
+        } catch (e) {
+            console.error('Respuesta no válida:', responseText);
+            throw new Error('Respuesta del servidor no válida');
         }
     } catch (error) {
-        console.error('Error completo:', error);
-        console.error('URLs:', { verificarUrl, bloquearUrl });
-        alert(error.message || 'Error al procesar el bloqueo');
+        console.error('Error al bloquear horario individual:', error);
+        throw error;
     }
 }
 
-// Función para bloqueo de día completo
-async function bloquearDiaCompleto(dia) {
+async function bloquearDiaCompleto(dia, trabajadorSocial) {
     try {
         if (!horarios || !Array.isArray(horarios)) {
             throw new Error('Error en la configuración de horarios');
-        }
-
-        // Obtener el RUN del TS seleccionado
-        const runTS = document.getElementById('ts-select')?.value;
-        if (!runTS) {
-            throw new Error('Por favor, seleccione un trabajador social');
-        }
-
-        // Verificar disponibilidad antes de intentar bloquear
-        const verificacionResponse = await fetch(`${site_url}/citas/verificar_disponibilidad_dia`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                run_trabajador: runTS,
-                fecha: dia
-            })
-        });
-
-        const verificacion = await verificacionResponse.json();
-        if (!verificacion.disponible) {
-            throw new Error(`El trabajador social ya tiene bloques ocupados en este día`);
         }
 
         const bloques = horarios
@@ -591,45 +506,44 @@ async function bloquearDiaCompleto(dia) {
                 
                 return {
                     ID: `BLQ${Date.now()}${Math.random().toString(36).substr(2, 5)}`,
-                    run_trabajador: runTS,
+                    run_trabajador: trabajadorSocial,
                     fechainicio: fechaInicio,
-                    fechafinal: fechaFin,
-                    dia: dia // Agregar el día para referencia
+                    fechafinal: fechaFin
                 };
             });
 
-        let bloquesExitosos = 0;
-        const errores = [];
+        const resultados = await Promise.all(
+            bloques.map(async bloque => {
+                try {
+                    const bloqueoResponse = await fetch(`${site_url}/citas/bloquear_dia_completo`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams(bloque)
+                    });
 
-        // Procesar bloques secuencialmente para evitar conflictos
-        for (const bloque of bloques) {
-            try {
-                const bloqueoResponse = await fetch(`${site_url}/citas/bloquear_dia_completo`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams(bloque)
-                });
+                    if (!bloqueoResponse.ok) {
+                        throw new Error(`Error HTTP: ${bloqueoResponse.status}`);
+                    }
 
-                if (!bloqueoResponse.ok) {
-                    throw new Error(`Error HTTP: ${bloqueoResponse.status}`);
+                    const resultado = await bloqueoResponse.json();
+                    if (!resultado.success) {
+                        throw new Error(resultado.message);
+                    }
+
+                    return { success: true };
+                } catch (error) {
+                    return { success: false, error: error.message };
                 }
+            })
+        );
 
-                const resultado = await bloqueoResponse.json();
-                if (resultado.success) {
-                    bloquesExitosos++;
-                } else {
-                    errores.push(`Error en bloque ${bloque.fechainicio}: ${resultado.message}`);
-                }
-            } catch (error) {
-                errores.push(`Error en bloque ${bloque.fechainicio}: ${error.message}`);
-            }
-        }
-
+        const exitosos = resultados.filter(r => r.success).length;
+        
         return {
-            success: bloquesExitosos > 0,
-            message: `Se bloquearon ${bloquesExitosos} de ${bloques.length} bloques.${errores.length > 0 ? '\nErrores: ' + errores.join('\n') : ''}`
+            success: exitosos > 0,
+            message: `Se bloquearon ${exitosos} de ${bloques.length} bloques.`
         };
 
     } catch (error) {
@@ -640,55 +554,97 @@ async function bloquearDiaCompleto(dia) {
     }
 }
 
-// Inicialización de eventos
-function inicializarEventos() {
-    if (tipoUsuario === "administrador") {
-        $('#btn-bloquear-dias').on('click', async function(e) {
-            e.preventDefault();
-            const $btnBloquear = $(this);
-            $btnBloquear.prop('disabled', true);
+// Nueva función para obtener la fecha de inicio de semana
+function obtenerFechaInicioSemana(fecha) {
+    const date = new Date(fecha);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // ajusta cuando es domingo
+    const lunes = new Date(date.setDate(diff));
+    lunes.setHours(0, 0, 0, 0);
+    return lunes.toISOString().slice(0, 19).replace('T', ' ');
+}
 
-            try {
-                const checkboxes = $('.dia-checkbox:checked');
-                if (checkboxes.length === 0) {
-                    throw new Error('Por favor, seleccione al menos un día para bloquear');
-                }
+async function desbloquearDiaCompleto(dia, trabajadorSocial) {
+    
+    try {
+        if (!horarios || !Array.isArray(horarios)) {
+            throw new Error('Error en la configuración de horarios');
+        }
 
-                const trabajadorSocial = $('#ts-select').val();
-                if (!trabajadorSocial) {
-                    throw new Error('Por favor, seleccione un trabajador social');
-                }
+        const fechaSeleccionada = obtenerFechaHoraBloque(dia, '00:00:00').split(' ')[0];
 
-                if (confirm('¿Está seguro que desea bloquear los días seleccionados?')) {
-                    const resultados = await Promise.all(
-                        checkboxes.map(async function() {
-                            const dia = $(this).val();
-                            return bloquearDiaCompleto(dia);
-                        }).get()
-                    );
-
-                    alert('Proceso completado:\n' + resultados.map(r => r.message).join('\n'));
-                    location.reload();
-                }
-            } catch (error) {
-                alert(error.message);
-            } finally {
-                $btnBloquear.prop('disabled', false);
-            }
+        // Obtener bloques bloqueados del día
+        const response = await fetch(`${site_url}/citas/obtener_bloques_bloqueados`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                fecha: fechaSeleccionada,
+                rut_trabajador: trabajadorSocial
+            })
         });
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const { bloques } = await response.json();
+        
+        if (!bloques || bloques.length === 0) {
+            return {
+                success: false,
+                message: `No hay bloques bloqueados para desbloquear el día ${dia}`
+            };
+        }
+
+        const resultados = await Promise.all(
+            bloques.map(async bloque => {
+                try {
+                    const response = await fetch(`${site_url}/citas/desbloquear`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            ID: bloque.ID,
+                            RUNTS: trabajadorSocial
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error en desbloqueo:', error);
+                    return { success: false };
+                }
+            })
+        );
+
+        const exitosos = resultados.filter(r => r.success).length;
+        const totalBloques = bloques.length;
+
+        return {
+            success: exitosos > 0,
+            message: `Día ${dia}: Se desbloquearon ${exitosos} de ${totalBloques} bloques.`
+        };
+
+    } catch (error) {
+        console.error('Error al desbloquear día completo:', error);
+        return {
+            success: false,
+            message: `Error al desbloquear el día ${dia}: ${error.message}`
+        };
     }
 }
 
-// Inicialización cuando el documento está listo
-$(document).ready(function() {
-    inicializarEventos();
-});
 
-console.log('=== INICIO CARGA AGENDAR.JS ===');
 
 // Función para inicializar los eventos
 function inicializarEventos() {
-    console.log('Iniciando configuración de eventos...');
     
     // Verificar que estamos en el contexto correcto
     if (typeof $ === 'undefined') {
@@ -697,7 +653,6 @@ function inicializarEventos() {
     }
 
     const btnBloquear = $('#btn-bloquear');
-    console.log('Buscando botón de bloquear...', btnBloquear.length ? 'Encontrado' : 'No encontrado');
 
     if (!btnBloquear.length) {
         console.error('No se encontró el botón de bloquear');
@@ -717,7 +672,6 @@ function inicializarEventos() {
 
             try {
                 const checkboxes = $('.dia-checkbox:checked');
-                console.log('Días seleccionados:', checkboxes.length);
 
                 if (checkboxes.length === 0) {
                     throw new Error('Por favor, seleccione al menos un día para bloquear');
@@ -740,12 +694,10 @@ function inicializarEventos() {
                 const resultados = await Promise.all(
                     checkboxes.map(async function() {
                         const dia = $(this).val();
-                        console.log('Procesando día:', dia);
-                        return bloquearDiaCompleto(dia);
+                        return bloquearDiaCompleto(dia, trabajadorSocial);
                     }).get()
                 );
 
-                console.log('Resultados:', resultados);
                 alert('Proceso completado:\n' + resultados.map(r => r.message).join('\n'));
 
             } catch (error) {
@@ -756,36 +708,30 @@ function inicializarEventos() {
             }
         });
 
-    console.log('Eventos configurados correctamente');
 }
 
 // Función para ocultar/mostrar el select de TS según el tipo de usuario
 function configurarInterfazSegunUsuario() {
     if (tipoUsuario === "trabajadorsocial") {
-        inicializarInterfazTS();
-    } else if (tipoUsuario === "administrador") {
-        // Mantener la lógica existente para administrador
-        const selectTS = document.getElementById('ts-select');
-        if (selectTS) {
-            selectTS.disabled = false;
+        // Ocultar el select para TS
+        const selectContainer = document.querySelector('.ts-select-container');
+        if (selectContainer) {
+            selectContainer.style.display = 'none';
         }
     }
 }
 
 // Inicializar cuando el documento esté listo
 $(document).ready(function() {
-    console.log('Documento listo - Inicializando...');
     configurarInterfazSegunUsuario();
     inicializarEventos();
 });
 
 // También inicializar cuando se muestre el modal
 $(document).on('shown.bs.modal', '#exampleModal', function() {
-    console.log('Modal mostrado - Reinicializando...');
     inicializarEventos();
 });
-
-console.log('=== FIN CARGA AGENDAR.JS ===');
+    
 
 async function bloquearIndividual(bloque) {
     try {
@@ -827,6 +773,50 @@ async function bloquearIndividual(bloque) {
     }
 }
 
+// Actualizar la función handleBloqueoIndividual para recibir todos los parámetros
+async function handleBloqueoIndividual(event, bloqueId, fechaInicio, fechaFinal, trabajadorSocial) {
+    event.preventDefault();
+    
+    if (!trabajadorSocial) {
+        alert('No se ha seleccionado un trabajador social');
+        return;
+    }
+
+    if (confirm('¿Está seguro que desea bloquear este horario?')) {
+        try {
+            const datosBloqueo = {
+                ID: bloqueId,
+                RUNTS: trabajadorSocial,
+                FechaInicio: fechaInicio,
+                FechaTermino: fechaFinal
+            };
+
+            const response = await fetch(`${site_url}/citas/bloquear_individual`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(datosBloqueo)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error de conexión`);
+            }
+
+            const resultado = await response.json();
+
+            if (resultado.success) {
+                alert('Bloque bloqueado correctamente');
+                location.reload();
+            } else {
+                alert('Error al bloquear: ' + resultado.message);
+            }
+        } catch (error) {
+            alert('Error al procesar el bloqueo');
+        }
+    }
+}
+
 // Asegurarse de que los botones de bloqueo individual tengan el evento asignado
 function inicializarBotonesBloqueo() {
     const botonesBloqueo = document.querySelectorAll('.btn-bloquear-individual');
@@ -853,98 +843,46 @@ document.addEventListener('DOMContentLoaded', function() {
     actualizarBotonesAlCambiarTS();
 });
 
-// Función para cargar datos del TS
-async function cargarDatosTS() {
-    if (tipoUsuario === "trabajadorsocial") {
-        try {
-            const response = await fetch(`${site_url}/citas/obtener_datos_ts/${trabajadorSocialActual}`);
-            if (!response.ok) {
-                throw new Error('Error al obtener datos del trabajador social');
-            }
-            
-            const datos = await response.json();
-            if (datos.success) {
-                actualizarDropboxTS(datos.data);
-                // Activar los eventos de selección después de cargar los datos
-                activarEventosSeleccion();
-            }
-        } catch (error) {
-            console.error('Error al cargar datos del TS:', error);
-        }
-    }
-}
-
-// Función para actualizar el dropbox
-function actualizarDropboxTS(datos) {
-    const selectTS = document.getElementById('ts-select');
-    if (!selectTS) return;
-
-    // Limpiar opciones actuales
-    selectTS.innerHTML = '';
-    
-    // Agregar opción por defecto
-    const optionDefault = document.createElement('option');
-    optionDefault.value = '';
-    optionDefault.textContent = 'Seleccione Trabajador Social';
-    selectTS.appendChild(optionDefault);
-
-    // Agregar datos del TS
-    if (datos && datos.length > 0) {
-        datos.forEach(ts => {
-            const option = document.createElement('option');
-            option.value = ts.RUN;
-            option.textContent = `${ts.Nombre} ${ts.Apellido}`;
-            selectTS.appendChild(option);
-        });
-        
-        // Seleccionar el TS actual por defecto
-        selectTS.value = trabajadorSocialActual;
-    }
-}
-
-// Función para activar eventos de selección
-function activarEventosSeleccion() {
-    const selectTS = document.getElementById('ts-select');
-    if (selectTS) {
-        selectTS.addEventListener('change', function() {
-            const selectedRUN = this.value;
-            if (selectedRUN) {
-                // Actualizar el RUN seleccionado para las operaciones de bloqueo
-                trabajadorSocialSeleccionado = selectedRUN;
-                // Actualizar la vista si es necesario
-                actualizarVistaSegunSeleccion(selectedRUN);
+function mostrarBotonCancelar() {
+    // Verificar si el usuario es estudiante o no estudiante
+    if (tipoUsuario === 'estudiante' || tipoUsuario === 'noestudiante') {
+        const celdas = document.querySelectorAll('.celda-horario');
+        celdas.forEach(celda => {
+            // Verificar si la celda tiene una cita agendada
+            if (celda.classList.contains('ocupado')) {
+                const botonCancelar = document.createElement('button');
+                botonCancelar.className = 'btn btn-danger btn-sm';
+                botonCancelar.textContent = 'Cancelar Cita';
+                botonCancelar.onclick = () => cancelarCita(celda.dataset.idCita);
+                celda.appendChild(botonCancelar);
             }
         });
     }
 }
 
-// Función para actualizar la vista según la selección
-function actualizarVistaSegunSeleccion(runSeleccionado) {
-    // Aquí puedes agregar lógica específica que necesites cuando se selecciona un TS
-    if (runSeleccionado === trabajadorSocialActual) {
-        // Lógica específica cuando se selecciona el TS actual
-        console.log('TS actual seleccionado');
+function cancelarCita(idCita) {
+    if (confirm('¿Estás seguro de que deseas cancelar esta cita?')) {
+        // Realizar la petición al servidor para cancelar la cita
+        $.post(`${site_url}/usuarios/eliminarcita`, {
+            idCita: idCita,
+            runCliente: run
+        })
+        .done(function(response) {
+            if (response.success) {
+                alert('Cita cancelada exitosamente');
+                cargar_calendario(); // Recargar el calendario
+            } else {
+                alert('Error al cancelar la cita: ' + response.message);
+            }
+        })
+        .fail(function() {
+            alert('Error al procesar la solicitud');
+        });
     }
-    
-    // Actualizar los botones de bloqueo u otros elementos según sea necesario
-    actualizarBotonesBloqueo(runSeleccionado);
 }
 
-// Función para actualizar los botones de bloqueo
-function actualizarBotonesBloqueo(runTS) {
-    const botonesBloqueo = document.querySelectorAll('.btn-bloquear-individual');
-    botonesBloqueo.forEach(boton => {
-        boton.setAttribute('data-run-ts', runTS);
-    });
-}
-
-// Función para inicializar la interfaz del TS
-function inicializarInterfazTS() {
-    if (tipoUsuario === "trabajadorsocial") {
-        const selectContainer = document.querySelector('.ts-select-container');
-        if (selectContainer) {
-            selectContainer.style.display = 'block';
-        }
-        cargarDatosTS();
-    }
+// En la función que genera los botones de la tabla
+function generarBotonHorario(bloque) {
+    let btnText = window.agendarConfig && window.agendarConfig.reagenda ? 'Reagendar' : 'Agendar';
+    return `<button class="btn btn-success btn-sm" onclick="abrirModal('${bloque.id}')">${btnText}</button>`;
 }

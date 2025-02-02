@@ -19,6 +19,19 @@ class TrabajadorSocialModel extends CI_Model {
         
         return $this->db->get()->result_array(); 
     }
+    public function actualizar_estados_automaticamente() {
+        $this->db->query("
+            UPDATE bloqueatencion ba
+            INNER JOIN bloque b ON ba.ID = b.ID
+            SET ba.Estado = 'Ausente'
+            WHERE b.FechaInicio < NOW() 
+            AND ba.Estado = 'Reservado'
+        ");
+        
+        // Opcionalmente, podemos registrar cuántas filas fueron actualizadas
+        $affected_rows = $this->db->affected_rows();
+        log_message('info', "Se actualizaron $affected_rows citas a estado Ausente");
+    }
 
     public function agregarPersona($personaData) {
         $this->db->insert('persona', $personaData);

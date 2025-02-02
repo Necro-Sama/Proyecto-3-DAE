@@ -208,6 +208,9 @@
             };
 
             function actualizarGraficos(data) {
+                // Agregar console.log para debug
+                console.log('Datos para gráfico de estados:', data.estados);
+
                 // Destruir gráficos existentes si existen
                 if (carreraChart instanceof Chart) {
                     carreraChart.destroy();
@@ -276,19 +279,73 @@
                 // Gráfico por estado
                 const ctxEstado = document.getElementById('estadoChart').getContext('2d');
                 estadoChart = new Chart(ctxEstado, {
-                    type: 'doughnut',
+                    type: 'bar',
                     data: {
                         labels: data.estados.map(item => item.Estado),
                         datasets: [{
-                            data: data.estados.map(item => item.total),
+                            label: 'Cantidad de Citas',
+                            data: data.estados.map(item => parseInt(item.total)),
                             backgroundColor: [
-                                'rgba(75, 192, 192, 0.5)',
-                                'rgba(255, 99, 132, 0.5)',
-                                'rgba(255, 206, 86, 0.5)'
-                            ]
+                                'rgba(54, 162, 235, 0.5)',  // Reservado - Azul
+                                'rgba(75, 192, 192, 0.5)',  // Atendido - Verde
+                                'rgba(255, 206, 86, 0.5)',  // Cancelado - Amarillo
+                                'rgba(255, 99, 132, 0.5)'   // Ausente - Rojo
+                            ],
+                            borderColor: [
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(255, 99, 132, 1)'
+                            ],
+                            borderWidth: 1
                         }]
                     },
-                    options: commonOptions
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Estado de las Citas',
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Total: ${context.raw}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Cantidad de Citas'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Estados'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Agregar console.log para debug
+                console.log('Datos para el gráfico:', {
+                    labels: data.estados.map(item => item.Estado),
+                    values: data.estados.map(item => parseInt(item.total))
                 });
             }
 

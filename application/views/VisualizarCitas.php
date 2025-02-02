@@ -3,11 +3,16 @@
     <head>
         <meta charset="UTF-8">
         <title>Visualizar Citas</title>
-        <?php
-
-    use Google\Service\CloudSearch\OnClick;
-
-    $this->load->view("navbar", $tipo); ?>
+        <?php  $this->load->view("navbar", $tipo); ?>
+        <!-- <?php 
+        // Limpiar cualquier dato de reagendamiento al cargar la vista
+        $this->session->unset_userdata(array(
+            'id_cita_anterior',
+            'reagenda',
+            'fecha_seleccionada',
+            'horario_seleccionado'
+        ));
+        ?> -->
         <link rel="stylesheet" href="<?= base_url('public/bootstrap/css/bootstrap.min.css'); ?>">
         <style>
             body {
@@ -136,7 +141,8 @@
                         
                         if ($esPasada && $estado !== 'Atendido' && $estado !== 'Cancelado') {
                             $estadoClass = 'text-danger';
-                            $estadoText = 'Cita Pasada';
+                            $estadoText = 'Ausente';
+                            $estado = 'Ausente'; // Actualizar el estado
                         } elseif ($estado === 'Cancelado') {
                             $estadoClass = 'text-warning';
                             $estadoText = 'Cita Cancelada';
@@ -159,12 +165,27 @@
                                 <p class="card-text"><strong>Trabajador Social:</strong> <?= $cita['NombreTS'] . ' ' . $cita['ApellidoTS'] ?></p>
                                 <p class="card-text"><strong>Motivo:</strong> <?= $cita['Motivo'] ?></p>
                                 
-                                <?php if ($estado !== 'Cancelado' && $estado !== 'Atendido' && !$esPasada): ?>
+                                <?php if ($tipo === 'trabajadorsocial' && $estado === 'Reservado'): ?>
+                                    <button type="button" class="btn btn-success" onclick="marcarComoAtendida(<?= $cita['ID'] ?>)">
+                                        Marcar como Atendida
+                                    </button>
+                                <?php endif; ?>
+
+                                <?php if (($tipo === 'estudiante' || $tipo === 'noestudiante') && $estado === 'Reservado'): ?>
                                     <form method="POST" action="<?= site_url('usuarios/eliminarcita'); ?>" style="display:inline;">
                                         <input type="hidden" name="idCita" value="<?= $cita['ID'] ?>">
                                         <input type="hidden" name="runCliente" value="<?= $cita['RUNCliente'] ?>">
                                         <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas cancelar esta cita?')">
                                             Cancelar Cita
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+
+                                <?php if ($cita['Estado'] === 'Reservado'): ?>
+                                    <form method="POST" action="<?= site_url('usuarios/agendar'); ?>" style="display:inline;">
+                                        <?php $this->session->set_userdata('id_cita_anterior', $cita['ID']); ?>
+                                        <button type="submit" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-calendar-alt"></i> Reagendar
                                         </button>
                                     </form>
                                 <?php endif; ?>
@@ -217,6 +238,40 @@
                         }
                     }, "json").fail(function() {
                         alert("Ocurrió un error al intentar reagendar la cita.");
+                    });
+                }
+            }
+        </script>
+        <script>
+            function marcarComoAtendida(idCita) {
+                if (confirm('¿Está seguro de marcar esta cita como atendida?')) {
+                    fetch('<?= site_url('trabajadorsocial/marcarComoAtendida') ?>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            idCita: idCita
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la respuesta del servidor: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            alert('Cita marcada como atendida exitosamente');
+                            window.location.reload();
+                        } else {
+                            alert(data.message || 'Error al marcar la cita como atendida');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al procesar la solicitud: ' + error.message);
                     });
                 }
             }

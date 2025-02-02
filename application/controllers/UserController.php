@@ -148,37 +148,26 @@ class UserController extends CI_Controller
         return $this->UserModel->get_admin($RUN_usuario);
     }
     public function accion_agendar(){
-        $this->session->agendar_exito = "";
-        $this->session->agendar_error = "";
-
         // Verificar si el usuario está autenticado
         $usuario = $this->check_logged_in();
         if (!$usuario) {
-            session_destroy();
-            redirect("/usuarios/login");
+            redirect(base_url("usuarios/login"));
         }
 
         // Recibir datos del formulario
         $fecha_ini = $this->input->post("fecha_ini");
         $fecha_ter = $this->input->post("fecha_ter");
         $motivo = $this->input->post("motivo");
-        $id_anterior = $this->input->post("id_anterior"); // ID de la cita anterior (si es reagendamiento)
-        $reagenda = $this->input->post("reagenda"); // true si es reagendar
-
-        // Validaciones básicas
-        if (!$motivo) {
-            $this->session->agendar_error = "Por favor seleccione un Motivo.";
-            $this->session->mark_as_flash("agendar_error");
-            redirect("/usuarios/agendar");
-        }
-        if (!$fecha_ini) {
-            $this->session->agendar_error = "No hubo una fecha seleccionada.";
-            $this->session->mark_as_flash("agendar_error");
-            redirect("/usuarios/agendar");
-        }
+        $id_anterior = $this->session->userdata('id_cita_anterior');
 
         try {
-            // Registrar nueva cita
+            // Si hay ID anterior en la sesión, eliminar la cita anterior primero
+            if ($id_anterior) {
+                $this->load->model('CitasModel');
+                $this->CitasModel->eliminarCitaAnterior($id_anterior);
+            }
+
+            // Luego registrar la nueva cita
             $this->BloqueModel->agendar_estudiante(
                 $usuario,
                 $fecha_ini,
@@ -186,51 +175,56 @@ class UserController extends CI_Controller
                 $motivo
             );
 
-            // Si es un reagendamiento, eliminar la cita anterior
-            if ($reagenda && $id_anterior) {
-                $this->load->controller('CitasController'); // Cargar el controlador
-                $this->CitasController->eliminar($id_anterior); // Llamar a la función de eliminación
+            // Configurar la cookie de sesión con SameSite
+            $config = array(
+                'name'   => 'ci_session',
+                'value'  => $this->session->userdata('session_id'),
+                'expire' => '7200',
+                'path'   => '/',
+                'secure' => TRUE,
+                'samesite' => 'Strict'
+            );
+            $this->input->set_cookie($config);
+
+            // Limpiar variables de agendamiento y mostrar mensaje apropiado
+            if ($id_anterior) {
+                $this->session->unset_userdata(array(
+                    'id_cita_anterior',
+                    'reagenda',
+                    'fecha_seleccionada',
+                    'horario_seleccionado'
+                ));
+                $this->session->sess_regenerate(true);
+                
+                echo "<script>
+                    console.log('Reagendamiento completado');
+                    console.log('Redirigiendo en 7 segundos...');
+                    setTimeout(function() {
+                        window.location.href = '" . site_url("usuarios/agendar") . "';
+                    }, 7000);
+                </script>";
+            } else {
+                echo "<script>
+                    console.log('Agendamiento normal completado');
+                    console.log('Redirigiendo en 7 segundos...');
+                    setTimeout(function() {
+                        window.location.href = '" . site_url("usuarios/agendar") . "';
+                    }, 7000);
+                </script>";
             }
-
-            // Obtener el correo del usuario
-            $RUN_usuario = $usuario['RUN'];
-            
-            $correoUsuario = $this->UserModel->getCorreoUsuario($RUN_usuario);
-
-            // Enviar correo de confirmación
-            $this->load->library('email');
-
-            // Configuración del correo
-            $this->email->from('gustavo.rios.alvarez@alumnos.uta.cl', 'Sistema de Citas');
-            $this->email->to($correoUsuario);
-            $this->email->subject('Confirmación de Cita Agendada');
-
-            $mensaje = "
-                <h1>Confirmación de Cita</h1>
-                <p><strong>Nombre:</strong> {$usuario['Nombre']} {$usuario['Apellido']}</p>
-                <p><strong>Motivo:</strong> $motivo</p>
-                <p><strong>Fecha y Hora de Inicio:</strong> $fecha_ini</p>
-                <p><strong>Fecha y Hora de Término:</strong> $fecha_ter</p>
-            ";
-            $this->email->message($mensaje);
-
-            $this->session->agendar_exito = "Cita agendada con exito y correo enviado.";
-
-            $this->session->mark_as_flash("agendar_exito");
-            $this->session->mark_as_flash("agendar_error");
-
-            // Si es reagendamiento, redirigir a visualizar cita
-            if ($reagenda) {
-                redirect("/usuarios/visualizar_cita");
-            }
+            return;
 
         } catch (Exception $e) {
-            $this->session->agendar_error = $e->getMessage();
-            $this->session->mark_as_flash("agendar_error");
+            $this->session->set_flashdata('agendar_error', $e->getMessage());
+            echo "<script>
+                console.error('Error: " . addslashes($e->getMessage()) . "');
+                console.log('Redirigiendo en 7 segundos...');
+                setTimeout(function() {
+                    window.location.href = '" . site_url("usuarios/agendar") . "';
+                }, 7000);
+            </script>";
+            return;
         }
-
-        // Redirigir de vuelta a agendar en caso normal
-        redirect("/usuarios/agendar");
     }
     public function logged_in($token)
     {

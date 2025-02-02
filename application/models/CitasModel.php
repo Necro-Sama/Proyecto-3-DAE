@@ -196,5 +196,64 @@ class CitasModel extends CI_Model
             return false;
         }
     }
+
+    public function eliminarCitaAnterior($idCita) {
+        try {
+            $this->db->where('ID', $idCita);
+            $existe = $this->db->get('bloqueatencion')->num_rows() > 0;
+
+            if (!$existe) {
+                return false;
+            }
+
+            $this->db->trans_start();
+            
+            // Eliminar de bloqueatencion primero
+            $this->db->where('ID', $idCita);
+            $this->db->delete('bloqueatencion');
+            
+            // Luego eliminar de bloque
+            $this->db->where('ID', $idCita);
+            $this->db->delete('bloque');
+            
+            $this->db->trans_complete();
+
+            return $this->db->trans_status();
+
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            return false;
+        }
+    }
+
+    public function obtenerCitasUsuario($run) {
+        try {
+            $this->db->select('
+                b.ID, 
+                b.FechaInicio, 
+                b.FechaTermino, 
+                p_ts.RUN as RUNTS,  // Cambiamos para obtener directamente el RUN del TS
+                ba.Estado, 
+                ba.Motivo, 
+                ba.RUNCliente,
+                p_est.Nombre as NombreEstudiante, 
+                p_est.Apellido as ApellidoEstudiante,
+                p_est.Telefono, 
+                p_est.Correo,
+                p_ts.Nombre as NombreTS, 
+                p_ts.Apellido as ApellidoTS
+            ')
+            ->from('bloque b')
+            ->join('bloqueatencion ba', 'b.ID = ba.ID')
+            ->join('persona p_est', 'ba.RUNCliente = p_est.RUN')
+            ->join('persona p_ts', 'b.RUNTS = p_ts.RUN')
+            ->where('ba.RUNCliente', $run)
+            ->order_by('b.FechaInicio', 'ASC');
+
+            return $this->db->get()->result_array();
+        } catch (Exception $e) {
+            return array();
+        }
+    }
 }
 ?>

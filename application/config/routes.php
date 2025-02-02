@@ -81,6 +81,8 @@ $route['translate_uri_dashes'] = FALSE;
         $route['citas/verificar_disponibilidad_bloque'] = 'CitasController/verificar_disponibilidad_bloque';
         $route['citas/bloquear_individual'] = 'CitasController/bloquear_individual';
         $route['citas/bloquear_dia_completo'] = 'CitasController/bloquear_dia_completo';
+    //Rutas de marcar como atendida
+        $route['trabajadorsocial/marcarComoAtendida'] = 'TrabajadorSocialController/marcarComoAtendida';
 //Rutas de Gestion TS
     $route['usuarios/gestor_ts'] = 'TrabajadorSocialController/index';
     //gestion de ts
@@ -99,6 +101,7 @@ $route['translate_uri_dashes'] = FALSE;
 //Rutas de Estadísticas
 $route['usuarios/estadisticas'] = 'EstadisticasController/cargarVista';
 $route['usuarios/estadisticas/obtener_datos'] = 'EstadisticasController/obtenerDatos';
+
 
 
 

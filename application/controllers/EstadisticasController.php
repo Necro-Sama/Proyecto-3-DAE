@@ -75,8 +75,16 @@ class EstadisticasController extends CI_Controller {
             echo json_encode(['error' => 'No hay sesión activa']);
             return;
         }
+
         $fecha_inicio = $this->input->post('fecha_inicio');
         $fecha_fin = $this->input->post('fecha_fin');
+
+        // Validar fechas
+        if (!$fecha_inicio || !$fecha_fin) {
+            $fecha_inicio = date('Y-01-01');
+            $fecha_fin = date('Y-12-31');
+        }
+
         $estadisticas = $this->EstadisticasModel->obtenerEstadisticas($fecha_inicio, $fecha_fin);
         echo json_encode($estadisticas);
     }

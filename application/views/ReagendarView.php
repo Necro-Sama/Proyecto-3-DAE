@@ -4,263 +4,152 @@ defined("BASEPATH") or exit("No direct script access allowed"); ?>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reagendar</title>
-    <?php  $this->load->view('navbar',$tipo); ?>
-    <?php print_r($tipo); ?>
-    <link rel="stylesheet" type="text/css" href="<?= base_url(
-        "css/agendar.css"
-    ) ?>"/>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
-    <link rel="stylesheet" type="text/css" href="<?= base_url() ?>css/style.css"/>
-    <link rel="stylesheet" href="<?php echo base_url(
-        "public/bootstrap/css/bootstrap.min.css"
-    ); ?>">
-    
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
-    <script src="<?= base_url("js/agendar.js") ?>"></script>
+    <title>Reagendar Cita</title>
+    <?php $this->load->view('navbar', $tipo); ?>
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="<?= base_url("css/agendar.css") ?>"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
 </head>
-
 <body>
-    <h1> </h1>
     <div class="container">
-        <!-- <h6>Bloques disponibles</h6> -->
-        <?php if ($this->session->agendar_error): ?>
-            <p class="error font-weight-bold alert alert-danger alert-dismissible fade show" role="alert">
-                <?= $this->session->agendar_error ?>
-            </p>
-        <?php endif; ?>
-
-        <?php if ($this->session->agendar_exito): ?>
-            <p class="alert-success font-weight-bold alert alert-dismissible fade show" role="alert">
-                <?= $this->session->agendar_exito ?>
-            </p>
-        <?php endif; ?>
-
-        <div id="tiempo-servidor" hidden><?= $this->BloqueModel->get_tiempo_bd() ?></div>
-        
-        <label for="semana">Semana: </label>
-        <?php  $semanas = $this->BloqueModel->get_semanas(3); ?>
-        <select class="form-select" name="semana" id="semana-select" onchange="seleccion_semana(event)">
-            <?php foreach ($semanas as $semana) { ?>
-                <?php print_r($semanas);?>
-                <option value="<?= $semana ?>">
-                    <?= trim($semana, "00:00:00") ?>
-                </option>
-            <?php } ?>
-        </select>
-        <table class="text-center">
-        <thead>
-            <tr>
-                <th><div class="p-2 display-7 dia">
-                    Hora
-                    </div>
-                </th>
-                <th><div class="p-2 display-7 dia">
-                Lunes
-                    </div>
-                </th>
-                <th><div class="p-2 display-7 dia">
-                Martes
-                    </div>
-                </th>
-                <th><div class="p-2 display-7 dia">
-                Miércoles
-                    </div>
-                </th>
-                <th><div class="p-2 display-7 dia">
-                Jueves
-                    </div>
-                </th>
-                <th><div class="p-2 display-7 dia">
-                Viernes
-                    </div>
-                </th>
-            </tr>
-        </thead>
-            <tbody id="tabla-horario">
-                <!-- Contenido generado dinamicamente -->
-            </tbody>
-        </table>
-    </div>
-
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">agendar</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+        <!-- Información de la cita actual -->
+        <div class="card mb-4 mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Información de Cita Actual</h5>
             </div>
-                <form method="post" accept-charset="utf-8" action="<?= site_url() ?>/usuarios/reagendar">
-                    <div class="modal-body">
-                        <input type="text" id="fecha_ini" name="fecha_ini" hidden>
-                        <input type="text" id="fecha_ter" name="fecha_ter" hidden>
-                        <div class="form-group">
-                            <label for="dia">Día: </label>
-                            <span id="dia"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="bloque_horario">Bloque Horario: </label>
-                            <span id="bloque_horario"></span>
-                        </div>
-                        <div class="form-group">
-                            <label for="motivo">Motivo: </label>
-                            <select class="form-select" aria-label="Default select example" name="motivo">
-                                <option value="" selected>Seleccionar Motivo...</option>
-                                <?php
-                                $motivos = [
-                                    "Gratuidad Mineduc",
-                                    "Becas de arancel Mineduc",
-                                    "Fondo Solidario de Crédito Universitario",
-                                    "Beneficios Junaeb (BAES y Becas de mantención)",
-                                    "Beca Fotocopia UTA",
-                                    "Beca Alimentación UTA",
-                                    "Beca Residencia UTA",
-                                    "Beca Internado UTA",
-                                    "Beca Ayuda Estudiantil UTA",
-                                    "Beca PSU-PDT-PAES UTA",
-                                    "Otro",
-                                ];
-                                foreach ($motivos as $m): ?>
-                                    <option value="<?= $m ?>"><?= $m ?></option>
-                                <?php endforeach;?>
-                            </select>
-                        </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Fecha:</strong> <?= date('d/m/Y', strtotime($citaOriginal['FechaInicio'])) ?></p>
+                        <p><strong>Hora:</strong> <?= date('H:i', strtotime($citaOriginal['FechaInicio'])) ?> - 
+                                                <?= date('H:i', strtotime($citaOriginal['FechaTermino'])) ?></p>
+                        <p><strong>Motivo:</strong> <?= $citaOriginal['Motivo'] ?></p>
                     </div>
-                    <div class="modal-footer">
-                        <input type="submit" class="btn btn-primary" name="agendar" value="Agendar" />
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estructura exacta del calendario como en agendar -->
+        <div id="contenedor-principal" class="mt-4">
+            <div id="contenedor-calendario">
+                <div class="controles-calendario mb-3">
+                    <button type="button" id="btn-semana-anterior" class="btn btn-primary">Semana Anterior</button>
+                    <button type="button" id="btn-semana-siguiente" class="btn btn-primary">Semana Siguiente</button>
+                </div>
+                <input type="hidden" id="tiempo-servidor" value="<?= date("Y-m-d") ?>">
+                <div class="table-responsive">
+                    <table id="tabla-horario" class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Hora</th>
+                                <th>Lunes</th>
+                                <th>Martes</th>
+                                <th>Miércoles</th>
+                                <th>Jueves</th>
+                                <th>Viernes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-horario-body">
+                            <!-- Se llenará dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de reagendamiento -->
+        <div class="modal fade" id="modalReagendar" tabindex="-1" role="dialog" aria-labelledby="modalReagendarLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalReagendarLabel">Confirmar Reagendamiento</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                </form>
+                    <form id="form-reagendar" method="POST">
+                        <div class="modal-body">
+                            <input type="hidden" name="idCitaAnterior" value="<?= $idCita ?>">
+                            <input type="hidden" name="fecha_inicio" id="fecha_inicio">
+                            <input type="hidden" name="fecha_fin" id="fecha_fin">
+                            <input type="hidden" name="motivo" value="<?= $citaOriginal['Motivo'] ?>">
+                            
+                            <div class="info-cita">
+                                <p><strong>Fecha seleccionada:</strong> <span id="fecha-seleccionada"></span></p>
+                                <p><strong>Hora:</strong> <span id="hora-seleccionada"></span></p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Confirmar Reagendamiento</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-    <script src="js/agendar.js"></script>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+    <script>
+        // Configuración para el calendario
+        window.agendarConfig = {
+            tipoUsuario: '<?= $tipo ?>',
+            site_url: '<?= site_url() ?>',
+            base_url: '<?= base_url() ?>',
+            run: '<?= $run ?>',
+            reagenda: true,
+            citaOriginal: <?= json_encode($citaOriginal) ?>,
+            idCitaAnterior: '<?= $idCita ?>'
+        };
+
+        // Debugger para el calendario
+        console.log('Configuración del calendario:', window.agendarConfig);
+        
+        // Verificar elementos del DOM
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM cargado');
+            console.log('Elemento tabla-horario:', document.getElementById('tabla-horario'));
+            console.log('Elemento tiempo-servidor:', document.getElementById('tiempo-servidor'));
+            
+            // Verificar si el script de agendar.js se cargó
+            console.log('Script agendar.js:', typeof cargar_calendario !== 'undefined' ? 'Cargado' : 'No cargado');
+            
+            // Intentar cargar el calendario
+            try {
+                if(typeof cargar_calendario === 'function') {
+                    console.log('Intentando cargar calendario...');
+                    cargar_calendario();
+                }
+            } catch(error) {
+                console.error('Error al cargar calendario:', error);
+            }
+        });
+    </script>
+
+    <!-- Asegurarnos que agendar.js se carga después de jQuery -->
+    <script>
+        // Verificar que jQuery está disponible
+        if(typeof jQuery === 'undefined') {
+            console.error('jQuery no está cargado!');
+        } else {
+            console.log('jQuery versión:', jQuery.fn.jquery);
+        }
+    </script>
+    <script src="<?= base_url('js/agendar.js') ?>"></script>
+
+    <?php if(isset($debug) && $debug): ?>
+        <script>
+            console.log('Datos del controlador:', {
+                tipo: '<?= $tipo ?>',
+                run: '<?= $run ?>',
+                idCita: '<?= $idCita ?>',
+                citaOriginal: <?= json_encode($citaOriginal) ?>
+            });
+        </script>
+    <?php endif; ?>
 </body>
-</html>
-<style>
-    /* Reducir el tamaño vertical del calendario */
-    table {
-        width: 80%; /* Ancho reducido */
-        margin: 20px auto; /* Centrado horizontal */
-        table-layout: fixed;
-        border-collapse: separate;
-        border-spacing: 0;
-        border: 2px solid #000; /* Borde del calendario */
-        border-radius: 15px; /* Bordes redondeados */
-        overflow: hidden;
-        font-size: 12px; /* Tamaño de texto más pequeño */
-    }
-
-    th, td {
-        padding: 4px; /* Menor espaciado interno */
-        text-align: center;
-        font-size: 11px; /* Texto más pequeño */
-        border: 1px solid #000; /* Bordes internos */
-        height: 30px; /* Altura fija para las celdas */
-    }
-
-    /* Estilo del encabezado */
-    thead {
-        background-color: #FBF1D0;
-        color: #000;
-        border-radius: 15px 15px 0 0;
-    }
-
-    /* Alternar colores en las filas del cuerpo */
-    tbody tr:nth-child(even) {
-        background-color: #FFF7CC;
-    }
-
-    tbody tr:nth-child(odd) {
-        background-color: #FFF2B3;
-    }
-
-    /* Estilo para los botones "Agendar" */
-    button {
-        font-size: 10px;
-        padding: 2px 5px; /* Más compacto */
-        cursor: pointer;
-        border: 1px solid #000;
-        border-radius: 5px; /* Bordes redondeados */
-        background-color: #FBF1D0; /* Color inicial */
-        transition: background-color 0.3s ease; /* Animación al cambiar de color */
-    }
-
-    button:active, button.selected {
-        background-color: #FDD188; /* Color cuando está seleccionado */
-    }
-    /* Estilo para el mensaje de error */
-    .error {
-        position: relative;
-        padding: 15px;
-        margin: 10px 0;
-        border-radius: 5px;
-        font-size: 16px;
-        background-color: #f8d7da; /* Fondo de error */
-        color: #721c24; /* Color del texto */
-        border: 1px solid #f5c6cb; /* Borde sutil */
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    /* Botón de cierre */
-    .error .btn-close {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        color: #721c24;
-        cursor: pointer;
-    }
-
-    /* Efecto de hover en el botón */
-    .error .btn-close:hover {
-        color: #f5c6cb;
-    }
-
-    /* Estilo para el texto */
-    .error strong {
-        font-weight: bold;
-    }
-
-    /* Estilo en caso de que el error tenga un mensaje largo o más de una línea */
-    .error {
-        white-space: normal;
-        word-wrap: break-word;
-    }
-    /* Personalización del modal */
-    .modal-body {
-        font-size: 16px;
-        padding: 20px;
-    }
-
-    .form-group label {
-        font-weight: bold;
-    }
-
-    .form-control-plaintext {
-    border: none;  /* Eliminar el borde */
-    background-color: transparent;  /* Asegurarse de que el fondo sea transparente */
-    padding: 0;  /* Eliminar el padding extra */
-    font-size: 16px;  /* Tamaño de texto adecuado */
-    }
-    .form-select {
-        font-size: 14px;
-    }
-</style>
-<script>
-    var reagenda = <?php echo json_encode($reagenda);?>
-</script>
+</html> 

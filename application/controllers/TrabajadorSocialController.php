@@ -97,7 +97,9 @@ class TrabajadorSocialController extends CI_Controller {
             redirect("/usuarios/login");
         }
         $filtro = $this->input->get('filtro'); // Obtener filtro desde la vista (puede ser RUN o nombre)
-
+        
+        $this->TrabajadorSocialModel->actualizar_estados_automaticamente();
+    
         $data = $this->comprobardatos($RUN_usuario);
         if ($data['tipo'] === 'estudiante') {
             $RUNTS = $this->TrabajadorSocialModel->obtenerRUNTS($RUN_usuario);
@@ -202,5 +204,78 @@ class TrabajadorSocialController extends CI_Controller {
         echo json_encode(['success' => false, 'message' => 'RUN no proporcionado']);
     }
 }
-    
+    public function marcarComoAtendida() {
+        // Asegurarnos de que la respuesta sea JSON
+        header('Content-Type: application/json');
+        
+        try {
+            // Verificar si hay datos POST
+            $input = file_get_contents('php://input');
+            if (empty($input)) {
+                throw new Exception('No se recibieron datos');
+            }
+
+            $data = json_decode($input, true);
+            if (!isset($data['idCita'])) {
+                throw new Exception('ID de cita no proporcionado');
+            }
+
+            $idCita = $data['idCita'];
+            
+            // Verificar que el usuario sea trabajador social
+            $RUN_usuario = $this->check_logged_in();
+            if (!$RUN_usuario) {
+                throw new Exception('Usuario no autenticado');
+            }
+
+            $userData = $this->comprobardatos($RUN_usuario);
+            if ($userData['tipo'] !== 'trabajadorsocial') {
+                throw new Exception('Usuario no autorizado');
+            }
+            
+            // Verificar que la cita exista y esté en estado Reservado
+            $this->db->where('ID', $idCita);
+            $this->db->where('Estado', 'Reservado');
+            $cita = $this->db->get('bloqueatencion')->row();
+            
+            if (!$cita) {
+                throw new Exception('La cita no existe o no está en estado Reservado');
+            }
+
+            // Actualizar el estado de la cita
+            $this->db->where('ID', $idCita);
+            $result = $this->db->update('bloqueatencion', ['Estado' => 'Atendido']);
+            
+            if ($result) {
+                echo json_encode(['success' => true, 'message' => 'Cita actualizada correctamente']);
+            } else {
+                throw new Exception('Error al actualizar la cita en la base de datos');
+            }
+
+        } catch (Exception $e) {
+            log_message('error', 'Error en marcarComoAtendida: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false, 
+                'message' => $e->getMessage(),
+                'debug' => ENVIRONMENT === 'development' ? $e->getTraceAsString() : null
+            ]);
+        }
+    }
+    public function visualizar_citas() {
+        try {
+            // ... código existente ...
+            
+            $this->load->model('CitasModel');
+            $citas = $this->CitasModel->obtenerCitasUsuario($run);
+            
+            // Debug para verificar los datos
+            log_message('debug', 'Datos enviados a la vista: ' . json_encode($citas));
+            
+            $data['citas'] = $citas;
+            $this->load->view('VisualizarCitas', $data);
+            
+        } catch (Exception $e) {
+            // ... manejo de errores ...
+        }
+    }
 }

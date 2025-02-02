@@ -651,4 +651,15 @@ class BloqueModel extends CI_Model
             return null;
         }
     }
+
+    public function obtener_runts($id_cita) {
+        $this->db->select('RUNTS')
+                 ->from('bloque')
+                 ->where('ID', $id_cita);
+         
+        $query = $this->db->get();
+        $result = $query->row();
+         
+        return $result ? $result->RUNTS : null;
+    }
 }

@@ -11,8 +11,11 @@ if (!isset($tipo)) {
 <head>
     <meta charset="UTF-8">
     <title>Agenda</title>
+    <?php 
+    // NO limpiar la sesión aquí, solo mostrar debug
+    error_log("DEBUG Vista: ID en sesión: " . $this->session->userdata('id_cita_anterior'));
+    ?>
     <?php $this->load->view('navbar', $tipo); ?>
-    
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="<?= base_url("css/agendar.css") ?>"/>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -31,24 +34,57 @@ if (!isset($tipo)) {
 
     <!-- Inicialización de variables globales -->
     <script>
-        // Variables globales necesarias para agendar.js
+        // Función para limpiar el estado de agendar.js
+        function limpiarEstadoAgenda() {
+            if (typeof jQuery !== 'undefined') {
+                $('.checkbox-dia').off();
+                $('#semana-select').off();
+                $('.dia-checkbox').off();
+                $('#btn-bloquear').off();
+                $('#tabla-horario').empty();
+                $('.bloque-hora').removeData();
+                $('.selected').removeClass('selected');
+                $('.disponible').removeClass('disponible');
+                $('.ocupado').removeClass('ocupado');
+            }
+            
+            window.agendarConfig = null;
+            window.cargar_calendario = null;
+            window.seleccion_semana = null;
+            window.marcarTodos = null;
+        }
+
+        <?php if(isset($reagenda) && $reagenda): ?>
+            limpiarEstadoAgenda();
+        <?php endif; ?>
+
         window.agendarConfig = {
-            tipoUsuario: <?php echo json_encode($tipo); ?>,
-            site_url: <?php echo json_encode(site_url()); ?>,
-            base_url: <?php echo json_encode(base_url()); ?>,
-            run: <?php echo json_encode($run); ?>,
-            reagenda: <?php echo json_encode(isset($reagenda) ? $reagenda : false); ?>,
-            id_cita_anterior: <?php echo json_encode(isset($id_cita_anterior) ? $id_cita_anterior : null); ?>,
-            trabajadorSocialActual: <?php echo json_encode(isset($runUsuarioActual) ? $runUsuarioActual : ''); ?>,
-            trabajadorSocialSeleccionado: <?php echo json_encode(isset($runTS) ? $runTS : ''); ?>
+            tipoUsuario: '<?= $tipo ?>',
+            site_url: '<?= site_url() ?>',
+            base_url: '<?= base_url() ?>',
+            run: '<?= $run ?>',
+            <?php if(isset($reagenda) && $reagenda): ?>
+            reagenda: true,
+            id_cita_anterior: '<?= $id_cita_anterior ?>',
+            runTS: '<?= $runTS ?>'
+            <?php else: ?>
+            reagenda: false
+            <?php endif; ?>
         };
 
-        // Debug para verificar las variables
-        console.log('Variables inicializadas:', window.agendarConfig);
+        window.BOTON_TEXTO = '<?php echo isset($reagenda) && $reagenda ? "Reagendar" : "Agendar"; ?>';
     </script>
 
     <!-- Cargar agendar.js después de la inicialización -->
-    <script src="<?= base_url("js/agendar.js") ?>"></script>
+    <script>
+        // Verificar si es reagendamiento antes de cargar agendar.js
+        <?php if(isset($reagenda) && $reagenda): ?>
+            console.log('Cargando agendar.js en modo reagendamiento');
+        <?php else: ?>
+            console.log('Cargando agendar.js en modo normal');
+        <?php endif; ?>
+    </script>
+    <script src="<?= base_url('js/agendar.js') ?>"></script>
 </head>
 
 <body>
@@ -215,7 +251,9 @@ if (!isset($tipo)) {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Agendar Cita</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        <?php echo isset($reagenda) && $reagenda ? 'Reagendar Cita' : 'Agendar Cita'; ?>
+                    </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -227,6 +265,7 @@ if (!isset($tipo)) {
                         <input type="hidden" id="fecha_ter" name="fecha_ter">
                         <input type="hidden" id="runTS" name="RUN">
                         <input type="hidden" id="run_usuario" name="run_usuario">
+                        <input type="hidden" name="reagenda" value="<?php echo isset($reagenda) && $reagenda ? 'true' : 'false'; ?>">
                         
                         <!-- Campos visibles -->
                         <div class="form-group">
@@ -308,9 +347,6 @@ if (!isset($tipo)) {
             }
         });
     </script>
-
-    <!-- Asegurarse que el archivo agendar.js se carga después -->  
-    <script src="<?php echo base_url('js/agendar.js'); ?>"></script>
 </body>
 </html>
 <style>
