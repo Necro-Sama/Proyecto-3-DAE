@@ -4,7 +4,8 @@
         <meta charset="UTF-8">
         <title>Visualizar Citas</title>
         <?php  $this->load->view("navbar", $tipo); ?>
-        <!-- <?php 
+        <?php 
+         
         // Limpiar cualquier dato de reagendamiento al cargar la vista
         $this->session->unset_userdata(array(
             'id_cita_anterior',
@@ -12,7 +13,8 @@
             'fecha_seleccionada',
             'horario_seleccionado'
         ));
-        ?> -->
+        echo ( $this->session->userdata('id_cita_anterior'));
+        ?>
         <link rel="stylesheet" href="<?= base_url('public/bootstrap/css/bootstrap.min.css'); ?>">
         <style>
             body {

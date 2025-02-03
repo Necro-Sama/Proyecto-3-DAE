@@ -9,9 +9,10 @@ if (!isset($tipo)) {
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    
     <meta charset="UTF-8">
     <title>Agenda</title>
-    <?php 
+    <?php echo ( $this->session->userdata('id_cita_anterior'));
     // NO limpiar la sesión aquí, solo mostrar debug
     error_log("DEBUG Vista: ID en sesión: " . $this->session->userdata('id_cita_anterior'));
     ?>
