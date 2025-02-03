@@ -1,3 +1,4 @@
+
 if (typeof window.agendarConfig === 'undefined') {
     console.error('Error: agendarConfig no está definido');
     throw new Error('agendarConfig no está definido');
@@ -14,41 +15,27 @@ const {
 
 let dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 let horarios = [
-    { id: 1, horaInicio: "09:00", horaFinal: "09:15" },
-    { id: 2, horaInicio: "09:15", horaFinal: "09:30" },
-    { id: 3, horaInicio: "09:30", horaFinal: "09:45" },
-    { id: 4, horaInicio: "09:45", horaFinal: "10:00" },
-    { id: 5, horaInicio: "10:00", horaFinal: "10:15" },
-    { id: 6, horaInicio: "10:15", horaFinal: "10:30" },
-    { id: 7, horaInicio: "10:30", horaFinal: "10:45" },
-    { id: 8, horaInicio: "10:45", horaFinal: "11:00" },
-    { id: 9, horaInicio: "11:00", horaFinal: "11:15" },
-    { id: 10, horaInicio: "11:15", horaFinal: "11:30" },
-    { id: 11, horaInicio: "11:30", horaFinal: "11:45" },
-    { id: 12, horaInicio: "11:45", horaFinal: "12:00" },
-    { id: 13, horaInicio: "12:00", horaFinal: "12:15" },
-    { id: 14, horaInicio: "12:15", horaFinal: "12:30" },
+    { id: 1, horaInicio: "08:00", horaFinal: "08:30" },
+    { id: 2, horaInicio: "08:30", horaFinal: "09:00" },
+    { id: 3, horaInicio: "09:00", horaFinal: "09:30" },
+    { id: 4, horaInicio: "09:30", horaFinal: "10:00" },
+    { id: 5, horaInicio: "10:00", horaFinal: "10:30" },
+    { id: 6, horaInicio: "10:30", horaFinal: "11:00" },
+    { id: 7, horaInicio: "11:00", horaFinal: "11:30" },
+    { id: 8, horaInicio: "11:30", horaFinal: "12:00" },
+    { id: 9, horaInicio: "12:00", horaFinal: "12:30" },
     { id: "almuerzo", horaInicio: "12:55", horaFinal: "14:30", esAlmuerzo: true },
-    { id: 15, horaInicio: "14:30", horaFinal: "14:45" },
-    { id: 16, horaInicio: "14:45", horaFinal: "15:00" },
-    { id: 17, horaInicio: "15:00", horaFinal: "15:15" },
-    { id: 18, horaInicio: "15:15", horaFinal: "15:30" },
-    { id: 19, horaInicio: "15:30", horaFinal: "15:45" },
-    { id: 20, horaInicio: "15:45", horaFinal: "16:00" },
-    { id: 21, horaInicio: "16:00", horaFinal: "16:15" },
-    { id: 22, horaInicio: "16:15", horaFinal: "16:30" },
-    { id: 23, horaInicio: "16:30", horaFinal: "16:45" },
-    { id: 24, horaInicio: "16:45", horaFinal: "17:00" },
-    { id: 25, horaInicio: "17:00", horaFinal: "17:15" },
-    { id: 26, horaInicio: "17:15", horaFinal: "17:30" },
-    { id: 27, horaInicio: "17:30", horaFinal: "17:45" },
-    { id: 28, horaInicio: "17:45", horaFinal: "18:00" },
-    { id: 29, horaInicio: "18:00", horaFinal: "18:15" },
-    { id: 30, horaInicio: "18:15", horaFinal: "18:30" },
-    { id: 31, horaInicio: "18:30", horaFinal: "18:45" },
-    { id: 32, horaInicio: "18:45", horaFinal: "19:00" }
+    { id: 10, horaInicio: "14:30", horaFinal: "15:00" },
+    { id: 11, horaInicio: "15:00", horaFinal: "15:30" },
+    { id: 12, horaInicio: "15:30", horaFinal: "16:00" },
+    { id: 13, horaInicio: "16:00", horaFinal: "16:30" },
+    { id: 14, horaInicio: "16:30", horaFinal: "17:00" },
+    { id: 15, horaInicio: "17:00", horaFinal: "17:30" },
+    { id: 16, horaInicio: "17:30", horaFinal: "18:00" },
+    { id: 17, horaInicio: "18:00", horaFinal: "18:30" },
+    { id: 18, horaInicio: "18:30", horaFinal: "19:00" },
+    
 ];
-
 
 function agendar(bloqueId, horario, fechaInicio, fechaFinal, trabajadorSocial) {
     const data = {
@@ -272,59 +259,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 RUN: e.target.elements.RUN.value
             });
         }
-    });
-
-    // Agregar manejo del formulario de fechas
-    $('#formFechas').on('submit', function(e) {
-        e.preventDefault();
-        
-        if (!confirm('¿Está seguro de actualizar las fechas del calendario?')) {
-            return;
-        }
-
-        $.ajax({
-            url: base_url + 'calendario/actualizar_fechas',
-            type: 'POST',
-            data: $(this).serialize(),
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    // Cerrar el modal
-                    $('#modalFechas').modal('hide');
-                    
-                    // Refrescar el calendario
-                    calendar.refetchEvents();
-                    
-                    // Mostrar mensaje de éxito
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Éxito',
-                        text: 'Fechas actualizadas correctamente'
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: response.message || 'Error al actualizar las fechas'
-                    });
-                }
-            },
-            error: function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error al procesar la solicitud'
-                });
-            }
-        });
-    });
-
-    // Inicializar el modal con Bootstrap 5
-    var modalFechas = new bootstrap.Modal(document.getElementById('modalFechas'));
-    
-    // Limpiar formulario al cerrar el modal
-    $('#modalFechas').on('hidden.bs.modal', function () {
-        $('#formFechas')[0].reset();
     });
 });
 
