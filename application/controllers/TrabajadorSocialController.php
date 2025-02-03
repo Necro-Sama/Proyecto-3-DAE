@@ -48,40 +48,10 @@ class TrabajadorSocialController extends CI_Controller {
         $run_ts_reemplazo = $this->input->post('RUN_TS_REEMPLAZO');
         echo "<script>console.log('Entrando al método asignarTSACarreraProcesar con los datos: " . json_encode($this->input->post()) . "');</script>";
 
-        // Obtener nombres de TS y carrera para los mensajes
-        $carrera = $this->db->select('Nombre')->where('COD_CARRERA', $cod_carrera)->get('carrera')->row();
-        
-        $ts_principal = $this->db->select('CONCAT(Nombre, " ", Apellido) as nombre_completo')
-                                ->where('RUN', $run_ts_principal)
-                                ->get('persona')
-                                ->row();
-        
-        $mensajes = [];
-        
-        // Asignar TS Principal
-        if ($run_ts_principal) {
-            $this->db->where('COD_CARRERA', $cod_carrera)
-                     ->update('carrera', ['RUNTS' => $run_ts_principal]);
-            
-            $mensajes[] = "Se asignó a {$ts_principal->nombre_completo} como TS Principal de {$carrera->Nombre}";
-        }
-        
-        // Asignar TS Reemplazo si se proporcionó
-        if ($run_ts_reemplazo) {
-            $ts_reemplazo = $this->db->select('CONCAT(Nombre, " ", Apellido) as nombre_completo')
-                                    ->where('RUN', $run_ts_reemplazo)
-                                    ->get('persona')
-                                    ->row();
-            
-            $this->db->where('COD_CARRERA', $cod_carrera)
-                     ->update('carrera', ['ReemplazaRUNTS' => $run_ts_reemplazo]);
-            
-            $mensajes[] = "Se asignó a {$ts_reemplazo->nombre_completo} como TS Reemplazo de {$carrera->Nombre}";
-        }
-        
-        // Guardar mensajes en la sesión
-        $this->session->set_flashdata('success', implode('<br>', $mensajes));
-        
+        // Aquí puedes procesar la asignación (ej., guardar la relación en la base de datos)
+        $this->CarreraModel->asignarTrabajadorSocialACarrera($cod_carrera, $run_ts_principal, $run_ts_reemplazo);
+
+        // Redirigir a otra página o mostrar mensaje de éxito
         redirect('usuarios/asignar-carrera');
     }
     public function index() {

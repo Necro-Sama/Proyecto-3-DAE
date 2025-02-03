@@ -176,15 +176,15 @@ class UserController extends CI_Controller
             );
 
             // Configurar la cookie de sesión con SameSite
-            $config = array(
-                'name'   => 'ci_session',
-                'value'  => $this->session->userdata('session_id'),
-                'expire' => '7200',
-                'path'   => '/',
-                'secure' => TRUE,
-                'samesite' => 'Strict'
-            );
-            $this->input->set_cookie($config);
+            // $config = array(
+            //     'name'   => 'ci_session',
+            //     'value'  => $this->session->userdata('session_id'),
+            //     'expire' => '7200',
+            //     'path'   => '/',
+            //     'secure' => TRUE,
+            //     'samesite' => 'Strict'
+            // );
+            // $this->input->set_cookie($config);
 
             // Limpiar variables de agendamiento y mostrar mensaje apropiado
             if ($id_anterior) {
@@ -195,23 +195,13 @@ class UserController extends CI_Controller
                     'horario_seleccionado'
                 ));
                 $this->session->sess_regenerate(true);
-            } else {
-                echo "<script>
-                    setTimeout(function() {
-                        window.location.href = '" . site_url("usuarios/agendar") . "';
-                    }, 500);
-                </script>";
-            }
-            return;
+            } 
+            return site_url("usuarios/agendar");
 
         } catch (Exception $e) {
             $this->session->set_flashdata('agendar_error', $e->getMessage());
-            echo "<script>
-                setTimeout(function() {
-                    window.location.href = '" . site_url("usuarios/agendar") . "';
-                }, 500);
-            </script>";
-            return;
+            
+            return site_url("usuarios/agendar");
         }
     }
     public function logged_in($token)

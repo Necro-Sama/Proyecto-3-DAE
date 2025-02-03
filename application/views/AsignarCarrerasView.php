@@ -38,13 +38,6 @@
 </head>
 <body>
 <div class="container mt-5">
-    <?php if ($this->session->flashdata('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <?= $this->session->flashdata('success') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php endif; ?>
-
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">Asignar Trabajadores Sociales a Carreras</h3>
@@ -57,17 +50,17 @@
                         <option value="">Seleccione una carrera</option>
                         <?php foreach ($carreras as $carrera): 
                             $estado_ts = '';
-                            
+                            print_r($carrera);
                             // Verificar TS Principal
                             if (!empty($carrera['RUNTS'])) {
-                                if (isset($carrera['Activo_Principal']) && $carrera['Activo_Principal'] == 0) {
+                                if ($carrera['Activo_Principal'] == 1) {
                                     $estado_ts .= ' (TS Principal con licencia)';
                                 }
                             }
                             
                             // Verificar TS Reemplazo
                             if (!empty($carrera['ReemplazaRUNTS'])) {
-                                if (isset($carrera['Activo_Reemplazo']) && $carrera['Activo_Reemplazo'] == 0) {
+                                if ($carrera['Activo_Reemplazo'] == 1) {
                                     $estado_ts .= ' (TS Reemplazo con licencia)';
                                 }
                             }
@@ -76,9 +69,6 @@
                             if (empty($carrera['RUNTS']) && empty($carrera['ReemplazaRUNTS'])) {
                                 $estado_ts = ' (Sin TS asignada)';
                             }
-                            
-                            // Debug
-                            //echo "<!-- Carrera: " . $carrera['Nombre'] . " | Principal Activo: " . $carrera['Activo_Principal'] . " | Reemplazo Activo: " . $carrera['Activo_Reemplazo'] . " -->";
                         ?>
                             <option value="<?= $carrera['COD_CARRERA'] ?>">
                                 <?= $carrera['Nombre'] . $estado_ts ?>

@@ -67,8 +67,6 @@ $route['translate_uri_dashes'] = FALSE;
     //Rutas de agendar cita
         $route['usuarios/agendar'] = 'UserController/agendar';
         $route['usuarios/accion_agendar'] = 'UserController/accion_agendar';
-    //Rutas de reagendar cita
-        $route['usuarios/vistaReagendar'] = 'CitasController/abrirreagendar';
     //Rutas de eliminar cita    
         $route['usuarios/eliminarcita'] = 'EliminarCitaController/eliminarCita';
     //Rutas de bloquear cita
