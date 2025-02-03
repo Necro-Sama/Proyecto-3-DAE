@@ -8,14 +8,30 @@ class TrabajadorSocialModel extends CI_Model {
         $this->load->database();
     }
 
-    // Método para obtener todos los trabajadores sociales con su información personal
+    /**
+     * Obtiene todos los trabajadores sociales con su estado de disponibilidad
+     * @return array Lista de trabajadores sociales
+     */
     public function obtenerTrabajadoresSociales() {
-        $this->db->select('trabajadorsocial.RUN, persona.Nombre, persona.Apellido, persona.Correo, persona.Telefono, 
-                           IF(administrador.RUN IS NOT NULL, 1, 0) as is_admin');
+        $this->db->select('
+            trabajadorsocial.RUN, 
+            persona.Nombre, 
+            persona.Apellido, 
+            persona.Correo, 
+            persona.Telefono,
+            persona.Activo,
+            IF(administrador.RUN IS NOT NULL, 1, 0) as is_admin,
+            CONCAT(persona.Nombre, " ", persona.Apellido, 
+                CASE 
+                    WHEN persona.Activo = 0 THEN " (Con Licencia)"
+                    ELSE ""
+                END) as nombre_completo
+        ');
         $this->db->from('trabajadorsocial');
         $this->db->join('funcionario', 'trabajadorsocial.RUN = funcionario.RUN', 'inner');
         $this->db->join('persona', 'funcionario.RUN = persona.RUN', 'inner');
-        $this->db->join('administrador', 'persona.RUN = administrador.RUN', 'left'); // Join con la tabla 'administrador'
+        $this->db->join('administrador', 'persona.RUN = administrador.RUN', 'left');
+        $this->db->order_by('persona.Activo DESC, persona.Apellido ASC');
         
         return $this->db->get()->result_array(); 
     }

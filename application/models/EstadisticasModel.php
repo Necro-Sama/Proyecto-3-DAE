@@ -1,6 +1,9 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Modelo para consultas de estadisticas
+ */
 class EstadisticasModel extends CI_Model {
     
     public function __construct() {
@@ -8,6 +11,9 @@ class EstadisticasModel extends CI_Model {
         $this->load->database();
     }
 
+    /**
+     * Obtiene todas las estadisticas
+     */
     public function obtenerEstadisticas() {
         return [
             'por_carrera' => $this->obtenerEstadisticasPorCarrera(),
@@ -16,6 +22,9 @@ class EstadisticasModel extends CI_Model {
         ];
     }
 
+    /**
+     * Consulta estadisticas por carrera
+     */
     private function obtenerEstadisticasPorCarrera() {
         $sql = "
             SELECT 
@@ -33,6 +42,9 @@ class EstadisticasModel extends CI_Model {
         return $query->result_array();
     }
 
+    /**
+     * Consulta estadisticas por motivo
+     */
     private function obtenerEstadisticasPorMotivo() {
         $sql = "
             SELECT 
@@ -47,6 +59,9 @@ class EstadisticasModel extends CI_Model {
         return $query->result_array();
     }
 
+    /**
+     * Consulta estadisticas por estado
+     */
     private function obtenerEstadisticasPorEstado() {
         $sql = "
             SELECT 

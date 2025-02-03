@@ -1,8 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Controlador para manejo de estadisticas
+ */
 class EstadisticasController extends CI_Controller {
     
+    /**
+     * Constructor - carga modelos necesarios
+     */
     public function __construct() {
         parent::__construct();
         $this->load->model('EstadisticasModel');
@@ -10,6 +16,9 @@ class EstadisticasController extends CI_Controller {
         $this->load->helper('url');
     }
 
+    /**
+     * Muestra la vista de estadisticas
+     */
     public function EstadisticaView() {
         $RUN_usuario = $this->check_logged_in();
         if (!$RUN_usuario) {
@@ -25,6 +34,10 @@ class EstadisticasController extends CI_Controller {
         $this->load->view('EstadisticaView', $data);
     }
 
+    
+    /**
+     * Obtiene datos para los graficos via AJAX
+     */
     public function obtenerDatos() {
         header('Content-Type: application/json');
         ob_clean();
@@ -38,67 +51,64 @@ class EstadisticasController extends CI_Controller {
         exit();
     }
 
+    /**
+     * Genera PDF con estadisticas
+     */
     public function exportarPDF() {
-        // Cargar la librería PDF
-        $this->load->library('pdf');
-        
-        // Obtener los datos
-        $data['estadisticas'] = $this->EstadisticasModel->obtenerEstadisticas();
-        
-        // Crear nuevo PDF
-        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-        
-        // Configurar el documento
-        $pdf->SetCreator(PDF_CREATOR);
-        $pdf->SetAuthor('Sistema de Citas');
-        $pdf->SetTitle('Estadísticas de Citas');
-        
-        // Configurar márgenes
-        $pdf->SetMargins(15, 15, 15);
-        $pdf->SetHeaderMargin(5);
-        $pdf->SetFooterMargin(10);
-        
-        // Agregar página
-        $pdf->AddPage();
-        
-        // Establecer fuente
-        $pdf->SetFont('helvetica', '', 12);
-        
-        // Título
-        $pdf->Cell(0, 10, 'Estadísticas de Citas', 0, 1, 'C');
-        $pdf->Ln(10);
-        
-        // Estadísticas por Carrera
-        $pdf->SetFont('helvetica', 'B', 14);
-        $pdf->Cell(0, 10, 'Por Carrera', 0, 1, 'L');
-        $pdf->SetFont('helvetica', '', 12);
-        foreach ($data['estadisticas']['por_carrera'] as $item) {
-            $pdf->Cell(140, 8, $item['nombre'], 0, 0);
-            $pdf->Cell(40, 8, $item['total'] . ' citas', 0, 1, 'R');
+        try {
+            // Cargar librería y datos
+            $this->load->library('pdf');
+            $estadisticas = $this->EstadisticasModel->obtenerEstadisticas();
+            
+            // Inicializar PDF
+            $pdf = new PDF();
+            $pdf->SetCreator('Sistema DAE');
+            $pdf->SetAuthor('Administrador');
+            $pdf->SetTitle('Reporte de Estadísticas');
+            
+            // Agregar página
+            $pdf->AddPage();
+            
+            // Configurar fuente
+            $pdf->SetFont('helvetica', 'B', 14);
+            
+            // Estadísticas por Carrera
+            $pdf->Cell(0, 10, 'Estadísticas por Carrera', 0, 1, 'L');
+            $pdf->SetFont('helvetica', '', 12);
+            foreach ($estadisticas['por_carrera'] as $item) {
+                $pdf->Cell(100, 8, $item['nombre'], 0, 0, 'L');
+                $pdf->Cell(30, 8, $item['total'], 0, 1, 'R');
+            }
+            
+            $pdf->Ln(10);
+            
+            // Estadísticas por Motivo
+            $pdf->SetFont('helvetica', 'B', 14);
+            $pdf->Cell(0, 10, 'Estadísticas por Motivo', 0, 1, 'L');
+            $pdf->SetFont('helvetica', '', 12);
+            foreach ($estadisticas['por_motivo'] as $item) {
+                $pdf->Cell(100, 8, $item['nombre'], 0, 0, 'L');
+                $pdf->Cell(30, 8, $item['total'], 0, 1, 'R');
+            }
+            
+            $pdf->Ln(10);
+            
+            // Estadísticas por Estado
+            $pdf->SetFont('helvetica', 'B', 14);
+            $pdf->Cell(0, 10, 'Estadísticas por Estado', 0, 1, 'L');
+            $pdf->SetFont('helvetica', '', 12);
+            foreach ($estadisticas['por_estado'] as $item) {
+                $pdf->Cell(100, 8, $item['nombre'], 0, 0, 'L');
+                $pdf->Cell(30, 8, $item['total'], 0, 1, 'R');
+            }
+            
+            // Generar PDF
+            $pdf->Output('estadisticas.pdf', 'D');
+            
+        } catch (Exception $e) {
+            log_message('error', 'Error al generar PDF: ' . $e->getMessage());
+            echo "Error al generar el PDF: " . $e->getMessage();
         }
-        $pdf->Ln(10);
-        
-        // Estadísticas por Motivo
-        $pdf->SetFont('helvetica', 'B', 14);
-        $pdf->Cell(0, 10, 'Por Motivo', 0, 1, 'L');
-        $pdf->SetFont('helvetica', '', 12);
-        foreach ($data['estadisticas']['por_motivo'] as $item) {
-            $pdf->Cell(140, 8, $item['nombre'], 0, 0);
-            $pdf->Cell(40, 8, $item['total'] . ' citas', 0, 1, 'R');
-        }
-        $pdf->Ln(10);
-        
-        // Estadísticas por Estado
-        $pdf->SetFont('helvetica', 'B', 14);
-        $pdf->Cell(0, 10, 'Por Estado', 0, 1, 'L');
-        $pdf->SetFont('helvetica', '', 12);
-        foreach ($data['estadisticas']['por_estado'] as $item) {
-            $pdf->Cell(140, 8, $item['nombre'], 0, 0);
-            $pdf->Cell(40, 8, $item['total'] . ' citas', 0, 1, 'R');
-        }
-        
-        // Generar el PDF
-        $pdf->Output('estadisticas_citas.pdf', 'D');
     }
 
     public function check_logged_in() {

@@ -100,8 +100,11 @@ $route['translate_uri_dashes'] = FALSE;
 
 //Rutas de Estadísticas
 $route['usuarios/estadisticas'] = 'EstadisticasController/EstadisticaView';
+/**
+ * Rutas para estadisticas
+ */
 $route['usuarios/estadisticas/obtenerDatos'] = 'EstadisticasController/obtenerDatos';
-$route['usuarios/exportarPDF'] = 'EstadisticasController/exportarPDF';
+$route['usuarios/estadisticas/exportarPDF'] = 'EstadisticasController/exportarPDF';
 
 
 

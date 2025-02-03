@@ -43,15 +43,35 @@
             <h3 class="card-title">Asignar Trabajadores Sociales a Carreras</h3>
         </div>
         <div class="card-body">
-            <form action="<?= base_url('index.php/usuarios/asignar-carrera-procesar') ?>" method="POST">
+            <form action="<?= site_url('usuarios/asignar-carrera-procesar') ?>" method="POST">
                 <div class="mb-3">
                     <label for="COD_CARRERA" class="form-label">Carrera:</label>
                     <select name="COD_CARRERA" class="form-select" required>
                         <option value="">Seleccione una carrera</option>
-                        <?php foreach ($carreras as $carrera): ?>
+                        <?php foreach ($carreras as $carrera): 
+                            $estado_ts = '';
+                            print_r($carrera);
+                            // Verificar TS Principal
+                            if (!empty($carrera['RUNTS'])) {
+                                if ($carrera['Activo_Principal'] == 1) {
+                                    $estado_ts .= ' (TS Principal con licencia)';
+                                }
+                            }
+                            
+                            // Verificar TS Reemplazo
+                            if (!empty($carrera['ReemplazaRUNTS'])) {
+                                if ($carrera['Activo_Reemplazo'] == 1) {
+                                    $estado_ts .= ' (TS Reemplazo con licencia)';
+                                }
+                            }
+                            
+                            // Si no hay ningún TS asignado
+                            if (empty($carrera['RUNTS']) && empty($carrera['ReemplazaRUNTS'])) {
+                                $estado_ts = ' (Sin TS asignada)';
+                            }
+                        ?>
                             <option value="<?= $carrera['COD_CARRERA'] ?>">
-                                <?= $carrera['Nombre'] ?> (<?= $carrera['Facultad'] ?>)
-                                <?= empty($carrera['NombreTS']) ? ' (Sin TS asignada)' : '' ?>
+                                <?= $carrera['Nombre'] . $estado_ts ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
@@ -59,68 +79,24 @@
                 <div class="mb-3">
                     <label for="RUN_TS_PRINCIPAL" class="form-label">Trabajador Social Principal:</label>
                     <?php error_log("DEBUG - Trabajadores Sociales recibidos: " . print_r($trabajadores_sociales, true)); ?>
-                    <select name="RUN_TS_PRINCIPAL" class="form-select" required>
-                        <option value="">Seleccione un trabajador social principal</option>
+                    <select name="RUN_TS_PRINCIPAL" class="form-control" required>
+                        <option value="">Seleccione Trabajador Social Principal</option>
                         <?php foreach ($trabajadores_sociales as $ts): ?>
-                            <?php 
-                            $disabled = false;
-                            $label = "";
-                            error_log("DEBUG - Procesando TS: " . print_r($ts, true));
-                            
-                            // Verificar si está asignado como TS principal
-                            foreach ($carreras as $carrera) {
-                                if ($carrera['RUNTS'] == $ts['RUN']) {
-                                    $disabled = true;
-                                    $label = " (TS activa asignada)";
-                                    error_log("DEBUG - TS asignada: {$ts['RUN']}");
-                                    break;
-                                }
-                            }
-                            
-                            // Verificar estado activo
-                            error_log("DEBUG - Activo TS {$ts['RUN']}: {$ts['Activo']}");
-                            if ($ts['Activo'] != 0) {
-                                $disabled = true;
-                                $label = " (Con ss)";
-                                error_log("DEBUG - TS con licencia: {$ts['RUN']}");
-                            }
-                            ?>
                             <option value="<?= $ts['RUN'] ?>" 
-                                    <?= $disabled ? 'disabled' : '' ?>>
-                                <?= $ts['Nombre'] ?> <?= $ts['Apellido'] ?> 
-                                (RUN: <?= $ts['RUN'] ?>) 
-                                <?= $label ?>
+                                    <?= $ts['Activo'] == 0 ? 'disabled' : '' ?>>
+                                <?= $ts['nombre_completo'] ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="mb-3">
                     <label for="RUN_TS_REEMPLAZO" class="form-label">Trabajador Social de Reemplazo:</label>
-                    <select name="RUN_TS_REEMPLAZO" class="form-select" required>
-                        <option value="">Seleccione un trabajador social de reemplazo</option>
+                    <select name="RUN_TS_REEMPLAZO" class="form-control">
+                        <option value="">Seleccione Trabajador Social de Reemplazo (Opcional)</option>
                         <?php foreach ($trabajadores_sociales as $ts): ?>
-                            <?php 
-                            $disabled = false;
-                            $label = "";
-                            // Verificar si está asignado como TS de reemplazo o con licencia
-                            foreach ($carreras as $carrera) {
-                                if ($carrera['ReemplazaRUNTS'] == $ts['RUN']) {
-                                    $disabled = true;
-                                    $label = " (TS activa asignada)";
-                                    break;
-                                }
-                            }
-                            // Verificar estado activo (1 es disponible, 0 es con licencia)
-                            if ($ts['Activo'] != 0) {
-                                $disabled = true;
-                                $label = " (Con Licencia)";
-                            }
-                            ?>
                             <option value="<?= $ts['RUN'] ?>" 
-                                    <?= $disabled ? 'disabled' : '' ?>>
-                                <?= $ts['Nombre'] ?> <?= $ts['Apellido'] ?> 
-                                (RUN: <?= $ts['RUN'] ?>)
-                                <?= $label ?>
+                                    <?= $ts['Activo'] == 0 ? 'disabled' : '' ?>>
+                                <?= $ts['nombre_completo'] ?>
                             </option>
                         <?php endforeach; ?>
                     </select>

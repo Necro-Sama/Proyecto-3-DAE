@@ -1,29 +1,33 @@
 <?php
 if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-// Si usaste Composer
-// require_once FCPATH . 'vendor/autoload.php';
+// Corregir la ruta al archivo TCPDF
+require_once APPPATH . 'third_party/TCPDF-main/tcpdf.php';
 
-// Si lo descargaste manualmente
-require_once APPPATH . 'third_party/tcpdf/tcpdf.php';
-
+/**
+ * Libreria para generar PDFs
+ * Extiende TCPDF
+ */
 class Pdf extends TCPDF {
+    
+    /**
+     * Constructor
+     */
     public function __construct() {
         parent::__construct();
     }
 
-    // Sobreescribir el header por defecto
+    /**
+     * Encabezado del PDF
+     */
     public function Header() {
-        // Logo
-        // $image_file = K_PATH_IMAGES.'logo.jpg';
-        // $this->Image($image_file, 10, 10, 15, '', 'JPG', '', 'T', false, 300, '', false, false, 0, false, false, false);
-        
-        // Título
         $this->SetFont('helvetica', 'B', 16);
         $this->Cell(0, 15, 'Reporte de Estadísticas', 0, false, 'C', 0, '', 0, false, 'M', 'M');
     }
 
-    // Sobreescribir el footer por defecto
+    /**
+     * Pie de pagina del PDF
+     */
     public function Footer() {
         $this->SetY(-15);
         $this->SetFont('helvetica', 'I', 8);

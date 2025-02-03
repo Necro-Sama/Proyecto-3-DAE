@@ -22,6 +22,24 @@ class TrabajadorSocialController extends CI_Controller {
         // Cargar la vista
         $this->load->view('AsignarCarrerasView', $data);
     }
+    public function obtenerCarreras() {
+        $this->db->select('
+            c.COD_CARRERA,
+            SUBSTRING_INDEX(c.Nombre, " - ", 1) as Nombre,
+            c.RUNTS,
+            c.ReemplazaRUNTS,
+            p1.Activo as Activo_Principal,
+            p2.Activo as Activo_Reemplazo
+        ');
+        $this->db->from('carrera c');
+        $this->db->join('trabajadorsocial ts1', 'c.RUNTS = ts1.RUN', 'left');
+        $this->db->join('persona p1', 'ts1.RUN = p1.RUN', 'left');
+        $this->db->join('trabajadorsocial ts2', 'c.ReemplazaRUNTS = ts2.RUN', 'left');
+        $this->db->join('persona p2', 'ts2.RUN = p2.RUN', 'left');
+        $this->db->order_by('c.Nombre', 'ASC');
+        
+        return $this->db->get()->result_array();
+    }
     // Método para procesar la asignación de trabajadores sociales
     public function asignarTSACarreraProcesar() {
         // Obtener los datos del formulario
