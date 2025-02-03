@@ -205,37 +205,27 @@ if (!isset($tipo)) {
                 <th><div class="p-2 display-7 dia">Hora</div></th>
                 <th><div class="p-2 display-7 dia">
                     Lunes
-                    <?php if ($tipo === 'administrador' or $tipo === 'trabajadorsocial'): ?>
-                        <input type="checkbox" class="checkbox-dia" id="checkbox-lunes" onchange="marcarTodos('lunes')" />
-                    <?php endif; ?>
+                    
                 </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                     Martes
-                    <?php if ($tipo === 'administrador' or $tipo === 'trabajadorsocial'): ?>
-                        <input type="checkbox" class="checkbox-dia" id="checkbox-martes" onchange="marcarTodos('martes')" />
-                    <?php endif; ?>
+                    
                 </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                     Miércoles
-                    <?php if ($tipo === 'administrador' or $tipo === 'trabajadorsocial'): ?>
-                        <input type="checkbox" class="checkbox-dia" id="checkbox-miercoles" onchange="marcarTodos('miercoles')" />
-                    <?php endif; ?>
+                    
                 </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                     Jueves
-                    <?php if ($tipo === 'administrador' or $tipo === 'trabajadorsocial'): ?>
-                        <input type="checkbox" class="checkbox-dia" id="checkbox-jueves" onchange="marcarTodos('jueves')" />
-                    <?php endif; ?>
+                    
                 </div>
                 </th>
                 <th><div class="p-2 display-7 dia">
                     Viernes
-                    <?php if ($tipo === 'administrador' or $tipo === 'trabajadorsocial'): ?>
-                        <input type="checkbox" class="checkbox-dia" id="checkbox-viernes" onchange="marcarTodos('viernes')" />
-                    <?php endif; ?>
+                    
                 </div>
                 </th>
             </tr>
@@ -244,6 +234,16 @@ if (!isset($tipo)) {
                 <!-- Contenido generado dinamicamente -->
             </tbody>
         </table>
+
+        <!-- Botón para abrir el modal -->
+        <div class="button-container">
+            <?php if ($tipo === 'administrador'): ?>
+                <button type="button" class="btn btn-custom btn-primary-dae" data-bs-toggle="modal" data-bs-target="#modalFechas">
+                    <i class="fas fa-calendar-alt"></i>
+                    Configurar Fechas
+                </button>
+            <?php endif; ?>
+        </div>
     </div>
 
     <!-- Modal para agendar -->
@@ -346,6 +346,78 @@ if (!isset($tipo)) {
                 });
             }
         });
+    </script>
+
+    <!-- Modal para configurar fechas -->
+    <div class="modal fade" id="modalFechas" tabindex="-1" aria-labelledby="modalFechasLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalFechasLabel">Configurar Fechas del Calendario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="formFechas" action="<?= site_url('calendario/actualizar_fechas') ?>" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="semana_inicio" class="form-label">Semana de Inicio</label>
+                            <input type="week" class="form-control" id="semana_inicio" name="semana_inicio" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cantidad_semanas" class="form-label">Cantidad de Semanas</label>
+                            <select class="form-select" id="cantidad_semanas" name="cantidad_semanas" required>
+                                <?php for($i = 1; $i <= 12; $i++): ?>
+                                    <option value="<?= $i ?>"><?= $i ?> semana<?= $i > 1 ? 's' : '' ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="mantener_citas" name="mantener_citas">
+                            <label class="form-check-label" for="mantener_citas">
+                                Mantener citas existentes
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-custom btn-cancel-dae" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-custom btn-primary-dae">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    $(document).ready(function() {
+        $('#formFechas').on('submit', function(e) {
+            e.preventDefault();
+            
+            if (!confirm('¿Está seguro de actualizar las fechas del calendario?')) {
+                return;
+            }
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        alert('Fechas actualizadas correctamente');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Error al procesar la solicitud');
+                }
+            });
+        });
+    });
     </script>
 </body>
 </html>
@@ -525,4 +597,121 @@ if (!isset($tipo)) {
         border-color: #1e7e34;
     }
 
+    /* Estilos base para todos los botones */
+    .btn-custom {
+        padding: 8px 16px;
+        margin: 5px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        border: 2px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 120px;
+    }
+
+    .btn-custom i {
+        margin-right: 8px;
+    }
+
+    /* Botón principal (azul DAE) */
+    .btn-primary-dae {
+        background-color: #2B309E;
+        color: white;
+        border-color: #2B309E;
+    }
+
+    .btn-primary-dae:hover {
+        background-color: white;
+        color: #2B309E;
+        border-color: #2B309E;
+        transform: scale(1.05);
+    }
+
+    /* Botón de acción (verde) */
+    .btn-action-dae {
+        background-color: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+
+    .btn-action-dae:hover {
+        background-color: white;
+        color: #28a745;
+        border-color: #28a745;
+        transform: scale(1.05);
+    }
+
+    /* Botón de cancelar (rojo) */
+    .btn-cancel-dae {
+        background-color: #dc3545;
+        color: white;
+        border-color: #dc3545;
+    }
+
+    .btn-cancel-dae:hover {
+        background-color: white;
+        color: #dc3545;
+        border-color: #dc3545;
+        transform: scale(1.05);
+    }
+
+    /* Contenedor de botones */
+    .button-container {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        margin: 10px 0;
+    }
+
+    /* Estilos responsivos */
+    @media (max-width: 768px) {
+        .btn-custom {
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        .button-container {
+            flex-direction: column;
+        }
+    }
+
+    /* Estilos adicionales para el modal */
+    .modal-content {
+        border-radius: 10px;
+    }
+
+    .modal-header {
+        background-color: #2B309E;
+        color: white;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .modal-header .btn-close {
+        color: white;
+        background-color: white;
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .form-control, .form-select {
+        border-radius: 5px;
+        border: 1px solid #ced4da;
+        padding: 8px 12px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #2B309E;
+        box-shadow: 0 0 0 0.2rem rgba(43, 48, 158, 0.25);
+    }
+
+    .form-check-input:checked {
+        background-color: #2B309E;
+        border-color: #2B309E;
+    }
 </style>
