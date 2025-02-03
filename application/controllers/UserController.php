@@ -126,7 +126,17 @@ class UserController extends CI_Controller
         
         // Agregar el RUN a los datos que se pasan a la vista
         $data['run'] = $run;
-        $data['reagenda'] = false;
+        
+        // Obtener valores del formulario de reagendamiento si existen
+        if ($this->input->post('reagendar')) {
+            $data['reagenda'] = true;
+            $data['id_cita_anterior'] = $this->input->post('id_cita_anterior');
+            $this->session->set_userdata('id_cita_anterior', $this->input->post('id_cita_anterior'));
+            $this->session->set_userdata('reagendar', 1);
+        } else {
+            $data['reagenda'] = false;
+            $data['id_cita_anterior'] = '';
+        }
 
         // Cargar el modelo de citas
         $this->load->model('CitasModel');
@@ -140,6 +150,10 @@ class UserController extends CI_Controller
             $data['trabajadores_sociales'] = $this->CitasModel->obtenerTrabajadoresSociales();
         }
 
+        // Debug
+        error_log("ID cita anterior: " . $data['id_cita_anterior']);
+        error_log("Reagenda: " . ($data['reagenda'] ? 'true' : 'false'));
+
         // Cargar la vista con los datos
         $this->load->view('StudentAgendarView', $data);
     }
@@ -147,11 +161,12 @@ class UserController extends CI_Controller
     {
         return $this->UserModel->get_admin($RUN_usuario);
     }
-    public function accion_agendar(){
+    public function accion_agendar() {
         // Verificar si el usuario está autenticado
         $usuario = $this->check_logged_in();
         if (!$usuario) {
             redirect(base_url("usuarios/login"));
+            return;
         }
 
         // Recibir datos del formulario
@@ -159,6 +174,10 @@ class UserController extends CI_Controller
         $fecha_ter = $this->input->post("fecha_ter");
         $motivo = $this->input->post("motivo");
         $id_anterior = $this->session->userdata('id_cita_anterior');
+            var_dump("valor de id dentro de accion_agendar:",$this->session->id_cita_anterior );
+            var_dump("valor de reagendar dentro de accion_agendar:",$this->session->reagendar);
+
+
 
         try {
             // Si hay ID anterior en la sesión, eliminar la cita anterior primero
@@ -175,18 +194,7 @@ class UserController extends CI_Controller
                 $motivo
             );
 
-            // Configurar la cookie de sesión con SameSite
-            $config = array(
-                'name'   => 'ci_session',
-                'value'  => $this->session->userdata('session_id'),
-                'expire' => '7200',
-                'path'   => '/',
-                'secure' => TRUE,
-                'samesite' => 'Strict'
-            );
-            $this->input->set_cookie($config);
-
-            // Limpiar variables de agendamiento y mostrar mensaje apropiado
+            // Limpiar variables de agendamiento
             if ($id_anterior) {
                 $this->session->unset_userdata(array(
                     'id_cita_anterior',
@@ -194,23 +202,18 @@ class UserController extends CI_Controller
                     'fecha_seleccionada',
                     'horario_seleccionado'
                 ));
-                $this->session->sess_regenerate(true);
-            } else {
-                echo "<script>
-                    setTimeout(function() {
-                        window.location.href = '" . site_url("usuarios/agendar") . "';
-                    }, 500);
-                </script>";
             }
+            
+            // Redirigir correctamente
+            redirect(site_url("usuarios/agendar"));
+            $this->session->set_userdata('reagendar', 0);
             return;
 
         } catch (Exception $e) {
-            $this->session->set_flashdata('agendar_error', $e->getMessage());
-            echo "<script>
-                setTimeout(function() {
-                    window.location.href = '" . site_url("usuarios/agendar") . "';
-                }, 500);
-            </script>";
+            // Manejar el error y redirigir
+            $this->session->set_flashdata('error', 'Error al agendar la cita. Por favor, intente nuevamente.');
+            $this->session->set_userdata('reagendar', 0);
+            redirect(site_url("usuarios/agendar"));
             return;
         }
     }

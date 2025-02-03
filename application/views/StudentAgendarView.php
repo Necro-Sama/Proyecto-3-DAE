@@ -11,13 +11,24 @@ if (!isset($tipo)) {
 <head>
     <meta charset="UTF-8">
     <title>Agenda</title>
+    <Script>
+        console.log("valor de id:",<?= $this->session->id_cita_anterior ?>);
+        console.log("valor de reagendar:",<?= $this->session->reagendar ?>);
+    </Script>
     <?php 
-    // NO limpiar la sesión aquí, solo mostrar debug
-    error_log("DEBUG Vista: ID en sesión: " . $this->session->userdata('id_cita_anterior'));
+    if($this->session->reagendar = 0)
+    {
+        $this->session->unset_userdata(array(
+            'id_cita_anterior',
+        ));
+    }
     ?>
+
+    <script>console.log("valor de id: luego de borrar: ",<?= $this->session->id_cita_anterior ?>);</script>
     <?php $this->load->view('navbar', $tipo); ?>
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="<?= base_url("css/agendar.css") ?>"/>
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css">
@@ -56,36 +67,28 @@ if (!isset($tipo)) {
             window.marcarTodos = null;
         }
 
-        <?php if(isset($reagenda) && $reagenda): ?>
-            limpiarEstadoAgenda();
-        <?php endif; ?>
-
+        // Asegurarse de que agendarConfig esté definido antes de usarlo
         window.agendarConfig = {
-            tipoUsuario: '<?= $tipo ?>',
+            tipoUsuario: '<?= isset($tipo) ? $tipo : "" ?>',
             site_url: '<?= site_url() ?>',
             base_url: '<?= base_url() ?>',
-            run: '<?= $run ?>',
-            <?php if(isset($reagenda) && $reagenda): ?>
-            reagenda: true,
-            id_cita_anterior: '<?= $id_cita_anterior ?>',
-            runTS: '<?= $runTS ?>'
-            <?php else: ?>
-            reagenda: false
-            <?php endif; ?>
+            run: '<?= isset($run) ? $run : "" ?>',
+            reagenda: <?= isset($reagenda) && $reagenda ? 'true' : 'false' ?>,
+            id_cita_anterior: '<?= $this->session->userdata("id_cita_anterior") ?? "" ?>',
+            runTS: '<?= isset($runTS) ? $runTS : "" ?>'
         };
+
+        // Verificar en consola
+        console.log('agendarConfig inicializado:', window.agendarConfig);
+
+        <?php if(isset($reagenda) && $reagenda): ?>
+            console.log('Modo reagendamiento - ID cita:', window.agendarConfig.id_cita_anterior);
+        <?php endif; ?>
 
         window.BOTON_TEXTO = '<?php echo isset($reagenda) && $reagenda ? "Reagendar" : "Agendar"; ?>';
     </script>
 
     <!-- Cargar agendar.js después de la inicialización -->
-    <script>
-        // Verificar si es reagendamiento antes de cargar agendar.js
-        <?php if(isset($reagenda) && $reagenda): ?>
-            console.log('Cargando agendar.js en modo reagendamiento');
-        <?php else: ?>
-            console.log('Cargando agendar.js en modo normal');
-        <?php endif; ?>
-    </script>
     <script src="<?= base_url('js/agendar.js') ?>"></script>
 </head>
 
@@ -365,7 +368,7 @@ if (!isset($tipo)) {
                         <button type="submit" class="btn btn-primary">
                             <?php echo isset($reagenda) && $reagenda ? 'Reagendar Cita' : 'Agendar Cita'; ?>
                         </button>
-                        <?php if (isset($reagenda) && $reagenda): ?>
+                        <?php if (isset($reagenda) && $reagenda && isset($id_cita_anterior)): ?>
                             <input type="hidden" name="id_cita_anterior" value="<?php echo $id_cita_anterior; ?>">
                         <?php endif; ?>
                     </div>
