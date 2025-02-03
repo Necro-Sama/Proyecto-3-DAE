@@ -241,64 +241,74 @@ class CitasController extends CI_Controller
         }
     }
     public function bloquear_individual() {
-        while (ob_get_level()) {
-            ob_end_clean();
-        }
+        // Desactivar el buffer de salida
+        ob_clean();
         
+        // Asegurar que la respuesta sea JSON
         header('Content-Type: application/json');
         
         try {
-            log_message('debug', '[INICIO] bloquear_individual');
+            // Log inicial
+            log_message('debug', '=== Inicio bloquear_individual ===');
             
-            // Obtener datos
-            $bloque_id = trim($this->input->post('ID'));
-            $run_ts = trim($this->input->post('RUNTS'));
-            $fecha_inicio = trim($this->input->post('FechaInicio'));
-            $fecha_termino = trim($this->input->post('FechaTermino'));
+            // Obtener y validar datos
+            $datos = [
+                'ID' => $this->input->post('ID'),
+                'RUN' => $this->input->post('RUN'),
+                'FechaInicio' => $this->input->post('FechaInicio'),
+                'FechaTermino' => $this->input->post('FechaTermino')
+            ];
 
-            log_message('debug', 'Datos recibidos en controlador: ' . json_encode([
-                'ID' => $bloque_id,
-                'RUNTS' => $run_ts,
-                'FechaInicio' => $fecha_inicio,
-                'FechaTermino' => $fecha_termino
-            ]));
-
-            // Validación
-            if (empty($bloque_id) || empty($run_ts) || 
-                empty($fecha_inicio) || empty($fecha_termino)) {
-                throw new Exception('Datos incompletos para el bloqueo');
+            // Validar datos
+            foreach ($datos as $key => $value) {
+                if (empty($value)) {
+                    throw new Exception("El campo {$key} es requerido");
+                }
             }
 
+            // Cargar el modelo
             $this->load->model('BloqueModel');
 
-            $resultado = $this->BloqueModel->bloquear_horario([
-                'ID' => $bloque_id,
-                'RUNTS' => $run_ts,
-                'FechaInicio' => $fecha_inicio,
-                'FechaTermino' => $fecha_termino
-            ]);
+            // Intentar el bloqueo dentro de una transacción
+            $this->db->trans_begin();
 
-            if (!$resultado) {
-                $last_error = $this->db->error();
-                log_message('error', 'Error de base de datos: ' . json_encode($last_error));
-                throw new Exception('Error al realizar el bloqueo: ' . $last_error['message']);
+            $resultado = $this->BloqueModel->bloquear_horario($datos);
+
+            if ($resultado === false) {
+                $this->db->trans_rollback();
+                $error = $this->db->error();
+                throw new Exception('Error de base de datos: ' . json_encode($error));
             }
 
-            log_message('debug', '[FIN] bloquear_individual - Éxito');
+            $this->db->trans_commit();
 
             echo json_encode([
                 'success' => true,
                 'message' => 'Bloque bloqueado correctamente'
             ]);
-            
+
         } catch (Exception $e) {
-            log_message('error', 'Error en bloquear_individual: ' . $e->getMessage());
+            // Si hay una transacción activa, hacer rollback
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+            }
+
+            $error_db = $this->db->error();
             
             echo json_encode([
                 'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'error_details' => [
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'db_error' => $error_db
+                ]
             ]);
         }
+        
+        // Asegurar que no haya más salida después de la respuesta JSON
+        exit();
     }
     public function obtener_datos_ts($run) {
         // Verificar si es una petición AJAX
