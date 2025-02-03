@@ -181,7 +181,7 @@
                                     </form>
                                 <?php endif; ?>
 
-                                <?php if ($cita['Estado'] === 'Reservado'): ?>
+                                <?php if ($cita['Estado'] === 'Reservado' && ($tipo === 'estudiante' || $tipo === 'noestudiante')): ?>
                                     <form method="POST" action="<?= site_url('usuarios/agendar'); ?>" style="display:inline;">
                                         <?php $this->session->set_userdata('id_cita_anterior', $cita['ID']); ?>
                                         <button type="submit" class="btn btn-warning btn-sm">
