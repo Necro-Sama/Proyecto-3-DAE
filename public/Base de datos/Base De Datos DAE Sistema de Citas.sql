@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 27-01-2025 a las 22:05:11
+-- Tiempo de generación: 03-02-2025 a las 06:40:07
 -- Versión del servidor: 10.4.27-MariaDB
 -- Versión de PHP: 7.4.33
 
@@ -27,6 +27,7 @@ SET time_zone = "+00:00";
 -- Estructura de tabla para la tabla `administrador`
 --
 
+DROP TABLE IF EXISTS `administrador`;
 CREATE TABLE `administrador` (
   `RUN` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -48,6 +49,7 @@ INSERT INTO `administrador` (`RUN`) VALUES
 -- Estructura de tabla para la tabla `adminmodpers`
 --
 
+DROP TABLE IF EXISTS `adminmodpers`;
 CREATE TABLE `adminmodpers` (
   `Fecha` timestamp NOT NULL DEFAULT current_timestamp(),
   `RUNAdmin` varchar(50) NOT NULL,
@@ -60,6 +62,7 @@ CREATE TABLE `adminmodpers` (
 -- Estructura de tabla para la tabla `bloque`
 --
 
+DROP TABLE IF EXISTS `bloque`;
 CREATE TABLE `bloque` (
   `FechaInicio` timestamp NOT NULL DEFAULT current_timestamp(),
   `FechaTermino` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -90,35 +93,11 @@ INSERT INTO `bloque` (`FechaInicio`, `FechaTermino`, `ID`, `FechaInicioSemana`, 
 ('2025-01-22 17:30:00', '2025-01-22 18:00:00', 84, '2025-01-20 03:00:00', '6.666.666-6'),
 ('2025-01-24 11:00:00', '2025-01-24 11:00:00', 91, '2025-01-20 03:00:00', '6.666.666-6'),
 ('2025-01-23 18:30:00', '2025-01-23 18:30:00', 92, '2025-01-20 03:00:00', '6.666.666-6'),
-('2025-02-07 12:00:00', '2025-02-07 12:30:00', 15217, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 21:00:00', '2025-02-07 21:30:00', 83591, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-01-29 11:00:00', '2025-01-29 11:30:00', 178103, '2025-01-27 06:00:00', '4.444.444-4'),
-('2025-02-07 20:30:00', '2025-02-07 21:00:00', 223481, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 12:30:00', '2025-02-07 13:00:00', 242569, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 15:00:00', '2025-02-07 15:30:00', 265157, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 18:30:00', '2025-02-07 19:00:00', 268323, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 19:00:00', '2025-02-07 19:30:00', 292814, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-01-29 11:00:00', '2025-01-29 11:30:00', 360287, '2025-01-27 06:00:00', '5.555.555-5'),
-('2025-02-07 20:00:00', '2025-02-07 20:30:00', 397239, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 14:00:00', '2025-02-07 14:30:00', 445475, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-01-29 11:00:00', '2025-01-29 11:30:00', 470638, '2025-01-27 06:00:00', '5.555.555-5'),
-('2025-01-29 11:00:00', '2025-01-29 11:30:00', 474347, '2025-01-27 06:00:00', '5.555.555-5'),
-('2025-02-07 17:30:00', '2025-02-07 18:00:00', 474492, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 19:30:00', '2025-02-07 20:00:00', 560374, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 13:30:00', '2025-02-07 14:00:00', 609473, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-01-29 11:00:00', '2025-01-29 11:30:00', 644028, '2025-01-27 06:00:00', '5.555.555-5'),
-('2025-01-29 11:00:00', '2025-01-29 11:30:00', 668542, '2025-01-27 06:00:00', '5.555.555-5'),
-('2025-01-29 11:00:00', '2025-01-29 11:30:00', 668548, '2025-01-27 03:00:00', '6.666.666-6'),
-('0000-00-00 00:00:00', '2025-01-29 11:00:00', 668549, '2025-01-27 06:51:13', '6.666.666-6'),
-('0000-00-00 00:00:00', '2025-01-29 11:00:00', 668550, '2025-01-27 06:51:33', '6.666.666-6'),
-('2025-01-29 11:00:00', '2025-01-29 11:30:00', 668551, '2025-01-27 03:00:00', '7.777.777-7'),
-('2025-01-27 08:01:13', '2025-01-27 08:01:13', 668552, '2025-01-27 08:01:13', '6.666.666-6'),
 ('2025-01-30 11:30:00', '2025-01-30 12:00:00', 668559, '2025-01-27 03:00:00', '0.000.000-0'),
-('2025-02-07 14:30:00', '2025-02-07 15:00:00', 701591, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 18:00:00', '2025-02-07 18:30:00', 750246, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 11:30:00', '2025-02-07 12:00:00', 764263, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 11:00:00', '2025-02-07 11:30:00', 861146, '2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-07 13:00:00', '2025-02-07 13:30:00', 887457, '2025-02-03 06:00:00', '5.555.555-5');
+('2025-02-05 11:00:00', '2025-02-05 11:30:00', 998187, '2025-02-03 03:00:00', '0.000.000-0'),
+('2025-02-03 11:00:00', '2025-02-03 11:30:00', 998189, '2025-02-03 03:00:00', '5.555.555-5'),
+('2025-02-10 11:00:00', '2025-02-10 11:30:00', 998242, '2025-02-10 03:00:00', '1.111.111-1'),
+('2025-02-14 11:00:00', '2025-02-14 11:30:00', 998243, '2025-02-10 03:00:00', '9.999.999-9');
 
 -- --------------------------------------------------------
 
@@ -126,8 +105,9 @@ INSERT INTO `bloque` (`FechaInicio`, `FechaTermino`, `ID`, `FechaInicioSemana`, 
 -- Estructura de tabla para la tabla `bloqueatencion`
 --
 
+DROP TABLE IF EXISTS `bloqueatencion`;
 CREATE TABLE `bloqueatencion` (
-  `Estado` enum('Reservado','Atendido','CanceladoTS','CanceladoAdmin','CanceladoCliente') NOT NULL,
+  `Estado` enum('Reservado','Atendido','Cancelado','Ausente') NOT NULL,
   `Motivo` enum('Gratuidad Mineduc','Becas de arancel Mineduc','Fondo Solidario de Crédito Universitario','Beneficios Junaeb (BAES y Becas de mantención)','Beca Fotocopia UTA','Beca Alimentación UTA','Beca Residencia UTA','Beca Internado UTA','Beca Ayuda Estudiantil UTA','Beca PSU-PDT-PAES UTA','Otro') NOT NULL,
   `ID` int(11) NOT NULL,
   `RUNCliente` varchar(50) NOT NULL
@@ -138,24 +118,28 @@ CREATE TABLE `bloqueatencion` (
 --
 
 INSERT INTO `bloqueatencion` (`Estado`, `Motivo`, `ID`, `RUNCliente`) VALUES
-('Reservado', 'Becas de arancel Mineduc', 60, '20.775.891-4'),
-('Reservado', 'Beca PSU-PDT-PAES UTA', 61, '20.775.891-4'),
-('Reservado', 'Beca Alimentación UTA', 62, '20820'),
-('Reservado', 'Beca Fotocopia UTA', 63, '20820'),
-('Reservado', 'Fondo Solidario de Crédito Universitario', 64, '20.216.400-5'),
-('Reservado', 'Fondo Solidario de Crédito Universitario', 65, '19.458.684-4'),
-('Reservado', 'Beneficios Junaeb (BAES y Becas de mantención)', 66, '20.775.891-4'),
-('Reservado', 'Beneficios Junaeb (BAES y Becas de mantención)', 67, '20.775.891-4'),
-('Reservado', 'Gratuidad Mineduc', 68, '20.216.400-5'),
-('Reservado', 'Beca Residencia UTA', 71, '20.625.856-2'),
-('Reservado', 'Fondo Solidario de Crédito Universitario', 72, '20.216.400-5'),
-('Reservado', 'Beca Internado UTA', 73, '20.216.400-5'),
-('Reservado', 'Beneficios Junaeb (BAES y Becas de mantención)', 80, '20.216.400-5'),
-('Reservado', 'Gratuidad Mineduc', 83, '20.216.400-5'),
-('Reservado', 'Becas de arancel Mineduc', 84, '20.216.400-5'),
-('Reservado', 'Gratuidad Mineduc', 91, '20.216.400-5'),
-('Reservado', 'Becas de arancel Mineduc', 92, '20.216.186-4'),
-('Reservado', 'Gratuidad Mineduc', 668559, '20.216.186-4');
+('Ausente', 'Becas de arancel Mineduc', 60, '20.775.891-4'),
+('Ausente', 'Beca PSU-PDT-PAES UTA', 61, '20.775.891-4'),
+('Ausente', 'Beca Alimentación UTA', 62, '20820'),
+('Ausente', 'Beca Fotocopia UTA', 63, '20820'),
+('Ausente', 'Fondo Solidario de Crédito Universitario', 64, '20.216.400-5'),
+('Ausente', 'Fondo Solidario de Crédito Universitario', 65, '19.458.684-4'),
+('Ausente', 'Beneficios Junaeb (BAES y Becas de mantención)', 66, '20.775.891-4'),
+('Ausente', 'Beneficios Junaeb (BAES y Becas de mantención)', 67, '20.775.891-4'),
+('Ausente', 'Gratuidad Mineduc', 68, '20.216.400-5'),
+('Ausente', 'Beca Residencia UTA', 71, '20.625.856-2'),
+('Ausente', 'Fondo Solidario de Crédito Universitario', 72, '20.216.400-5'),
+('Ausente', 'Beca Internado UTA', 73, '20.216.400-5'),
+('Ausente', 'Beneficios Junaeb (BAES y Becas de mantención)', 80, '20.216.400-5'),
+('Ausente', 'Gratuidad Mineduc', 83, '20.216.400-5'),
+('Ausente', 'Becas de arancel Mineduc', 84, '20.216.400-5'),
+('Ausente', 'Gratuidad Mineduc', 91, '20.216.400-5'),
+('Ausente', 'Becas de arancel Mineduc', 92, '20.216.186-4'),
+('Ausente', 'Gratuidad Mineduc', 668559, '20.216.186-4'),
+('Cancelado', 'Gratuidad Mineduc', 998187, '20.216.186-4'),
+('Atendido', 'Beca Internado UTA', 998189, '20.216.400-5'),
+('Reservado', 'Beca PSU-PDT-PAES UTA', 998242, '20.216.186-4'),
+('Reservado', 'Fondo Solidario de Crédito Universitario', 998243, '20.216.186-4');
 
 -- --------------------------------------------------------
 
@@ -163,6 +147,7 @@ INSERT INTO `bloqueatencion` (`Estado`, `Motivo`, `ID`, `RUNCliente`) VALUES
 -- Estructura de tabla para la tabla `bloquebloqueado`
 --
 
+DROP TABLE IF EXISTS `bloquebloqueado`;
 CREATE TABLE `bloquebloqueado` (
   `ID` int(11) NOT NULL,
   `fechainicio` datetime NOT NULL,
@@ -175,24 +160,43 @@ CREATE TABLE `bloquebloqueado` (
 --
 
 INSERT INTO `bloquebloqueado` (`ID`, `fechainicio`, `fechafinal`, `RUN`) VALUES
-(15217, '2025-02-07 09:00:00', '2025-02-07 09:30:00', '5.555.555-5'),
-(83591, '2025-02-07 18:00:00', '2025-02-07 18:30:00', '5.555.555-5'),
-(223481, '2025-02-07 17:30:00', '2025-02-07 18:00:00', '5.555.555-5'),
-(242569, '2025-02-07 09:30:00', '2025-02-07 10:00:00', '5.555.555-5'),
-(265157, '2025-02-07 12:00:00', '2025-02-07 12:30:00', '5.555.555-5'),
-(268323, '2025-02-07 15:30:00', '2025-02-07 16:00:00', '5.555.555-5'),
-(292814, '2025-02-07 16:00:00', '2025-02-07 16:30:00', '5.555.555-5'),
-(360287, '2025-01-29 08:00:00', '2025-01-29 08:30:00', '5.555.555-5'),
-(397239, '2025-02-07 17:00:00', '2025-02-07 17:30:00', '5.555.555-5'),
-(445475, '2025-02-07 11:00:00', '2025-02-07 11:30:00', '5.555.555-5'),
-(474492, '2025-02-07 14:30:00', '2025-02-07 15:00:00', '5.555.555-5'),
-(560374, '2025-02-07 16:30:00', '2025-02-07 17:00:00', '5.555.555-5'),
-(609473, '2025-02-07 10:30:00', '2025-02-07 11:00:00', '5.555.555-5'),
-(701591, '2025-02-07 11:30:00', '2025-02-07 12:00:00', '5.555.555-5'),
-(750246, '2025-02-07 15:00:00', '2025-02-07 15:30:00', '5.555.555-5'),
-(764263, '2025-02-07 08:30:00', '2025-02-07 09:00:00', '5.555.555-5'),
-(861146, '2025-02-07 08:00:00', '2025-02-07 08:30:00', '5.555.555-5'),
-(887457, '2025-02-07 10:00:00', '2025-02-07 10:30:00', '5.555.555-5');
+(0, '2025-01-31 18:30:00', '2025-01-31 19:00:00', '5.555.555-5'),
+(0, '2025-02-13 11:00:00', '2025-02-13 11:30:00', '0.000.000-0'),
+(0, '2025-02-13 11:30:00', '2025-02-13 12:00:00', '0.000.000-0'),
+(0, '2025-02-13 12:00:00', '2025-02-13 12:30:00', '0.000.000-0'),
+(0, '2025-02-13 12:30:00', '2025-02-13 13:00:00', '0.000.000-0'),
+(0, '2025-02-13 13:00:00', '2025-02-13 13:30:00', '0.000.000-0'),
+(0, '2025-02-13 13:30:00', '2025-02-13 14:00:00', '0.000.000-0'),
+(0, '2025-02-13 14:00:00', '2025-02-13 14:30:00', '0.000.000-0'),
+(0, '2025-02-13 14:30:00', '2025-02-13 15:00:00', '0.000.000-0'),
+(0, '2025-02-13 15:00:00', '2025-02-13 15:30:00', '0.000.000-0'),
+(0, '2025-02-13 17:30:00', '2025-02-13 18:00:00', '0.000.000-0'),
+(0, '2025-02-13 18:00:00', '2025-02-13 18:30:00', '0.000.000-0'),
+(0, '2025-02-13 18:30:00', '2025-02-13 19:00:00', '0.000.000-0'),
+(0, '2025-02-13 19:00:00', '2025-02-13 19:30:00', '0.000.000-0'),
+(0, '2025-02-13 19:30:00', '2025-02-13 20:00:00', '0.000.000-0'),
+(0, '2025-02-13 20:00:00', '2025-02-13 20:30:00', '0.000.000-0'),
+(0, '2025-02-13 20:30:00', '2025-02-13 21:00:00', '0.000.000-0'),
+(0, '2025-02-13 21:00:00', '2025-02-13 21:30:00', '0.000.000-0'),
+(0, '2025-02-13 21:30:00', '2025-02-13 22:00:00', '0.000.000-0'),
+(0, '2025-02-14 11:00:00', '2025-02-14 11:30:00', '5.555.555-5'),
+(0, '2025-02-14 11:30:00', '2025-02-14 12:00:00', '5.555.555-5'),
+(0, '2025-02-14 12:00:00', '2025-02-14 12:30:00', '5.555.555-5'),
+(0, '2025-02-14 12:30:00', '2025-02-14 13:00:00', '5.555.555-5'),
+(0, '2025-02-14 13:00:00', '2025-02-14 13:30:00', '5.555.555-5'),
+(0, '2025-02-14 13:30:00', '2025-02-14 14:00:00', '5.555.555-5'),
+(0, '2025-02-14 14:00:00', '2025-02-14 14:30:00', '5.555.555-5'),
+(0, '2025-02-14 14:30:00', '2025-02-14 15:00:00', '5.555.555-5'),
+(0, '2025-02-14 15:00:00', '2025-02-14 15:30:00', '5.555.555-5'),
+(0, '2025-02-14 17:30:00', '2025-02-14 18:00:00', '5.555.555-5'),
+(0, '2025-02-14 18:00:00', '2025-02-14 18:30:00', '5.555.555-5'),
+(0, '2025-02-14 18:30:00', '2025-02-14 19:00:00', '5.555.555-5'),
+(0, '2025-02-14 19:00:00', '2025-02-14 19:30:00', '5.555.555-5'),
+(0, '2025-02-14 19:30:00', '2025-02-14 20:00:00', '5.555.555-5'),
+(0, '2025-02-14 20:00:00', '2025-02-14 20:30:00', '5.555.555-5'),
+(0, '2025-02-14 20:30:00', '2025-02-14 21:00:00', '5.555.555-5'),
+(0, '2025-02-14 21:00:00', '2025-02-14 21:30:00', '5.555.555-5'),
+(0, '2025-02-14 21:30:00', '2025-02-14 22:00:00', '5.555.555-5');
 
 -- --------------------------------------------------------
 
@@ -200,6 +204,7 @@ INSERT INTO `bloquebloqueado` (`ID`, `fechainicio`, `fechafinal`, `RUN`) VALUES
 -- Estructura de tabla para la tabla `calendariosemanal`
 --
 
+DROP TABLE IF EXISTS `calendariosemanal`;
 CREATE TABLE `calendariosemanal` (
   `FechaInicioSemana` timestamp NOT NULL DEFAULT current_timestamp(),
   `RUNTS` varchar(50) NOT NULL
@@ -232,9 +237,19 @@ INSERT INTO `calendariosemanal` (`FechaInicioSemana`, `RUNTS`) VALUES
 ('2025-01-27 06:51:13', '6.666.666-6'),
 ('2025-01-27 06:51:33', '6.666.666-6'),
 ('2025-01-27 08:01:13', '6.666.666-6'),
+('2025-02-03 03:00:00', '0.000.000-0'),
+('2025-02-03 03:00:00', '1.111.111-1'),
+('2025-02-03 03:00:00', '2.222.222-2'),
+('2025-02-03 03:00:00', '4.444.444-4'),
+('2025-02-03 03:00:00', '5.555.555-5'),
 ('2025-02-03 03:00:00', '6.666.666-6'),
+('2025-02-03 03:00:00', '9.999.999-9'),
 ('2025-02-03 06:00:00', '5.555.555-5'),
-('2025-02-10 03:00:00', '6.666.666-6');
+('2025-02-10 03:00:00', '1.111.111-1'),
+('2025-02-10 03:00:00', '6.666.666-6'),
+('2025-02-10 03:00:00', '7.777.777-7'),
+('2025-02-10 03:00:00', '8.888.888-8'),
+('2025-02-10 03:00:00', '9.999.999-9');
 
 -- --------------------------------------------------------
 
@@ -242,12 +257,13 @@ INSERT INTO `calendariosemanal` (`FechaInicioSemana`, `RUNTS`) VALUES
 -- Estructura de tabla para la tabla `carrera`
 --
 
+DROP TABLE IF EXISTS `carrera`;
 CREATE TABLE `carrera` (
   `COD_CARRERA` int(11) NOT NULL,
   `Nombre` varchar(100) NOT NULL,
   `Facultad` varchar(100) NOT NULL,
-  `RUNTS` varchar(50) NOT NULL,
-  `ReemplazaRUNTS` varchar(50) NOT NULL
+  `RUNTS` varchar(50) DEFAULT NULL,
+  `ReemplazaRUNTS` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -298,7 +314,7 @@ INSERT INTO `carrera` (`COD_CARRERA`, `Nombre`, `Facultad`, `RUNTS`, `ReemplazaR
 (532, 'INGENIERÍA CIVIL INDUSTRIAL', 'FAC.INGENIERIA CARRERAS DE PREGRADO', '5.555.555-5', '7.777.777-7'),
 (533, 'INGENIERÍA CIVIL MECÁNICA', 'FAC.INGENIERIA CARRERAS DE PREGRADO', '8.888.888-8', '6.666.666-6'),
 (534, 'ING.CIVIL COMPUTACIÓN E INFORMÁTICA', 'FAC.INGENIERIA CARRERAS DE PREGRADO', '5.555.555-5', '7.777.777-7'),
-(537, 'INGENIERÍA MECATRONICA', 'FAC.INGENIERIA CARRERAS DE PREGRADO', '8.888.888-8', '6.666.666-6'),
+(537, 'INGENIERÍA MECATRONICA', 'FAC.INGENIERIA CARRERAS DE PREGRADO', '0.000.000-0', '7.777.777-7'),
 (544, 'INGENIERÍA DE EJECUCIÓN ELÉCTRICA', 'FAC.INGENIERIA CARRERAS DE PREGRADO', '8.888.888-8', '6.666.666-6'),
 (545, 'INGENIERÍA DE EJECUCIÓN ELECTRÓNICA', 'FAC.INGENIERIA CARRERAS DE PREGRADO', '8.888.888-8', '6.666.666-6'),
 (546, 'INGENIERÍA DE EJECUCIÓN MECÁNICA', 'FAC.INGENIERIA CARRERAS DE PREGRADO', '8.888.888-8', '6.666.666-6'),
@@ -314,6 +330,7 @@ INSERT INTO `carrera` (`COD_CARRERA`, `Nombre`, `Facultad`, `RUNTS`, `ReemplazaR
 -- Estructura de tabla para la tabla `cliente`
 --
 
+DROP TABLE IF EXISTS `cliente`;
 CREATE TABLE `cliente` (
   `RUN` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -339,6 +356,7 @@ INSERT INTO `cliente` (`RUN`) VALUES
 -- Estructura de tabla para la tabla `cookie`
 --
 
+DROP TABLE IF EXISTS `cookie`;
 CREATE TABLE `cookie` (
   `ID` int(11) NOT NULL,
   `Token` varbinary(200) NOT NULL,
@@ -357,8 +375,7 @@ INSERT INTO `cookie` (`ID`, `Token`, `FechaCreacion`, `RUN`) VALUES
 (202, 0xb17ec2ba3ff3f35d7b59190bf9c9219eac59408635006ef80172ed1759b1ebb8609db5f9ff1e2a07daea7f59c7f45034b7b447825d6a7f5aed4d2dfcfa7810c604df1382fb2981a1d60c6650bbdad43adfc9b1555fe49b5880056d9f3819c487eb915878, '2024-12-05 12:37:08', '20.775.891-4'),
 (203, 0xfac1cb684036200134d74789d102751be6e4bb64a7eb4ae516a90a91d70abede758d8973bb264658d221aac6053daa854bdc7d857616ee7acdf19e6e0ecf26dd398c9a885a460dd473ce21374b99d70ffa862ac45ee296cfab503fefccb70a008bb2518f, '2024-12-05 12:42:15', '12345678-9'),
 (210, 0xb49090bcdd303d8d48d875bb4a676c6f667cc31aec13eab290a7c96f1b00faddbd6bc49d2f6da13487a493a09cf63d69e56a6154f75bda521d7c2da4bb413f8d2e8d5c4e3463123273b5c258195a7aac1b14474df6af28e7fad30f9b55de1a91c377a3e2, '2024-12-05 14:01:56', '20.775.891-4'),
-(424, 0x566c10b2bd052d77eb59f3ac3b36bc9c03315cad29649023ac7108d2afb4d4edaa5eafb6a95f768e1d45ad02ec72555386ea1b9b5b14169ddb3e53bede292ee5e00b04dd7c2697404e545cb07ea07bb1b76893d336276d9a1c1231d8cc175a535cc74419, '2025-01-27 19:40:21', '20.216.186-4'),
-(425, 0x86858f5355d6acbd762d223da3392288465127dbd0e58f223943e54d3f25f7cc2a9e20896f1ed456a2c9ab593a421d8357ce4b29a8f894dbc5266531a4aa4991059c10bb6057ae692a82bfbdb96ef8d8471c92152d382b6f8b6174c9cc1914cd5750747a, '2025-01-27 20:25:55', '20.216.163-4');
+(521, 0xa6f1afb2f4d4638c402bcaeb7eb8641a82670ff4aff2d9cfd106dd851199a604925734545c6802ab320ca2ce355ec7cc28de7b02ee84f15fd22b6a6214643a252be90faf139000abc93e2f08ab92ef1d9df97e54c8098455eb3ac52a0a6107ed9fdc01ab, '2025-02-03 05:20:12', '20.216.163-4');
 
 -- --------------------------------------------------------
 
@@ -366,6 +383,7 @@ INSERT INTO `cookie` (`ID`, `Token`, `FechaCreacion`, `RUN`) VALUES
 -- Estructura de tabla para la tabla `estudiante`
 --
 
+DROP TABLE IF EXISTS `estudiante`;
 CREATE TABLE `estudiante` (
   `RUN` varchar(50) NOT NULL,
   `COD_CARRERA` int(11) NOT NULL
@@ -387,6 +405,7 @@ INSERT INTO `estudiante` (`RUN`, `COD_CARRERA`) VALUES
 -- Estructura de tabla para la tabla `funcionario`
 --
 
+DROP TABLE IF EXISTS `funcionario`;
 CREATE TABLE `funcionario` (
   `RUN` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -416,6 +435,7 @@ INSERT INTO `funcionario` (`RUN`) VALUES
 -- Estructura de tabla para la tabla `funcmodbloq`
 --
 
+DROP TABLE IF EXISTS `funcmodbloq`;
 CREATE TABLE `funcmodbloq` (
   `Fecha` timestamp NOT NULL DEFAULT current_timestamp(),
   `RUNFuncionario` varchar(50) NOT NULL,
@@ -428,6 +448,7 @@ CREATE TABLE `funcmodbloq` (
 -- Estructura de tabla para la tabla `licencia`
 --
 
+DROP TABLE IF EXISTS `licencia`;
 CREATE TABLE `licencia` (
   `ID_LICENCIA` int(11) NOT NULL,
   `FECHA_INI` date NOT NULL,
@@ -452,6 +473,7 @@ INSERT INTO `licencia` (`ID_LICENCIA`, `FECHA_INI`, `FECHA_TER`, `RUN`) VALUES
 -- Estructura de tabla para la tabla `noestudiante`
 --
 
+DROP TABLE IF EXISTS `noestudiante`;
 CREATE TABLE `noestudiante` (
   `RUN` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -473,6 +495,7 @@ INSERT INTO `noestudiante` (`RUN`) VALUES
 -- Estructura de tabla para la tabla `persona`
 --
 
+DROP TABLE IF EXISTS `persona`;
 CREATE TABLE `persona` (
   `RUN` varchar(50) NOT NULL,
   `Nombre` varchar(50) NOT NULL,
@@ -517,6 +540,7 @@ INSERT INTO `persona` (`RUN`, `Nombre`, `Apellido`, `Telefono`, `Correo`, `Contr
 -- Estructura de tabla para la tabla `trabajadorsocial`
 --
 
+DROP TABLE IF EXISTS `trabajadorsocial`;
 CREATE TABLE `trabajadorsocial` (
   `RUN` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -587,7 +611,7 @@ ALTER TABLE `calendariosemanal`
 ALTER TABLE `carrera`
   ADD PRIMARY KEY (`COD_CARRERA`),
   ADD KEY `RUNTS` (`RUNTS`),
-  ADD KEY `ReemplazaRUNTS` (`ReemplazaRUNTS`);
+  ADD KEY `ReemplazaRUNTS` (`ReemplazaRUNTS`) USING BTREE;
 
 --
 -- Indices de la tabla `cliente`
@@ -657,13 +681,13 @@ ALTER TABLE `trabajadorsocial`
 -- AUTO_INCREMENT de la tabla `bloque`
 --
 ALTER TABLE `bloque`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=887458;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=998244;
 
 --
 -- AUTO_INCREMENT de la tabla `cookie`
 --
 ALTER TABLE `cookie`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=426;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=522;
 
 --
 -- AUTO_INCREMENT de la tabla `licencia`
@@ -763,6 +787,29 @@ ALTER TABLE `noestudiante`
 --
 ALTER TABLE `trabajadorsocial`
   ADD CONSTRAINT `trabajadorsocial_ibfk_1` FOREIGN KEY (`RUN`) REFERENCES `funcionario` (`RUN`);
+
+DELIMITER $$
+--
+-- Eventos
+--
+DROP EVENT IF EXISTS `actualizar_estado_persona_licencia`$$
+CREATE DEFINER=`root`@`localhost` EVENT `actualizar_estado_persona_licencia` ON SCHEDULE EVERY 1 DAY STARTS '2025-02-02 07:53:34' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
+    -- Actualizar a 0 cuando inicia la licencia
+    UPDATE persona p 
+    INNER JOIN licencia l ON p.RUN = l.RUN 
+    SET p.Estado = 0 
+    WHERE l.FECHA_INI <= CURDATE() 
+    AND l.FECHA_TER >= CURDATE();
+
+    -- Actualizar a 1 cuando termina la licencia
+    UPDATE persona p 
+    LEFT JOIN licencia l ON p.RUN = l.RUN 
+    SET p.Estado = 1 
+    WHERE (l.FECHA_TER IS NOT NULL AND l.FECHA_TER < CURDATE()) 
+       OR l.RUN IS NULL;
+END$$
+
+DELIMITER ;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

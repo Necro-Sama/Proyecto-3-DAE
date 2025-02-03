@@ -31,6 +31,8 @@ if (!isset($tipo)) {
             integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Inicialización de variables globales -->
     <script>
@@ -124,7 +126,62 @@ if (!isset($tipo)) {
         <?php endif; ?>
 
         <div id="tiempo-servidor" hidden><?= $this->BloqueModel->get_tiempo_bd() ?></div>
-        
+        <!-- Modal para configurar fechas -->
+        <div class="modal fade" id="modalFechas" tabindex="-1" aria-labelledby="modalFechasLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalFechasLabel">Configurar Calendario</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="formFechas">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="duracion_bloque" class="form-label">Duración del Bloque</label>
+                                <select class="form-select" id="duracion_bloque" name="duracion_bloque" required>
+                                    <option value="15">15 minutos</option>
+                                    <option value="30" selected>30 minutos</option>
+                                    <option value="45">45 minutos</option>
+                                    <option value="60">1 hora</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="semana_inicio" class="form-label">Semana de Inicio</label>
+                                <select class="form-select" id="semana_inicio" name="semana_inicio" required>
+                                    <!-- Se llenará dinámicamente con JavaScript -->
+                                </select>
+                                <small class="text-muted" id="rango_semana"></small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cantidad_semanas" class="form-label">Duración en Semanas</label>
+                                <select class="form-select" id="cantidad_semanas" name="cantidad_semanas" required>
+                                    <?php for($i = 1; $i <= 12; $i++): ?>
+                                        <option value="<?= $i ?>" <?= $i == 4 ? 'selected' : '' ?>>
+                                            <?= $i ?> semana<?= $i > 1 ? 's' : '' ?>
+                                        </option>
+                                    <?php endfor; ?>
+                                </select>
+                                <small class="text-muted" id="fecha_termino"></small>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="mantener_citas" name="mantener_citas" checked>
+                                <label class="form-check-label" for="mantener_citas">
+                                    Mantener citas existentes
+                                </label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-custom btn-cancel-dae" data-bs-dismiss="modal">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-custom btn-primary-dae">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
         <div class="row mb-3">
             <div class="col-md-6">
                 <div class="form-group">
@@ -198,6 +255,7 @@ if (!isset($tipo)) {
                 </div>
             <?php endif; ?>
         </div>
+        
 
         <table class="text-center">
         <thead>
@@ -244,6 +302,21 @@ if (!isset($tipo)) {
                 <!-- Contenido generado dinamicamente -->
             </tbody>
         </table>
+<<<<<<< HEAD
+=======
+
+        <!-- Botón para abrir el modal (justo arriba del calendario) -->
+        <div class="d-flex justify-content-end mb-3">
+            <?php if ($tipo === 'administrador'): ?>
+                <button type="button" class="btn btn-custom btn-primary-dae" data-bs-toggle="modal" data-bs-target="#modalFechas">
+                    <i class="fas fa-calendar-alt"></i>
+                    Configurar Calendario
+                </button>
+            <?php endif; ?>
+        </div>
+
+        <div id='calendar'></div>
+>>>>>>> parent of 9667be02 (Revert "Terminado")
     </div>
 
     <!-- Modal para agendar -->
@@ -347,6 +420,72 @@ if (!isset($tipo)) {
             }
         });
     </script>
+<<<<<<< HEAD
+=======
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Función para formatear fecha en español
+        function formatearFecha(fecha) {
+            const opciones = { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            };
+            return fecha.toLocaleDateString('es-ES', opciones);
+        }
+
+        // Función para generar las opciones de semanas
+        function generarOpcionesSemanas() {
+            const selectSemana = document.getElementById('semana_inicio');
+            const hoy = new Date();
+            const primerDia = new Date(hoy);
+            
+            // Ajustar al próximo lunes si no es lunes
+            const diaSemana = hoy.getDay();
+            const diasHastaLunes = diaSemana === 0 ? 1 : 8 - diaSemana;
+            primerDia.setDate(hoy.getDate() + diasHastaLunes);
+
+            // Generar opciones para las próximas 12 semanas
+            for (let i = 0; i < 12; i++) {
+                const inicioSemana = new Date(primerDia);
+                inicioSemana.setDate(primerDia.getDate() + (i * 7));
+                
+                const finSemana = new Date(inicioSemana);
+                finSemana.setDate(inicioSemana.getDate() + 4); // Hasta el viernes
+
+                const option = document.createElement('option');
+                option.value = inicioSemana.toISOString().split('T')[0];
+                option.text = `Semana ${i + 1}: ${formatearFecha(inicioSemana)} - ${formatearFecha(finSemana)}`;
+                selectSemana.appendChild(option);
+            }
+        }
+
+        // Función para actualizar la fecha de término
+        function actualizarFechaTermino() {
+            const semanaInicio = new Date(document.getElementById('semana_inicio').value);
+            const cantidadSemanas = parseInt(document.getElementById('cantidad_semanas').value);
+            
+            const fechaTermino = new Date(semanaInicio);
+            fechaTermino.setDate(semanaInicio.getDate() + ((cantidadSemanas * 7) - 3)); // -3 para terminar en viernes
+            
+            document.getElementById('fecha_termino').textContent = 
+                `Fecha de término: ${formatearFecha(fechaTermino)}`;
+        }
+
+        // Inicializar selectores
+        generarOpcionesSemanas();
+
+        // Event listeners
+        document.getElementById('semana_inicio').addEventListener('change', actualizarFechaTermino);
+        document.getElementById('cantidad_semanas').addEventListener('change', actualizarFechaTermino);
+
+        // Actualizar fecha de término inicial
+        actualizarFechaTermino();
+    });
+    </script>
+>>>>>>> parent of 9667be02 (Revert "Terminado")
 </body>
 </html>
 <style>
