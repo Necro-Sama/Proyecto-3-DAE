@@ -1,4 +1,6 @@
 <?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
 class BloqueModel extends CI_Model
 {
     public function __construct()
@@ -379,94 +381,57 @@ class BloqueModel extends CI_Model
         return ($result->total > 0);
     }
 
+    private function obtener_inicio_semana($fecha) {
+        $fecha_obj = new DateTime($fecha);
+        $dia_semana = $fecha_obj->format('N');
+        $dias_a_restar = $dia_semana - 1;
+        $fecha_obj->modify("-{$dias_a_restar} days");
+        $fecha_obj->setTime(0, 0, 0);
+        return $fecha_obj->format('Y-m-d H:i:s');
+    }
+
     public function bloquear_horario($datos) {
+        $this->db->db_debug = TRUE;
+        
         try {
-            log_message('debug', '[INICIO] bloquear_horario - Datos recibidos: ' . json_encode($datos));
+            log_message('debug', 'Intentando bloquear horario con datos: ' . json_encode($datos));
 
-            // Validar datos de entrada
-            if (empty($datos['ID']) || empty($datos['RUNTS']) || 
-                empty($datos['FechaInicio']) || empty($datos['FechaTermino'])) {
-                log_message('error', 'Datos incompletos: ' . json_encode($datos));
-                return false;
-            }
+            // Primero, insertar en la tabla bloque
+            $datos_bloque = [
+                'ID' => $datos['ID'],
+                'RUNTS' => $datos['RUN'],  // Cambiado a RUNTS
+                'FechaInicio' => $datos['FechaInicio'],
+                'FechaTermino' => $datos['FechaTermino'],
+                'FechaInicioSemana' => $this->obtener_inicio_semana($datos['FechaInicio'])
+            ];
 
-            // Formatear fechas
-            $fecha_inicio = date('Y-m-d H:i:s', strtotime($datos['FechaInicio']));
-            $fecha_termino = date('Y-m-d H:i:s', strtotime($datos['FechaTermino']));
+            // Insertar en la tabla bloque
+            $resultado_bloque = $this->db->insert('bloque', $datos_bloque);
             
-            log_message('debug', 'Fechas formateadas: Inicio=' . $fecha_inicio . ', Fin=' . $fecha_termino);
-
-            // Iniciar transacción
-            $this->db->trans_start();
-
-            try {
-                // 1. Insertar en bloque
-                $bloque_data = [
-                    'ID' => $datos['ID'],
-                    'RUNTS' => $datos['RUNTS'],
-                    'FechaInicio' => $fecha_inicio,
-                    'FechaTermino' => $fecha_termino
-                ];
-
-                log_message('debug', 'Intentando insertar en bloque: ' . json_encode($bloque_data));
-                
-                // Verificar si el bloque ya existe
-                $bloque_existe = $this->db->where('ID', $datos['ID'])
-                                        ->get('bloque')
-                                        ->num_rows() > 0;
-
-                if (!$bloque_existe) {
-                    if (!$this->db->insert('bloque', $bloque_data)) {
-                        $error = $this->db->error();
-                        log_message('error', 'Error al insertar en bloque: ' . json_encode($error));
-                        throw new Exception('Error al insertar en la tabla bloque');
-                    }
-                    log_message('debug', 'Bloque insertado correctamente');
-                } else {
-                    log_message('debug', 'Bloque ya existe, continuando...');
-                }
-
-                // 2. Insertar en bloquebloqueado
-                $bloqueo_data = [
-                    'ID' => $datos['ID'],
-                    'fechainicio' => $fecha_inicio,
-                    'fechafinal' => $fecha_termino,
-                    'RUN' => $datos['RUNTS']
-                ];
-
-                log_message('debug', 'Intentando insertar en bloquebloqueado: ' . json_encode($bloqueo_data));
-
-                // Primero eliminar si existe
-                $this->db->where('ID', $datos['ID'])->delete('bloquebloqueado');
-                
-                if (!$this->db->insert('bloquebloqueado', $bloqueo_data)) {
-                    $error = $this->db->error();
-                    log_message('error', 'Error al insertar en bloquebloqueado: ' . json_encode($error));
-                    throw new Exception('Error al insertar en la tabla bloquebloqueado');
-                }
-                
-                log_message('debug', 'Bloqueo insertado correctamente');
-
-                // Completar transacción
-                $this->db->trans_complete();
-
-                if ($this->db->trans_status() === FALSE) {
-                    $error = $this->db->error();
-                    log_message('error', 'Error en transacción final: ' . json_encode($error));
-                    throw new Exception('Error en la transacción de base de datos');
-                }
-
-                log_message('debug', '[FIN] bloquear_horario - Proceso completado exitosamente');
-                return true;
-
-            } catch (Exception $e) {
-                log_message('error', 'Error específico en bloqueo: ' . $e->getMessage());
-                $this->db->trans_rollback();
-                throw $e;
+            if (!$resultado_bloque) {
+                $error = $this->db->error();
+                throw new Exception('Error al insertar en bloque: ' . json_encode($error));
             }
+
+            // Luego, insertar en bloquebloqueado
+            $datos_bloqueado = [
+                'ID' => $datos['ID'],
+                'RUN' => $datos['RUN']
+            ];
+
+            $resultado_bloqueado = $this->db->insert('bloquebloqueado', $datos_bloqueado);
+
+            if (!$resultado_bloqueado) {
+                // Si falla, hacer rollback eliminando el registro de bloque
+                $this->db->where('ID', $datos['ID'])->delete('bloque');
+                $error = $this->db->error();
+                throw new Exception('Error al insertar en bloquebloqueado: ' . json_encode($error));
+            }
+
+            return true;
 
         } catch (Exception $e) {
-            log_message('error', 'Error general en bloqueo_horario: ' . $e->getMessage());
+            log_message('error', 'Error en bloquear_horario: ' . $e->getMessage());
             return false;
         }
     }
@@ -661,5 +626,29 @@ class BloqueModel extends CI_Model
         $result = $query->row();
          
         return $result ? $result->RUNTS : null;
+    }
+
+    public function insertar_bloque_individual($datos) {
+        try {
+            // Insertar en la tabla bloque
+            $datos_bloque = [
+                'ID' => $datos['ID'],
+                'RUNTS' => $datos['RUNTS'],
+                'fechainicio' => $datos['fechainicio'],
+                'fechafinal' => $datos['fechafinal']
+            ];
+
+            $resultado = $this->db->insert('bloque', $datos_bloque);
+
+            if (!$resultado) {
+                throw new Exception('Error al insertar el bloque');
+            }
+
+            return true;
+
+        } catch (Exception $e) {
+            log_message('error', 'Error en insertar_bloque_individual: ' . $e->getMessage());
+            return false;
+        }
     }
 }

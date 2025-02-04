@@ -1,11 +1,10 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
     <html lang="es">
     <head>
         <meta charset="UTF-8">
         <title>Visualizar Citas</title>
         <?php  $this->load->view("navbar", $tipo); ?>
         <?php 
-         
         // Limpiar cualquier dato de reagendamiento al cargar la vista
         $this->session->unset_userdata(array(
             'id_cita_anterior',
@@ -13,10 +12,10 @@
             'fecha_seleccionada',
             'horario_seleccionado'
         ));
-        echo ( $this->session->userdata('id_cita_anterior'));
         ?>
         <link rel="stylesheet" href="<?= base_url('public/bootstrap/css/bootstrap.min.css'); ?>">
         <style>
+
             body {
                 background-color: #FBF1D0;
             }
@@ -185,7 +184,11 @@
 
                                 <?php if ($cita['Estado'] === 'Reservado' && ($tipo === 'estudiante' || $tipo === 'noestudiante')): ?>
                                     <form method="POST" action="<?= site_url('usuarios/agendar'); ?>" style="display:inline;">
-                                        <?php $this->session->set_userdata('id_cita_anterior', $cita['ID']); ?>
+                                        <?php 
+                                            // En lugar de usar set_userdata, pasaremos los valores como campos ocultos del formulario
+                                        ?>
+                                        <input type="hidden" name="id_cita_anterior" value="<?= $cita['ID'] ?>">
+                                        <input type="hidden" name="reagendar" value="1">
                                         <button type="submit" class="btn btn-warning btn-sm">
                                             <i class="fas fa-calendar-alt"></i> Reagendar
                                         </button>

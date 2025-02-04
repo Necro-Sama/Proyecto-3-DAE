@@ -86,7 +86,7 @@ function cargar_calendario() {
         fila.className = index % 2 === 0 ? "fila1" : "fila2";
 
         const celdaHora = document.createElement("td");
-        celdaHora.innerHTML = `<div class="p-2 display-8">${horario.id}<br>${horario.horaInicio} - ${horario.horaFinal}</div>`;
+        celdaHora.innerHTML = `<div class="p-2 display-8">${horario.horaInicio} - ${horario.horaFinal}</div>`;
         fila.appendChild(celdaHora);
 
         for (let dia = 1; dia <= 5; dia++) {
@@ -96,9 +96,9 @@ function cargar_calendario() {
             let tiempo_bloque_ini = new Date(`${semana}${tInicio}`);
             tiempo_bloque_ini = new Date(tiempo_bloque_ini.getTime() + (dia - 1) * 24 * 3600 * 1000);
 
-            if (horario.estado === 'Reservado') {
-                celda.innerHTML = `<div style="color: #ff0000;">Reservado</div>`;
-            } else if (horario.esAlmuerzo || tiempo_bloque_ini < tiempo_servidor) {
+            if (horario.esAlmuerzo) {
+                celda.innerHTML = `<div style="color: #ff0000;">(Almuerzo)</div>`;
+            } else if (tiempo_bloque_ini < tiempo_servidor) {
                 celda.innerHTML = `<div style="color: #ff0000;">(no disponible)</div>`;
             } else {
                 celda.innerHTML = crearBotones(dia, horario, tiempo_bloque_ini);
@@ -111,8 +111,6 @@ function cargar_calendario() {
     });
 
     tablaHorario.appendChild(fragment);
-
-    mostrarBotonCancelar();
 }
 
 function generarIdBloque(fechaInicio, horario) {
@@ -141,8 +139,8 @@ function crearBotones(dia, horario, tiempo_bloque_ini) {
                 <form class="bloqueo-individual-form">
                     <input type="hidden" name="ID" value="${bloqueId}">
                     <input type="hidden" name="RUNTS" value="${trabajadorSocial}">
-                    <input type="hidden" name="FechaInicio" value="${fechaInicio}">
-                    <input type="hidden" name="FechaTermino" value="${fechaFinal}">
+                    <input type="hidden" name="fechainicio" value="${fechaInicio}">
+                    <input type="hidden" name="fechafinal" value="${fechaFinal}">
                     <button type="button" 
                             class="btn btn-success btn-sm btn-bloquear-individual"
                             onclick="handleBloqueoIndividual(event, '${bloqueId}', '${fechaInicio}', '${fechaFinal}', '${trabajadorSocial}')">
@@ -160,8 +158,8 @@ function crearBotones(dia, horario, tiempo_bloque_ini) {
                     <form class="bloqueo-individual-form">
                         <input type="hidden" name="ID" value="${bloqueId}">
                         <input type="hidden" name="RUNTS" value="${trabajadorSocial}">
-                        <input type="hidden" name="FechaInicio" value="${fechaInicio}">
-                        <input type="hidden" name="FechaTermino" value="${fechaFinal}">
+                        <input type="hidden" name="fechainicio" value="${fechaInicio}">
+                        <input type="hidden" name="fechafinal" value="${fechaFinal}">
                         <button type="button" 
                                 class="btn btn-success btn-sm btn-bloquear-individual"
                                 onclick="handleBloqueoIndividual(event, '${bloqueId}', '${fechaInicio}', '${fechaFinal}', '${trabajadorSocial}')">
@@ -326,6 +324,17 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#modalFechas').on('hidden.bs.modal', function () {
         $('#formFechas')[0].reset();
     });
+
+    // Agregar event listener para el select de TS
+    const tsSelect = document.getElementById('ts-select');
+    if (tsSelect) {
+        tsSelect.addEventListener('change', function() {
+            cargar_calendario();
+        });
+    }
+
+    // Cargar calendario inicial
+    cargar_calendario();
 });
 
 $(document).ready(function() {
@@ -797,52 +806,18 @@ $(document).ready(function() {
 $(document).on('shown.bs.modal', '#exampleModal', function() {
     inicializarEventos();
 });
-    
-
-async function bloquearIndividual(bloque) {
-    try {
-        // Asegurarnos de que tenemos todos los datos necesarios
-        const trabajadorSocial = document.getElementById('ts-select').value;
-        
-        const datosBloqueo = {
-            RUNTS: trabajadorSocial,
-            FechaInicio: bloque.fechainicio,
-            FechaTermino: bloque.fechafinal || bloque.fechainicio
-        };
-
-        console.log('Datos de bloqueo individual:', datosBloqueo); // Para debug
-
-        const response = await fetch(`${site_url}/citas/bloquear_individual`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams(datosBloqueo)
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error HTTP: ${response.status}`);
-        }
-
-        const resultado = await response.json();
-        if (!resultado.success) {
-            throw new Error(resultado.message);
-        }
-
-        return resultado;
-    } catch (error) {
-        console.error('Error en bloqueo individual:', error);
-        return {
-            success: false,
-            message: error.message
-        };
-    }
-}
 
 // Actualizar la función handleBloqueoIndividual para recibir todos los parámetros
 async function handleBloqueoIndividual(event, bloqueId, fechaInicio, fechaFinal, trabajadorSocial) {
     event.preventDefault();
     
+    console.log('Datos recibidos:', {
+        bloqueId,
+        fechaInicio,
+        fechaFinal,
+        trabajadorSocial
+    });
+
     if (!trabajadorSocial) {
         alert('No se ha seleccionado un trabajador social');
         return;
@@ -850,35 +825,57 @@ async function handleBloqueoIndividual(event, bloqueId, fechaInicio, fechaFinal,
 
     if (confirm('¿Está seguro que desea bloquear este horario?')) {
         try {
+            // Crear el objeto de datos
             const datosBloqueo = {
                 ID: bloqueId,
-                RUNTS: trabajadorSocial,
+                RUN: trabajadorSocial,
                 FechaInicio: fechaInicio,
                 FechaTermino: fechaFinal
             };
+
+            console.log('Enviando datos:', datosBloqueo);
+
+            const formData = new URLSearchParams();
+            for (const [key, value] of Object.entries(datosBloqueo)) {
+                formData.append(key, value);
+            }
 
             const response = await fetch(`${site_url}/citas/bloquear_individual`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams(datosBloqueo)
+                body: formData
             });
 
-            if (!response.ok) {
-                throw new Error(`Error de conexión`);
+            // Obtener el texto de la respuesta
+            const responseText = await response.text();
+            console.log('Respuesta del servidor (texto):', responseText);
+
+            // Intentar parsear la respuesta como JSON
+            let resultado;
+            try {
+                resultado = JSON.parse(responseText);
+                console.log('Respuesta del servidor (JSON):', resultado);
+            } catch (e) {
+                console.error('Error al parsear respuesta JSON:', e);
+                throw new Error('Respuesta del servidor no válida: ' + responseText);
             }
 
-            const resultado = await response.json();
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}. Detalles: ${JSON.stringify(resultado)}`);
+            }
 
             if (resultado.success) {
                 alert('Bloque bloqueado correctamente');
                 location.reload();
             } else {
-                alert('Error al bloquear: ' + resultado.message);
+                throw new Error(resultado.message || 'Error al bloquear el horario');
             }
         } catch (error) {
-            alert('Error al procesar el bloqueo');
+            console.error('Error completo:', error);
+            console.error('Detalles del error:', error.message);
+            alert('Error al procesar el bloqueo: ' + error.message);
         }
     }
 }
