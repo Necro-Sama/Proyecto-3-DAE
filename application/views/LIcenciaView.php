@@ -104,7 +104,7 @@
 
             <div class="form-group">
                 <button type="submit" class="btn btn-block">Guardar Licencia</button>
-                <a href="<?= site_url('usuarios/listar') ?>" class="btn btn-secondary btn-block">Cancelar</a>
+                <a href="<?= site_url('usuarios/Licencia') ?>" class="btn btn-secondary btn-block">Cancelar</a>
             </div>
         </form>
     </div>
