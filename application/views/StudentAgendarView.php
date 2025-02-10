@@ -5,6 +5,18 @@ defined("BASEPATH") or exit("No direct script access allowed");
 if (!isset($tipo)) {
     die('Error: Tipo de usuario no definido');
 }
+
+// Obtener la fecha actual
+$fecha_actual = new DateTime();
+$dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+$fechas_dias = [];
+
+// Calcular las fechas para cada día de la semana
+for ($i = 0; $i < 5; $i++) {
+    $fecha_dia = clone $fecha_actual;
+    $fecha_dia->modify("+$i days");
+    $fechas_dias[] = $fecha_dia->format('d-m-Y'); // Formato: 10-febrero-2025
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -122,7 +134,15 @@ if (!isset($tipo)) {
                 <pre><?= $this->session->flashdata('debug_info') ?></pre>
             </div>
         <?php endif; ?>
-
+            <!-- Botón para abrir el modal (justo arriba del calendario) -->
+        <div class="d-flex justify-content-end mb-3">
+            <?php if ($tipo === 'administrador'): ?>
+                <button type="button" class="btn btn-custom btn-primary-dae" data-bs-toggle="modal" data-bs-target="#modalFechas">
+                    <i class="fas fa-calendar-alt"></i>
+                    Configurar Calendario
+                </button>
+            <?php endif; ?>
+        </div>
         <div id="tiempo-servidor" hidden><?= $this->BloqueModel->get_tiempo_bd() ?></div>
         <!-- Modal para configurar fechas -->
         <div class="modal fade" id="modalFechas" tabindex="-1" aria-labelledby="modalFechasLabel" aria-hidden="true">
@@ -203,21 +223,17 @@ if (!isset($tipo)) {
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="ts-select">Trabajador Social:</label>
-                        <select class="form-control" id="ts-select" name="ts-select" required 
-                                <?php echo ($tipo === 'trabajadorsocial') ? 'disabled' : ''; ?>>
+                        <select class="form-control" id="ts-select" name="ts-select" required >
                             <option value="">Seleccione un Trabajador Social</option>
                             <?php if(isset($trabajadores_sociales) && !empty($trabajadores_sociales)): ?>
                                 <?php foreach ($trabajadores_sociales as $ts): ?>
-                                    <option value="<?= $ts['RUN'] ?>" 
-                                            <?php echo ($tipo === 'trabajadorsocial') ? 'selected' : ''; ?>>
+                                    <option value="<?= $ts['RUN'] ?>">
                                         <?= $ts['Nombre'] . ' ' . $ts['Apellido'] ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </select>
-                        <?php if($tipo === 'trabajadorsocial'): ?>
-                            <input type="hidden" name="ts-select" value="<?= $trabajadores_sociales[0]['RUN'] ?>">
-                        <?php endif; ?>
+
                     </div>
                 </div>
 
@@ -259,31 +275,13 @@ if (!isset($tipo)) {
         <thead>
             <tr>
                 <th><div class="p-2 display-7 dia">Hora</div></th>
-                <th><div class="p-2 display-7 dia">
-                    Lunes
-                    
-                </div>
-                </th>
-                <th><div class="p-2 display-7 dia">
-                    Martes
-                    
-                </div>
-                </th>
-                <th><div class="p-2 display-7 dia">
-                    Miércoles
-                    
-                </div>
-                </th>
-                <th><div class="p-2 display-7 dia">
-                    Jueves
-                    
-                </div>
-                </th>
-                <th><div class="p-2 display-7 dia">
-                    Viernes
-                    
-                </div>
-                </th>
+                <?php foreach ($dias as $index => $dia): ?>
+                    <th>
+                        <div class="p-2 display-7 dia">
+                            <?php echo "$dia " . $fechas_dias[$index]; ?>
+                        </div>
+                    </th>
+                <?php endforeach; ?>
             </tr>
         </thead>
             <tbody id="tabla-horario">
@@ -291,15 +289,7 @@ if (!isset($tipo)) {
             </tbody>
         </table>
 
-        <!-- Botón para abrir el modal (justo arriba del calendario) -->
-        <div class="d-flex justify-content-end mb-3">
-            <?php if ($tipo === 'administrador'): ?>
-                <button type="button" class="btn btn-custom btn-primary-dae" data-bs-toggle="modal" data-bs-target="#modalFechas">
-                    <i class="fas fa-calendar-alt"></i>
-                    Configurar Calendario
-                </button>
-            <?php endif; ?>
-        </div>
+        
 
         <div id='calendar'></div>
     </div>
@@ -371,42 +361,6 @@ if (!isset($tipo)) {
             </div>
         </div>
     </div>
-
-    <!-- Debug para verificar que el modal se carga -->
-    <script>
-        $(document).ready(function() {
-            console.log('Modal cargado:', $('#exampleModal').length > 0);
-        });
-    </script>
-
-    <!-- Al final del archivo, justo antes de cerrar el body -->
-    <script>
-        console.log('Vista cargada - Verificando elementos...');
-        
-        // Verificar que jQuery esté disponible
-        if (typeof jQuery !== 'undefined') {
-            console.log('jQuery está disponible:', jQuery.fn.jquery);
-        } else {
-            console.error('jQuery no está disponible!');
-        }
-        
-        // Verificar que el botón existe
-        $(document).ready(function() {
-            console.log('DOM listo - Buscando elementos...');
-            
-            const btnBloquear = $('#btn-bloquear');
-            console.log('Botón de bloquear:', btnBloquear.length ? 'Encontrado' : 'No encontrado');
-            
-            if (btnBloquear.length) {
-                console.log('Agregando evento click al botón...');
-                btnBloquear.on('click', function() {
-                    console.log('Botón clickeado!');
-                });
-            }
-        });
-    </script>
-
-
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Función para formatear fecha en español

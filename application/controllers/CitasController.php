@@ -71,10 +71,7 @@ class CitasController extends CI_Controller
                 'fechafinal' => $this->input->post('fechafinal')
             );
 
-            // Log para debug
-            log_message('debug', 'Datos a insertar en bloquebloqueado: ' . json_encode($data));
-
-            $this->load->model('CitasModel');
+            // Aquí puedes agregar la lógica para bloquear el horario
             $resultado = $this->CitasModel->insertarBloqueBloqueado($data);
 
             if ($resultado) {

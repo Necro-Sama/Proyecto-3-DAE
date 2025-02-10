@@ -493,7 +493,7 @@ async function bloquearHorario(datos) {
             ...datos,
             run_trabajador: datos.RUN
         };
-        delete datosAjustados.RUN;
+        // delete datosAjustados.RUN;
 
         const formData = new URLSearchParams();
         for (const [key, value] of Object.entries(datosAjustados)) {
@@ -949,3 +949,35 @@ function generarBotonHorario(bloque) {
     let btnText = window.agendarConfig && window.agendarConfig.reagenda ? 'Reagendar' : 'Agendar';
     return `<button class="btn btn-success btn-sm" onclick="abrirModal('${bloque.id}')">${btnText}</button>`;
 }
+
+function bloquearHorario(bloqueId, runTrabajador, fechaInicio, fechaFinal) {
+    $.post(`${site_url}/citas/bloquear`, {
+        ID: bloqueId,
+        run_trabajador: runTrabajador,
+        fechainicio: fechaInicio,
+        fechafinal: fechaFinal
+    })
+    .done(function(response) {
+        if (response.success) {
+            alert('Bloqueo realizado correctamente');
+            location.reload(); // Recargar la página o actualizar la vista
+        } else {
+            alert('Error al bloquear: ' + response.message);
+        }
+    })
+    .fail(function() {
+        alert('Error al procesar la solicitud de bloqueo');
+    });
+}
+
+// Asegúrate de que el botón de bloqueo tenga el evento asignado
+document.querySelectorAll('.btn-bloquear').forEach(boton => {
+    boton.addEventListener('click', function() {
+        const bloqueId = this.dataset.bloqueId; // Asegúrate de que el botón tenga el data-bloque-id
+        const runTrabajador = this.dataset.runTrabajador; // Asegúrate de que el botón tenga el data-run-trabajador
+        const fechaInicio = this.dataset.fechaInicio; // Asegúrate de que el botón tenga el data-fecha-inicio
+        const fechaFinal = this.dataset.fechaFinal; // Asegúrate de que el botón tenga el data-fecha-final
+
+        bloquearHorario(bloqueId, runTrabajador, fechaInicio, fechaFinal);
+    });
+});

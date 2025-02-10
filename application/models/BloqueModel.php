@@ -119,14 +119,7 @@ class BloqueModel extends CI_Model
 
         try {
             // Verificar si el bloque ya está reservado
-            $bloque_reservado = $this->db->query("
-                SELECT ba.* 
-                FROM bloque b
-                JOIN bloqueatencion ba ON b.ID = ba.ID
-                WHERE b.FechaInicio = ? 
-                AND b.FechaTermino = ?
-                AND ba.Estado = 'Reservado'
-            ", array($fecha_ini, $fecha_ter))->num_rows() > 0;
+            $bloque_reservado = $this->db->query("SELECT ba.* FROM bloque b JOIN bloqueatencion ba ON b.ID = ba.ID WHERE b.FechaInicio = ? AND b.FechaTermino = ? AND ba.Estado = 'Reservado'", array($fecha_ini, $fecha_ter))->num_rows() > 0;
 
             if ($bloque_reservado) {
                 throw new Exception("Este horario ya ha sido reservado. Por favor, seleccione otro horario.");
@@ -139,28 +132,20 @@ class BloqueModel extends CI_Model
             }
 
             // Verificar si es estudiante
-            $estudiante = $this->db->query("
-                SELECT * FROM estudiante WHERE RUN = ?
-            ", array($RUN_estudiante))->row();
+            $estudiante = $this->db->query("SELECT * FROM estudiante WHERE RUN = ?", array($RUN_estudiante))->row();
 
             // Determinar el trabajador social
             if (!$estudiante) {
                 // Verificar/crear cliente
-                $cliente_existe = $this->db->query("
-                    SELECT * FROM cliente WHERE RUN = ?
-                ", array($RUN_estudiante))->num_rows() > 0;
+                $cliente_existe = $this->db->query("SELECT * FROM cliente WHERE RUN = ?", array($RUN_estudiante))->num_rows() > 0;
 
                 if (!$cliente_existe) {
-                    $this->db->query("
-                        INSERT INTO cliente (RUN) VALUES (?)
-                    ", array($RUN_estudiante));
+                    $this->db->query("INSERT INTO cliente (RUN) VALUES (?)", array($RUN_estudiante));
                 }
                 
                 $run_ts = $this->obtenerTSDisponible();
             } else {
-                $carrera = $this->db->query("
-                    SELECT * FROM carrera WHERE COD_CARRERA = ?
-                ", array($estudiante->COD_CARRERA))->row();
+                $carrera = $this->db->query("SELECT * FROM carrera WHERE COD_CARRERA = ?", array($estudiante->COD_CARRERA))->row();
 
                 if (!$carrera) {
                     throw new Exception("No se encontró la carrera del estudiante.");
@@ -178,22 +163,22 @@ class BloqueModel extends CI_Model
 
             // Verificar/crear calendario semanal
             $calendario_existe = $this->db->query("
-                SELECT * FROM calendariosemanal 
-                WHERE FechaInicioSemana = ? AND RUNTS = ?
-            ", array($fecha_inicio_semana, $run_ts))->num_rows() > 0;
+            SELECT * 
+            FROM calendariosemanal 
+            WHERE FechaInicioSemana = ? AND RUNTS = ?", 
+            array($fecha_inicio_semana, $run_ts))->num_rows() > 0;
 
             if (!$calendario_existe) {
+                // Insertar en calendario semanal si no existe
                 $this->db->query("
-                    INSERT INTO calendariosemanal (FechaInicioSemana, RUNTS) 
-                    VALUES (?, ?)
-                ", array($fecha_inicio_semana, $run_ts));
+                INSERT INTO calendariosemanal (FechaInicioSemana, RUNTS) 
+                VALUES (?, ?)", array($fecha_inicio_semana, $run_ts));
             }
 
             // Insertar bloque
             $result = $this->db->query("
-                INSERT INTO bloque (FechaInicio, FechaTermino, FechaInicioSemana, RUNTS) 
-                VALUES (?, ?, ?, ?)
-            ", array($fecha_ini, $fecha_ter, $fecha_inicio_semana, $run_ts));
+            INSERT INTO bloque (FechaInicio, FechaTermino, FechaInicioSemana, RUNTS) 
+            VALUES (?, ?, ?, ?)", array($fecha_ini, $fecha_ter, $fecha_inicio_semana, $run_ts));
 
             if (!$result) {
                 throw new Exception("Error al crear el bloque de atención.");
@@ -202,10 +187,7 @@ class BloqueModel extends CI_Model
             $bloque_id = $this->db->insert_id();
 
             // Insertar bloque atención
-            $result = $this->db->query("
-                INSERT INTO bloqueatencion (Estado, Motivo, ID, RUNCliente) 
-                VALUES ('Reservado', ?, ?, ?)
-            ", array($motivo, $bloque_id, $RUN_estudiante));
+            $result = $this->db->query("INSERT INTO bloqueatencion (Estado, Motivo, ID, RUNCliente) VALUES ('Reservado', ?, ?, ?)", array($motivo, $bloque_id, $RUN_estudiante));
 
             if (!$result) {
                 throw new Exception("Error al registrar la atención.");
@@ -228,8 +210,7 @@ class BloqueModel extends CI_Model
             }
 
             if (!$correo_enviado) {
-                $this->session->set_flashdata('warning', 
-                    'La cita se ha agendado correctamente, pero hubo un problema al enviar el correo de confirmación.');
+                $this->session->set_flashdata('warning', 'La cita se ha agendado correctamente, pero hubo un problema al enviar el correo de confirmación.');
             }
 
             return true;
@@ -396,34 +377,17 @@ class BloqueModel extends CI_Model
         try {
             log_message('debug', 'Intentando bloquear horario con datos: ' . json_encode($datos));
 
-            // Primero, insertar en la tabla bloque
-            $datos_bloque = [
-                'ID' => $datos['ID'],
-                'RUNTS' => $datos['RUN'],  // Cambiado a RUNTS
-                'FechaInicio' => $datos['FechaInicio'],
-                'FechaTermino' => $datos['FechaTermino'],
-                'FechaInicioSemana' => $this->obtener_inicio_semana($datos['FechaInicio'])
-            ];
-
-            // Insertar en la tabla bloque
-            $resultado_bloque = $this->db->insert('bloque', $datos_bloque);
-            
-            if (!$resultado_bloque) {
-                $error = $this->db->error();
-                throw new Exception('Error al insertar en bloque: ' . json_encode($error));
-            }
-
-            // Luego, insertar en bloquebloqueado
+            //insertar en bloquebloqueado
             $datos_bloqueado = [
                 'ID' => $datos['ID'],
-                'RUN' => $datos['RUN']
+                'RUN' => $datos['RUN'],
+                'fechainicio' => $datos['FechaInicio'],
+                'fechafinal' => $datos['FechaTermino'],
             ];
 
             $resultado_bloqueado = $this->db->insert('bloquebloqueado', $datos_bloqueado);
 
             if (!$resultado_bloqueado) {
-                // Si falla, hacer rollback eliminando el registro de bloque
-                $this->db->where('ID', $datos['ID'])->delete('bloque');
                 $error = $this->db->error();
                 throw new Exception('Error al insertar en bloquebloqueado: ' . json_encode($error));
             }
