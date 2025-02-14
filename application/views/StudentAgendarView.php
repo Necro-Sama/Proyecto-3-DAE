@@ -135,71 +135,8 @@ for ($i = 0; $i < 5; $i++) {
             </div>
         <?php endif; ?>
             <!-- Botón para abrir el modal (justo arriba del calendario) -->
-        <div class="d-flex justify-content-end mb-3">
-            <?php if ($tipo === 'administrador'): ?>
-                <button type="button" class="btn btn-custom btn-primary-dae" data-bs-toggle="modal" data-bs-target="#modalFechas">
-                    <i class="fas fa-calendar-alt"></i>
-                    Configurar Calendario
-                </button>
-            <?php endif; ?>
-        </div>
         <div id="tiempo-servidor" hidden><?= $this->BloqueModel->get_tiempo_bd() ?></div>
-        <!-- Modal para configurar fechas -->
-        <div class="modal fade" id="modalFechas" tabindex="-1" aria-labelledby="modalFechasLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalFechasLabel">Configurar Calendario</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form id="formFechas">
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="duracion_bloque" class="form-label">Duración del Bloque</label>
-                                <select class="form-select" id="duracion_bloque" name="duracion_bloque" required>
-                                    <option value="15">15 minutos</option>
-                                    <option value="30" selected>30 minutos</option>
-                                    <option value="45">45 minutos</option>
-                                    <option value="60">1 hora</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="semana_inicio" class="form-label">Semana de Inicio</label>
-                                <select class="form-select" id="semana_inicio" name="semana_inicio" required>
-                                    <!-- Se llenará dinámicamente con JavaScript -->
-                                </select>
-                                <small class="text-muted" id="rango_semana"></small>
-                            </div>
-                            <div class="mb-3">
-                                <label for="cantidad_semanas" class="form-label">Duración en Semanas</label>
-                                <select class="form-select" id="cantidad_semanas" name="cantidad_semanas" required>
-                                    <?php for($i = 1; $i <= 12; $i++): ?>
-                                        <option value="<?= $i ?>" <?= $i == 4 ? 'selected' : '' ?>>
-                                            <?= $i ?> semana<?= $i > 1 ? 's' : '' ?>
-                                        </option>
-                                    <?php endfor; ?>
-                                </select>
-                                <small class="text-muted" id="fecha_termino"></small>
-                            </div>
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" id="mantener_citas" name="mantener_citas" checked>
-                                <label class="form-check-label" for="mantener_citas">
-                                    Mantener citas existentes
-                                </label>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-custom btn-cancel-dae" data-bs-dismiss="modal">
-                                <i class="fas fa-times"></i> Cancelar
-                            </button>
-                            <button type="submit" class="btn btn-custom btn-primary-dae">
-                                <i class="fas fa-save"></i> Guardar Cambios
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+        
         <div class="row mb-3">
             <div class="col-md-6">
                 <div class="form-group">
@@ -397,18 +334,6 @@ for ($i = 0; $i < 5; $i++) {
                 option.text = `Semana ${i + 1}: ${formatearFecha(inicioSemana)} - ${formatearFecha(finSemana)}`;
                 selectSemana.appendChild(option);
             }
-        }
-
-        // Función para actualizar la fecha de término
-        function actualizarFechaTermino() {
-            const semanaInicio = new Date(document.getElementById('semana_inicio').value);
-            const cantidadSemanas = parseInt(document.getElementById('cantidad_semanas').value);
-            
-            const fechaTermino = new Date(semanaInicio);
-            fechaTermino.setDate(semanaInicio.getDate() + ((cantidadSemanas * 7) - 3)); // -3 para terminar en viernes
-            
-            document.getElementById('fecha_termino').textContent = 
-                `Fecha de término: ${formatearFecha(fechaTermino)}`;
         }
 
         // Inicializar selectores
