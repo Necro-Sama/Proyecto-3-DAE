@@ -372,59 +372,31 @@ class BloqueModel extends CI_Model
     }
 
     public function bloquear_horario($datos) {
-        $this->db->trans_begin();
+        $this->db->db_debug = TRUE;
         
         try {
-            // Validar datos de entrada
-            if (empty($datos['RUN']) || empty($datos['fechainicio']) || empty($datos['fechafinal'])) {
-                throw new Exception('Datos incompletos para bloquear horario');
-            }
+            log_message('debug', 'Intentando bloquear horario con datos: ' . json_encode($datos));
 
-            // Verificar si ya existe un bloque
-            $existe = $this->db->where('FechaInicio', $datos['fechainicio'])
-                              ->where('FechaTermino', $datos['fechafinal'])
-                              ->where('RUNTS', $datos['RUN'])
-                              ->get('bloque')
-                              ->num_rows() > 0;
-
-            if ($existe) {
-                throw new Exception('Ya existe un bloque para este horario');
-            }
-
-            // Preparar datos para la tabla bloque
-            $datos_bloque = [
-                'ID' => $datos['ID'],
-                'FechaInicio' => $datos['fechainicio'],
-                'FechaTermino' => $datos['fechafinal'],
-                'RUNTS' => $datos['RUN'],
-                'FechaInicioSemana' => date('Y-m-d', strtotime('monday this week', strtotime($datos['fechainicio'])))
-            ];
-
-            // Insertar en bloque
-            if (!$this->db->insert('bloque', $datos_bloque)) {
-                throw new Exception('Error al insertar en tabla bloque: ' . json_encode($this->db->error()));
-            }
-
-            // Preparar datos para bloquebloqueado
+            //insertar en bloquebloqueado
             $datos_bloqueado = [
                 'ID' => $datos['ID'],
                 'RUN' => $datos['RUN'],
-                'fechainicio' => $datos['fechainicio'],
-                'fechafinal' => $datos['fechafinal']
+                'fechainicio' => $datos['FechaInicio'],
+                'fechafinal' => $datos['FechaTermino'],
             ];
 
-            // Insertar en bloquebloqueado
-            if (!$this->db->insert('bloquebloqueado', $datos_bloqueado)) {
-                throw new Exception('Error al insertar en tabla bloquebloqueado: ' . json_encode($this->db->error()));
+            $resultado_bloqueado = $this->db->insert('bloquebloqueado', $datos_bloqueado);
+
+            if (!$resultado_bloqueado) {
+                $error = $this->db->error();
+                throw new Exception('Error al insertar en bloquebloqueado: ' . json_encode($error));
             }
 
-            $this->db->trans_commit();
-            return ['success' => true, 'message' => 'Bloque bloqueado correctamente'];
+            return true;
 
         } catch (Exception $e) {
-            $this->db->trans_rollback();
             log_message('error', 'Error en bloquear_horario: ' . $e->getMessage());
-            return ['success' => false, 'message' => $e->getMessage()];
+            return false;
         }
     }
 
@@ -613,6 +585,7 @@ class BloqueModel extends CI_Model
         $this->db->select('RUNTS')
                  ->from('bloque')
                  ->where('ID', $id_cita);
+         
         $query = $this->db->get();
         $result = $query->row();
          
@@ -639,28 +612,6 @@ class BloqueModel extends CI_Model
 
         } catch (Exception $e) {
             log_message('error', 'Error en insertar_bloque_individual: ' . $e->getMessage());
-            return false;
-        }
-    }
-
-    public function verificar_disponibilidad($datos) {
-        try {
-            // Verificar si hay citas existentes
-            $existe = $this->db
-                ->where('FechaInicio', $datos['fechainicio'])
-                ->where('FechaTermino', $datos['fechafinal'])
-                ->where('RUNTS', $datos['RUNTS'])
-                ->group_start()
-                    ->where('EXISTS (SELECT 1 FROM bloqueatencion ba WHERE ba.ID = bloque.ID)', null, false)
-                    ->or_where('EXISTS (SELECT 1 FROM bloquebloqueado bb WHERE bb.ID = bloque.ID)', null, false)
-                ->group_end()
-                ->get('bloque')
-                ->num_rows() > 0;
-
-            return !$existe;
-
-        } catch (Exception $e) {
-            log_message('error', 'Error en verificar_disponibilidad: ' . $e->getMessage());
             return false;
         }
     }

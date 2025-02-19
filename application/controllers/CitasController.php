@@ -8,9 +8,6 @@ class CitasController extends CI_Controller
         $this->load->model('TrabajadorSocialModel');
         $this->load->model('CitasModel');
         $this->load->model('UserModel');
-        $this->load->model('bloquemodel', 'BloqueModel');
-        $this->output->set_content_type('application/json');
-        $this->load->helper('url');
     }
     function estadobloque($id_bloque){
         return $this->CitasModel->verificar_bloque($id_bloque);
@@ -56,50 +53,46 @@ class CitasController extends CI_Controller
         return $data;
     }
     public function bloquear() {
-        // Deshabilitar cualquier salida previa
-        if (ob_get_level()) ob_end_clean();
+        header('Content-Type: application/json');
         
         try {
-            $datos = $this->input->post();
-            
-            if (!$datos) {
-                throw new Exception('No se recibieron datos');
-            }
-            
-            log_message('debug', 'Datos recibidos en bloquear: ' . json_encode($datos));
-            
-            if (empty($datos['run_trabajador']) || empty($datos['fechainicio']) || empty($datos['fechafinal'])) {
-                throw new Exception('Faltan datos requeridos');
+            // Validar datos requeridos
+            $requiredFields = ['ID', 'run_trabajador', 'fechainicio', 'fechafinal'];
+            foreach ($requiredFields as $field) {
+                if (!$this->input->post($field)) {
+                    throw new Exception('Datos incompletos: falta ' . $field);
+                }
             }
 
-            $datosBloqueo = [
-                'ID' => uniqid('BLQ_'),
-                'RUN' => $datos['run_trabajador'],
-                'fechainicio' => $datos['fechainicio'],
-                'fechafinal' => $datos['fechafinal']
-            ];
+            $data = array(
+                'ID' => $this->input->post('ID'),
+                'RUN' => $this->input->post('run_trabajador'),
+                'fechainicio' => $this->input->post('fechainicio'),
+                'fechafinal' => $this->input->post('fechafinal')
+            );
 
-            $resultado = $this->BloqueModel->bloquear_horario($datosBloqueo);
-            
-            if (!$resultado['success']) {
-                throw new Exception($resultado['message']);
+            // Aquí puedes agregar la lógica para bloquear el horario
+            $resultado = $this->CitasModel->insertarBloqueBloqueado($data);
+
+            if ($resultado) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Bloque bloqueado correctamente'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'No se pudo bloquear el bloque'
+                ]);
             }
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Bloque bloqueado correctamente',
-                'data' => $resultado
-            ]);
 
         } catch (Exception $e) {
             log_message('error', 'Error en bloquear: ' . $e->getMessage());
-            
             echo json_encode([
                 'success' => false,
                 'message' => $e->getMessage()
             ]);
         }
-        exit();
     }
     //seccion reagendar
     public function obtener_horarios() {
@@ -368,32 +361,68 @@ class CitasController extends CI_Controller
         }
     }
     public function verificar_disponibilidad_bloque() {
+        // Asegurarse de que es una petición AJAX
+        if (!$this->input->is_ajax_request()) {
+            exit(json_encode(['status' => 'error', 'mensaje' => 'Petición no válida']));
+        }
+
+        // Limpiar cualquier salida previa
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        // Establecer headers
+        header('Content-Type: application/json');
+
         try {
-            $fechaInicio = $this->input->post('fechainicio');
-            $fechaFinal = $this->input->post('fechafinal');
-            $runTrabajador = $this->input->post('run_trabajador');
+            // Obtener datos POST
+            $fecha_inicio = $this->input->post('fecha_inicio');
+            $fecha_fin = $this->input->post('fecha_fin');
+            $run_ts = $this->input->post('run_ts');
 
-            // Verificar si hay citas existentes
-            $disponible = $this->BloqueModel->verificar_disponibilidad([
-                'fechainicio' => $fechaInicio,
-                'fechafinal' => $fechaFinal,
-                'RUNTS' => $runTrabajador
-            ]);
+            // Log para debugging
+            log_message('debug', sprintf(
+                'Verificando bloque - Inicio: %s, Fin: %s, RUN: %s',
+                $fecha_inicio,
+                $fecha_fin,
+                $run_ts
+            ));
 
-            $this->output
-                ->set_content_type('application/json')
-                ->set_output(json_encode([
-                    'success' => true,
-                    'disponible' => $disponible
+            // Validar datos
+            if (empty($fecha_inicio) || empty($fecha_fin) || empty($run_ts)) {
+                exit(json_encode([
+                    'status' => 'error',
+                    'mensaje' => 'Faltan datos requeridos'
                 ]));
+            }
+
+            // Cargar modelo si no está cargado
+            if (!isset($this->BloqueModel)) {
+                $this->load->model('BloqueModel');
+            }
+
+            // Verificar disponibilidad
+            $bloque_existente = $this->BloqueModel->verificar_bloque_disponible(
+                $fecha_inicio,
+                $fecha_fin,
+                $run_ts
+            );
+
+            // Enviar respuesta
+            exit(json_encode([
+                'status' => 'success',
+                'disponible' => !$bloque_existente,
+                'mensaje' => !$bloque_existente ? 
+                    'Bloque disponible' : 
+                    'Este trabajador social ya tiene bloqueado este horario'
+            ]));
 
         } catch (Exception $e) {
-            $this->output
-                ->set_content_type('application/json')
-                ->set_output(json_encode([
-                    'success' => false,
-                    'message' => $e->getMessage()
-                ]));
+            log_message('error', 'Error en verificación: ' . $e->getMessage());
+            exit(json_encode([
+                'status' => 'error',
+                'mensaje' => 'Error al verificar disponibilidad: ' . $e->getMessage()
+            ]));
         }
     }
 }
