@@ -339,27 +339,11 @@ class BloqueModel extends CI_Model
     }
 
     public function verificar_bloque_disponible($fecha_inicio, $fecha_fin, $run_ts) {
-        // Primero, asegurarnos de que las fechas estén en el formato correcto
-        $fecha_inicio = date('Y-m-d H:i:s', strtotime($fecha_inicio));
-        $fecha_fin = date('Y-m-d H:i:s', strtotime($fecha_fin));
-
-        $this->db->select('COUNT(*) as total');
-        $this->db->from('bloque');
-        $this->db->where('RUNTS', $run_ts);
-        $this->db->where("(
-            (FechaInicio <= '$fecha_inicio' AND FechaTermino >= '$fecha_inicio')
-            OR (FechaInicio <= '$fecha_fin' AND FechaTermino >= '$fecha_fin')
-            OR (FechaInicio >= '$fecha_inicio' AND FechaTermino <= '$fecha_fin')
-        )");
-
-        $query = $this->db->get();
-        $result = $query->row();
-        
-        // Para debug
-        log_message('debug', 'SQL Query: ' . $this->db->last_query());
-        log_message('debug', 'Resultado: ' . print_r($result, true));
-
-        return ($result->total > 0);
+        return $this->db->where('RUNTS', $run_ts)
+                        ->where('FechaInicio', $fecha_inicio)
+                        ->where('FechaTermino', $fecha_fin)
+                        ->get('bloquebloqueado')
+                        ->num_rows() > 0;
     }
 
     private function obtener_inicio_semana($fecha) {
@@ -614,5 +598,9 @@ class BloqueModel extends CI_Model
             log_message('error', 'Error en insertar_bloque_individual: ' . $e->getMessage());
             return false;
         }
+    }
+
+    public function insertar_bloque_bloqueado($datos) {
+        return $this->db->insert('bloquebloqueado', $datos);
     }
 }

@@ -807,104 +807,111 @@ $(document).on('shown.bs.modal', '#exampleModal', function() {
     inicializarEventos();
 });
 
-// Actualizar la función handleBloqueoIndividual para recibir todos los parámetros
+// Actualizar la función handleBloqueoIndividual
 async function handleBloqueoIndividual(event, bloqueId, fechaInicio, fechaFinal, trabajadorSocial) {
     event.preventDefault();
     
-    console.log('Datos recibidos:', {
-        bloqueId,
-        fechaInicio,
-        fechaFinal,
-        trabajadorSocial
-    });
-
     if (!trabajadorSocial) {
-        alert('No se ha seleccionado un trabajador social');
+        Swal.fire({
+            title: 'Error',
+            text: 'No se ha seleccionado un trabajador social',
+            icon: 'error'
+        });
         return;
     }
 
-    if (confirm('¿Está seguro que desea bloquear este horario?')) {
-        try {
-            // Crear el objeto de datos
-            const datosBloqueo = {
-                ID: bloqueId,
-                RUN: trabajadorSocial,
-                FechaInicio: fechaInicio,
-                FechaTermino: fechaFinal
-            };
+    try {
+        // Deshabilitar el botón y mostrar loading
+        const boton = event.target;
+        boton.disabled = true;
+        const textoOriginal = boton.innerHTML;
+        boton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Bloqueando...';
 
-            console.log('Enviando datos:', datosBloqueo);
+        // Crear el objeto de datos
+        const datosBloqueo = {
+            ID: bloqueId,
+            RUN: trabajadorSocial,
+            FechaInicio: fechaInicio,
+            FechaTermino: fechaFinal
+        };
 
-            const formData = new URLSearchParams();
-            for (const [key, value] of Object.entries(datosBloqueo)) {
-                formData.append(key, value);
-            }
+        const formData = new URLSearchParams();
+        for (const [key, value] of Object.entries(datosBloqueo)) {
+            formData.append(key, value);
+        }
 
-            const response = await fetch(`${site_url}/citas/bloquear_individual`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: formData
+        const response = await fetch(`${site_url}/citas/bloquear_individual`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        });
+
+        const resultado = await response.json();
+
+        if (resultado.success) {
+            await Swal.fire({
+                title: 'Éxito',
+                text: 'Bloque bloqueado correctamente',
+                icon: 'success'
             });
-
-            // Obtener el texto de la respuesta
-            const responseText = await response.text();
-            console.log('Respuesta del servidor (texto):', responseText);
-
-            // Intentar parsear la respuesta como JSON
-            let resultado;
-            try {
-                resultado = JSON.parse(responseText);
-                console.log('Respuesta del servidor (JSON):', resultado);
-            } catch (e) {
-                console.error('Error al parsear respuesta JSON:', e);
-                throw new Error('Respuesta del servidor no válida: ' + responseText);
-            }
-
-            if (!response.ok) {
-                throw new Error(`Error HTTP: ${response.status}. Detalles: ${JSON.stringify(resultado)}`);
-            }
-
-            if (resultado.success) {
-                alert('Bloque bloqueado correctamente');
-                location.reload();
-            } else {
-                throw new Error(resultado.message || 'Error al bloquear el horario');
-            }
-        } catch (error) {
-            console.error('Error completo:', error);
-            console.error('Detalles del error:', error.message);
-            alert('Error al procesar el bloqueo: ' + error.message);
+            cargar_calendario(); // Recargar el calendario
+        } else {
+            throw new Error(resultado.message || 'Error al bloquear el horario');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error',
+            text: error.message || 'Error al procesar el bloqueo',
+            icon: 'error'
+        });
+    } finally {
+        // Restaurar el botón
+        if (boton) {
+            boton.disabled = false;
+            boton.innerHTML = textoOriginal;
         }
     }
 }
 
-// Asegurarse de que los botones de bloqueo individual tengan el evento asignado
-function inicializarBotonesBloqueo() {
-    const botonesBloqueo = document.querySelectorAll('.btn-bloquear-individual');
-    botonesBloqueo.forEach(boton => {
-        boton.addEventListener('click', handleBloqueoIndividual);
-    });
+// Función para generar el botón de bloqueo individual
+function generarBotonBloqueoIndividual(bloque) {
+    const boton = document.createElement('button');
+    boton.className = 'btn btn-warning btn-sm';
+    boton.textContent = 'Bloquear';
+    boton.onclick = (event) => handleBloqueoIndividual(
+        event,
+        bloque.id,
+        bloque.fechaInicio,
+        bloque.fechaFinal,
+        document.getElementById('ts-select')?.value
+    );
+    return boton;
 }
 
-// Llamar a la inicialización cuando el documento esté listo
-document.addEventListener('DOMContentLoaded', inicializarBotonesBloqueo);
+// Actualizar la función que genera la tabla de horarios para incluir los botones de bloqueo
+function generarTablaHorarios(data) {
+    const tabla = document.getElementById('tabla-horario');
+    tabla.innerHTML = ''; // Limpiar tabla existente
 
-// Agregar función para actualizar los botones cuando cambie el select
-function actualizarBotonesAlCambiarTS() {
-    const selectTS = document.getElementById('ts-select');
-    if (selectTS) {
-        selectTS.addEventListener('change', function() {
-            cargar_calendario(); // Recargar el calendario para actualizar los botones
+    // ... resto del código de generación de tabla ...
+    
+    // Al generar cada celda, si corresponde agregar el botón de bloqueo:
+    if (tipoUsuario === 'administrador' || tipoUsuario === 'trabajadorsocial') {
+        const botonBloqueo = generarBotonBloqueoIndividual({
+            id: `BLQ${Date.now()}${Math.random().toString(36).substr(2, 5)}`,
+            fechaInicio: fechaHoraInicio,
+            fechaFinal: fechaHoraFin,
         });
+        celda.appendChild(botonBloqueo);
     }
+    
+    // ... resto del código ...
 }
 
-// Llamar a la función cuando el documento esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    actualizarBotonesAlCambiarTS();
-});
+// ... existing code ...
 
 function mostrarBotonCancelar() {
     // Verificar si el usuario es estudiante o no estudiante

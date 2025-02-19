@@ -215,7 +215,10 @@ for ($i = 0; $i < 5; $i++) {
                 <?php foreach ($dias as $index => $dia): ?>
                     <th>
                         <div class="p-2 display-7 dia">
-                            <?php echo "$dia " . $fechas_dias[$index]; ?>
+                            <?php 
+                            $fecha = new DateTime($fechas_dias[$index]);
+                            echo $dia . " " . $fecha->format('d-F-Y'); 
+                            ?>
                         </div>
                     </th>
                 <?php endforeach; ?>
@@ -346,6 +349,27 @@ for ($i = 0; $i < 5; $i++) {
         // Actualizar fecha de término inicial
         actualizarFechaTermino();
     });
+
+    function seleccion_semana(event) {
+        const fechaInicio = new Date(event.target.value);
+        const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        
+        const encabezados = document.querySelectorAll('.dia');
+        
+        // Saltamos el primer encabezado que es "Hora"
+        for(let i = 1; i < encabezados.length; i++) {
+            const fecha = new Date(fechaInicio);
+            fecha.setDate(fechaInicio.getDate() + (i-1));
+            
+            const dia = dias[i-1];
+            const formatoFecha = `${dia} ${fecha.getDate()}-${meses[fecha.getMonth()]}-${fecha.getFullYear()}`;
+            encabezados[i].textContent = formatoFecha;
+        }
+        
+        // Resto de la lógica de selección de semana...
+        cargar_calendario();
+    }
     </script>
 </body>
 </html>

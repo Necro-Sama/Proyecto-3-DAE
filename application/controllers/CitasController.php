@@ -200,36 +200,67 @@ class CitasController extends CI_Controller
         
         try {
             // Validar datos requeridos
-            $requiredFields = ['ID', 'run_trabajador', 'fechainicio', 'fechafinal'];
-            foreach ($requiredFields as $field) {
-                if (!$this->input->post($field)) {
-                    throw new Exception('Datos incompletos: falta ' . $field);
+            if (!$this->input->post('run_trabajador') || !$this->input->post('fecha') || !$this->input->post('bloques')) {
+                throw new Exception('Datos incompletos');
+            }
+
+            $run_trabajador = $this->input->post('run_trabajador');
+            $fecha = $this->input->post('fecha');
+            $bloques = json_decode($this->input->post('bloques'), true);
+
+            if (!is_array($bloques)) {
+                throw new Exception('Formato de bloques inválido');
+            }
+
+            $this->load->model('BloqueModel');
+            $bloquesInsertados = 0;
+            $errores = [];
+
+            // Iniciar transacción
+            $this->db->trans_begin();
+
+            foreach ($bloques as $bloque) {
+                // Verificar si el bloque ya está bloqueado o reservado
+                $bloqueExistente = $this->BloqueModel->verificar_bloque_disponible(
+                    $bloque['fechainicio'],
+                    $bloque['fechafinal'],
+                    $run_trabajador
+                );
+
+                if (!$bloqueExistente) {
+                    // Insertar bloque
+                    $datos_bloque = array(
+                        'ID' => $bloque['ID'],
+                        'RUNTS' => $run_trabajador,
+                        'fechainicio' => $bloque['fechainicio'],
+                        'fechafinal' => $bloque['fechafinal']
+                    );
+
+                    if ($this->BloqueModel->insertar_bloque_bloqueado($datos_bloque)) {
+                        $bloquesInsertados++;
+                    } else {
+                        $errores[] = "Error al bloquear horario {$bloque['horaInicio']} - {$bloque['horaFinal']}";
+                    }
                 }
             }
 
-            $data = array(
-                'ID' => $this->input->post('ID'),
-                'RUN' => $this->input->post('run_trabajador'),
-                'fechainicio' => $this->input->post('fechainicio'),
-                'fechafinal' => $this->input->post('fechafinal')
-            );
-
-            $this->load->model('CitasModel');
-            $resultado = $this->CitasModel->insertarBloqueDiaCompleto($data);
-
-            if ($resultado) {
-                echo json_encode([
-                    'success' => true,
-                    'message' => 'Día bloqueado correctamente'
-                ]);
-            } else {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'No se pudo bloquear el día'
-                ]);
+            if ($this->db->trans_status() === FALSE || count($errores) > 0) {
+                $this->db->trans_rollback();
+                throw new Exception('Error al bloquear algunos horarios: ' . implode(', ', $errores));
             }
 
+            $this->db->trans_commit();
+
+            echo json_encode([
+                'success' => true,
+                'message' => "Se bloquearon {$bloquesInsertados} horarios correctamente"
+            ]);
+
         } catch (Exception $e) {
+            if ($this->db->trans_status() === FALSE) {
+                $this->db->trans_rollback();
+            }
+            
             log_message('error', 'Error en bloquear_dia_completo: ' . $e->getMessage());
             echo json_encode([
                 'success' => false,
@@ -238,25 +269,16 @@ class CitasController extends CI_Controller
         }
     }
     public function bloquear_individual() {
-        // Desactivar el buffer de salida
-        ob_clean();
-        
-        // Asegurar que la respuesta sea JSON
-        header('Content-Type: application/json');
-        
         try {
-            // Log inicial
-            log_message('debug', '=== Inicio bloquear_individual ===');
-            
-            // Obtener y validar datos
-            $datos = [
+            // Obtener los datos del POST
+            $datos = array(
                 'ID' => $this->input->post('ID'),
                 'RUN' => $this->input->post('RUN'),
                 'FechaInicio' => $this->input->post('FechaInicio'),
                 'FechaTermino' => $this->input->post('FechaTermino')
-            ];
+            );
 
-            // Validar datos
+            // Validar que todos los campos necesarios estén presentes
             foreach ($datos as $key => $value) {
                 if (empty($value)) {
                     throw new Exception("El campo {$key} es requerido");
@@ -266,46 +288,17 @@ class CitasController extends CI_Controller
             // Cargar el modelo
             $this->load->model('BloqueModel');
 
-            // Intentar el bloqueo dentro de una transacción
-            $this->db->trans_begin();
-
+            // Intentar bloquear el horario
             $resultado = $this->BloqueModel->bloquear_horario($datos);
 
-            if ($resultado === false) {
-                $this->db->trans_rollback();
-                $error = $this->db->error();
-                throw new Exception('Error de base de datos: ' . json_encode($error));
+            if ($resultado) {
+                echo json_encode(['success' => true, 'message' => 'Horario bloqueado correctamente']);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Error al bloquear el horario']);
             }
-
-            $this->db->trans_commit();
-
-            echo json_encode([
-                'success' => true,
-                'message' => 'Bloque bloqueado correctamente'
-            ]);
-
         } catch (Exception $e) {
-            // Si hay una transacción activa, hacer rollback
-            if ($this->db->trans_status() === FALSE) {
-                $this->db->trans_rollback();
-            }
-
-            $error_db = $this->db->error();
-            
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'error_details' => [
-                    'message' => $e->getMessage(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'db_error' => $error_db
-                ]
-            ]);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
-        
-        // Asegurar que no haya más salida después de la respuesta JSON
-        exit();
     }
     public function obtener_datos_ts($run) {
         // Verificar si es una petición AJAX
