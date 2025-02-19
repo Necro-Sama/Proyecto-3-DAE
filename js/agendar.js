@@ -462,28 +462,23 @@ function getDiaIndex(dia) {
 
 
 function obtenerFechaHoraBloque(dia, hora) {
-    const semanaSelect = document.getElementById("semana-select");
-    const fechaInicio = new Date(semanaSelect.value);
+    const semanaSelect = document.getElementById('semana-select');
+    if (!semanaSelect) {
+        throw new Error('Elemento semana-select no encontrado');
+    }
     
-    // Mapeo de días a números (0 = domingo, 1 = lunes, etc.)
-    const diasSemana = {
-        'lunes': 1,
-        'martes': 2,
-        'miercoles': 3,
-        'jueves': 4,
-        'viernes': 5
-    };
-
-    // Ajustar la fecha al día seleccionado
-    const diaNumero = diasSemana[dia.toLowerCase()];
-    fechaInicio.setDate(fechaInicio.getDate() + (diaNumero - fechaInicio.getDay()));
-
-    // Formatear la fecha y hora
-    const [hours, minutes] = hora.split(':');
-    fechaInicio.setHours(parseInt(hours), parseInt(minutes), 0);
-
-    // Retornar en formato MySQL datetime
-    return fechaInicio.toISOString().slice(0, 19).replace('T', ' ');
+    const fechaBase = new Date(semanaSelect.value);
+    const diaIndex = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'].indexOf(dia.toLowerCase());
+    
+    if (diaIndex === -1) {
+        throw new Error('Día inválido');
+    }
+    
+    fechaBase.setDate(fechaBase.getDate() + diaIndex);
+    const [horas, minutos] = hora.split(':');
+    fechaBase.setHours(parseInt(horas), parseInt(minutos), 0);
+    
+    return fechaBase.toISOString().slice(0, 19).replace('T', ' ');
 }
 
 async function bloquearHorario(datos) {
@@ -569,6 +564,8 @@ async function bloquearHorarioIndividual(datos) {
 
 async function bloquearDiaCompleto(dia, trabajadorSocial) {
     try {
+        console.log(`Intentando bloquear día ${dia} para TS ${trabajadorSocial}`);
+        
         if (!horarios || !Array.isArray(horarios)) {
             throw new Error('Error en la configuración de horarios');
         }
@@ -580,51 +577,73 @@ async function bloquearDiaCompleto(dia, trabajadorSocial) {
                 const fechaFin = obtenerFechaHoraBloque(dia, horario.horaFinal);
                 
                 return {
-                    ID: `BLQ${Date.now()}${Math.random().toString(36).substr(2, 5)}`,
                     run_trabajador: trabajadorSocial,
                     fechainicio: fechaInicio,
                     fechafinal: fechaFin
                 };
             });
 
+        console.log('Bloques a procesar:', bloques);
+
         const resultados = await Promise.all(
-            bloques.map(async bloque => {
+            bloques.map(async (bloque, index) => {
                 try {
-                    const bloqueoResponse = await fetch(`${site_url}/citas/bloquear_dia_completo`, {
+                    console.log(`Procesando bloque ${index + 1}/${bloques.length}:`, bloque);
+                    
+                    const formData = new URLSearchParams(bloque);
+                    const response = await fetch(`${site_url}/citas/bloquear`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
+                            'Accept': 'application/json'
                         },
-                        body: new URLSearchParams(bloque)
+                        body: formData
                     });
 
-                    if (!bloqueoResponse.ok) {
-                        throw new Error(`Error HTTP: ${bloqueoResponse.status}`);
+                    // Log de la respuesta raw
+                    const responseText = await response.text();
+                    console.log(`Respuesta raw del bloque ${index + 1}:`, responseText);
+
+                    let data;
+                    try {
+                        data = JSON.parse(responseText);
+                    } catch (e) {
+                        console.error(`Error parsing JSON para bloque ${index + 1}:`, e);
+                        console.error('Respuesta problemática:', responseText);
+                        throw new Error(`Error al procesar respuesta del servidor: ${e.message}`);
                     }
 
-                    const resultado = await bloqueoResponse.json();
-                    if (!resultado.success) {
-                        throw new Error(resultado.message);
+                    if (!response.ok || !data.success) {
+                        throw new Error(data.message || `Error HTTP: ${response.status}`);
                     }
 
-                    return { success: true };
+                    return { success: true, data };
                 } catch (error) {
+                    console.error(`Error en bloque ${index + 1}:`, error);
                     return { success: false, error: error.message };
                 }
             })
         );
 
         const exitosos = resultados.filter(r => r.success).length;
+        console.log(`Resultados procesados: ${exitosos} exitosos de ${resultados.length} totales`);
+        
+        if (exitosos === 0) {
+            throw new Error('No se pudo bloquear ningún horario');
+        }
+
+        await cargar_calendario();
         
         return {
-            success: exitosos > 0,
+            success: true,
             message: `Se bloquearon ${exitosos} de ${bloques.length} bloques.`
         };
 
     } catch (error) {
+        console.error('Error al bloquear día completo:', error);
         return {
             success: false,
-            message: `Error al bloquear el día: ${error.message}`
+            message: error.message
         };
     }
 }
@@ -981,3 +1000,87 @@ document.querySelectorAll('.btn-bloquear').forEach(boton => {
         bloquearHorario(bloqueId, runTrabajador, fechaInicio, fechaFinal);
     });
 });
+
+// Función para manejar el bloqueo de días
+async function handleBloquearDias(event) {
+    event.preventDefault();
+    const $btnBloquear = $('#btn-bloquear');
+    const trabajadorSocial = document.getElementById('ts-select')?.value;
+
+    if (!trabajadorSocial) {
+        alert('Por favor seleccione un trabajador social');
+        return;
+    }
+
+    const diasSeleccionados = Array.from(document.querySelectorAll('.dia-checkbox:checked'))
+        .map(checkbox => checkbox.value);
+
+    if (diasSeleccionados.length === 0) {
+        alert('Por favor seleccione al menos un día');
+        return;
+    }
+
+    $btnBloquear.prop('disabled', true).text('Procesando...');
+
+    try {
+        const resultados = await Promise.all(
+            diasSeleccionados.map(dia => bloquearDiaCompleto(dia, trabajadorSocial))
+        );
+
+        const mensajes = resultados.map((r, i) => 
+            `${diasSeleccionados[i]}: ${r.success ? 'Éxito' : 'Error - ' + r.message}`
+        );
+
+        alert('Resultado del proceso:\n' + mensajes.join('\n'));
+        
+        // Recargar el calendario
+        cargar_calendario();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error al procesar el bloqueo: ' + error.message);
+    } finally {
+        $btnBloquear.prop('disabled', false).text('Bloquear días seleccionados');
+    }
+}
+
+// Inicialización cuando el documento está listo
+$(document).ready(function() {
+    // Inicializar eventos
+    $('#btn-bloquear').on('click', handleBloquearDias);
+    
+    // Inicializar el calendario
+    cargar_calendario();
+    
+    // Configurar la interfaz según el tipo de usuario
+    configurarInterfazSegunUsuario();
+});
+
+// Función para verificar disponibilidad antes de bloquear
+async function verificarDisponibilidadBloque(bloque) {
+    try {
+        const formData = new URLSearchParams({
+            fechainicio: bloque.fechainicio,
+            fechafinal: bloque.fechafinal,
+            run_trabajador: bloque.run_trabajador
+        });
+
+        const response = await fetch(`${site_url}/citas/verificar_disponibilidad_bloque`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const resultado = await response.json();
+        return resultado.disponible;
+    } catch (error) {
+        console.error('Error al verificar disponibilidad:', error);
+        return false;
+    }
+}
